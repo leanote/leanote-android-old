@@ -4,14 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.leanote.Controller.DataController;
-import com.leanote.provider.LeanoteDatabase;
 
 /**
  * A simple note showed in notes list. It contains id, title, time, description and thumbnails only.
- *
+ * <p/>
  * Created by jerrychoi on 2014-9-26.
  */
 public class SimpleNote extends BaseNoteModel {
@@ -48,7 +46,7 @@ public class SimpleNote extends BaseNoteModel {
         simpleNote.desc = DataController.parseString(cursor, NoteColumns.DESC);
         simpleNote.thumbnailsSrc = DataController.parseString(cursor, NoteColumns.THUMBNAILS_SRC);
 
-        return  simpleNote;
+        return simpleNote;
     }
 
     public String getDesc() {
@@ -108,5 +106,13 @@ public class SimpleNote extends BaseNoteModel {
             return new SimpleNote[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return "SimpleNote{" +
+                "desc='" + desc + '\'' +
+                ", thumbnailsSrc='" + thumbnailsSrc + '\'' +
+                "} " + super.toString();
+    }
 
 }

@@ -90,4 +90,14 @@ public abstract class BaseNoteModel implements IModel {
         this.updatedTime = updatedTime;
     }
 
+    @Override
+    public String toString() {
+        return "BaseNoteModel{" +
+                "id='" + id + '\'' +
+                ", userId='" + userId + '\'' +
+                ", title='" + title + '\'' +
+                ", createdTime=" + createdTime +
+                ", updatedTime=" + updatedTime +
+                '}';
+    }
 }
