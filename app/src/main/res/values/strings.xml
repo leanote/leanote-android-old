@@ -2,7 +2,24 @@
 <resources>
 
     <string name="app_name">leanote</string>
-    <string name="hello_world">Hello world!</string>
+
+    <!-- Settings -->
     <string name="action_settings">Settings</string>
+
+    <!-- notebooks activity -->
+    <string name="title_activity_notebooks">Notebooks</string>
+
+    <!-- notes activity -->
+    <string name="title_activity_notes">Notes</string>
+
+    <!-- navigation drawer -->
+    <string name="nav_drawer_item_account">Account</string>
+    <string name="nav_drawer_item_notebooks">Notebooks</string>
+    <string name="nav_drawer_item_notes">Notes</string>
+    <string name="nav_drawer_item_tags">Tags</string>
+    <string name="nav_drawer_sync_btn">Last sync: %1$s</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
 
 </resources>

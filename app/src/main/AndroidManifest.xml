@@ -2,19 +2,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.leanote" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
+        android:name="com.leanote.LeanoteApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.leanote.MainActivity"
-            android:label="@string/app_name" >
+            android:name=".activity.NoteListActivity"
+            android:label="@string/title_activity_notes"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.NotebookListActivity"
+            android:label="@string/title_activity_notebooks"
+            android:launchMode="singleTop">
         </activity>
     </application>
 
