@@ -1,30 +1,6 @@
 Welcome to your tutorial repository!
 ================
-
 Learn how to use Git and Bitbucket with either SourceTree, one of the best Git clients available, or using Git from the command line. Whichever you choose you will learn how set up Git, clone this repository locally. Then learn how to make and commit a change locally and push that change back to Bitbucket.
-
----
-
-If you selected the tutorial repository: [Start here](#markdown-header-start-here)
-
-----
-#Hackathon participants 
-
-Welcome to Bitbucket! You can learn the basics of Git and Bitbucket from this repository. In fact, you can fork this repository and use it for your own. 
-
-**Be sure you have a Bitbucket account and are logged in before you fork this repository** 
-
-###To fork this repository for your own use
-
-1. Press the '[' key to expand the sidebar navigation. 
-2. Click **Fork**. 
-3. Fill in an appropriate name and description for your repository. 
-4. Select **This is a private repository**. Leave all other default settings in place. 
-5. Click **Fork repository**. 
-
-**NOTE: We've modified this particular repository so that the fork will actually "break" unlike an actual fork of a repository in which a connection remains to the origin repository. 
- 
-The fork should open under your bitbucket account. From there choose one of the options below to clone the repository to your local system and make a commit. Once you've done that you can add your own files to the directory folder on your local system, add them to Git, and push them to Bitbucket. Then you can delete the files which came with the fork. 
 
 ____
 
