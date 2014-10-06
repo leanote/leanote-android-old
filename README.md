@@ -3,7 +3,9 @@ Welcome to your tutorial repository!
 
 Learn how to use Git and Bitbucket with either SourceTree, one of the best Git clients available, or using Git from the command line. Whichever you choose you will learn how set up Git, clone this repository locally. Then learn how to make and commit a change locally and push that change back to Bitbucket.
 
-[Start here!](#markdown-header-start-here!) 
+---
+
+If you selected the tutorial repository: [Start here](#markdown-header-start-here)
 
 ----
 #Hackathon participants 
@@ -25,9 +27,8 @@ Welcome to Bitbucket! You can learn the basics of Git and Bitbucket from this re
 The fork should open under your bitbucket account. From there choose one of the options below to clone the repository to your local system and make a commit. Once you've done that you can add your own files to the directory folder on your local system, add them to Git, and push them to Bitbucket. Then you can delete the files which came with the fork. 
 
 ____
-Learn how to use Git and Bitbucket with either SourceTree, one of the best Git clients available, or using Git from the command line. Whichever you choose you will learn how set up Git, clone this repository locally. Then learn how to make and commit a change locally and push that change back to Bitbucket. 
 
-# Start here!
+## Start here
 Choose either SourceTree, Atlassian's Git client, or the command line to learn source control using Bitbucket and Git. 
 
 ### Use [SourceTree Atlassian's Git client](#markdown-header-sourcetree) for Windows and Mac
