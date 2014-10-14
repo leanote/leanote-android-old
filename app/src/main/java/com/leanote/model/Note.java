@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 
-import com.leanote.Controller.DataController;
+import com.leanote.controller.DataController;
 
 /**
  * Created by jerrychoi on 14-9-27.

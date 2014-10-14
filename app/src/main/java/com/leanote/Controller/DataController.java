@@ -1,4 +1,4 @@
-package com.leanote.Controller;
+package com.leanote.controller;
 
 import android.database.Cursor;
 

@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 
-import com.leanote.Controller.DataController;
+import com.leanote.controller.DataController;
 
 /**
  * A simple note showed in notes list. It contains id, title, time, description and thumbnails only.
