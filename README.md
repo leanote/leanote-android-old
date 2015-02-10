@@ -231,7 +231,7 @@ Cloning makes a local copy of the repository for you.
 3. Copy the command **C**. 
 4. Open a terminal, or launch a GitBash terminal, on your local machine.
 5. Navigate to the directory where you want your files. Use the cd /path-to-your/directory command to navigate to the location you want your repository. 
-6. Paste the command at the prompt.
+6. Paste the command **C** you copied in step 3 at the prompt.
 7. Press ENTER on your keyboard.
 The result should be something like. 
 
