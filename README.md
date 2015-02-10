@@ -13,18 +13,6 @@ Choose either SourceTree, Atlassian's Git client, or the command line to learn s
 
 ### Use [Git from the command line](#markdown-header-command-line) for Windows, Mac, and Linux
 
-~~~~
-	$ git clone https://teamsinspace-sourcetree@bitbucket.org/teamsinspace-sourcetree/tutorial.git
-	Cloning into 'tutorial'...
-	Password for 'https://teamsinspace-sourcetree@bitbucket.org': 
-	remote: Counting objects: 131, done.
-	remote: Compressing objects: 100% (100/100), done.
-	remote: Total 131 (delta 44), reused 98 (delta 28)
-	Receiving objects: 100% (131/131), 19.43 KiB | 0 bytes/s, done.
-	Resolving deltas: 100% (44/44), done.
-	Checking connectivity... done.
-~~~~
-
 
 **Finally**, if you want a complete end to end tutorial: See our [Bitbucket 101](https://confluence.atlassian.com/x/cgozDQ). 
 
@@ -235,30 +223,17 @@ Cloning makes a local copy of the repository for you.
 
 ![Clone from command line](https://confluence.atlassian.com/download/attachments/304578655/repo-setup-clone_menu-sidexpand.png)
 
-1. Click the **Clone** button **A**  in Bitbucket.
-2. Make sure the protocol **B** is set to HTTPS.
+1. Click the **Clone** button **A**  in Bitbucket, as shown in the previous figure. 
+2. Make sure the protocol **B** is set to HTTPS, as shown in the previous figure.
 
     Bitbucket pre-fills the clone command for you.
     
-3. Copy the command **C**.
+3. Copy the command **C**. 
 4. Open a terminal, or launch a GitBash terminal, on your local machine.
-5. Navigate to the directory where you want your files.
+5. Navigate to the directory where you want your files. Use the cd /path-to-your/directory command to navigate to the location you want your repository. 
 6. Paste the command at the prompt.
 7. Press ENTER on your keyboard.
-The result should be something like 
-
-~~~~
-	$ git clone https://teamsinspace-sourcetree@bitbucket.org/teamsinspace-sourcetree/tutorial.git
-	Cloning into 'tutorial'...
-	Password for 'https://teamsinspace-sourcetree@bitbucket.org': 
-	remote: Counting objects: 131, done.
-	remote: Compressing objects: 100% (100/100), done.
-	remote: Total 131 (delta 44), reused 98 (delta 28)
-	Receiving objects: 100% (131/131), 19.43 KiB | 0 bytes/s, done.
-	Resolving deltas: 100% (44/44), done.
-	Checking connectivity... done.
-~~~~
-
+The result should be something like. 
 
 Git clones your repository from Bitbucket to your local machine.
 > If you have trouble cloning from these instructions you can check out the more [detailed tutorial](https://confluence.atlassian.com/x/W4DHHw).
