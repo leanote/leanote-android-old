@@ -247,10 +247,11 @@ The git clone command copies an existing Git repository as its own full-fledged 
 
 Learn the Git basics of stage, commit, push when you make a change to the 'sample.html' file.
 
-1.  Go to your terminal window and navigate to the repository root.
-2.  Using your favorite editor, edit the `sample.html` file.
+1.  Navigate to the directory (folder) where you cloned your repository.
+2.  Using your favorite editor, open the `sample.html` file.
 3.  Change the heading from `My First File` to `Playing in the Sand`. 
 4.  Save and close the file.
+5.  Navigate to the repository in your command line 'cd path/to/your-repository'.
 5.  Stage the file with Git.
     
     `git add sample.html`
