@@ -223,7 +223,7 @@ Cloning makes a local copy of the repository for you.
 
 ![Clone from command line](https://confluence.atlassian.com/download/attachments/304578655/repo-setup-clone_menu-sidexpand.png)
 
-1. Click the **Clone** button **A**  in Bitbucket, as shown in the previous figure. 
+1. Click  **Clone** button **A**  in Bitbucket, as shown in the previous figure. 
 2. Make sure the protocol **B** is set to HTTPS, as shown in the previous figure.
 
     Bitbucket pre-fills the clone command for you.
