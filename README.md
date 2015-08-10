@@ -14,7 +14,7 @@ Choose either SourceTree, Atlassian's Git client, or the command line to learn s
 ### Use [Git from the command line](#markdown-header-command-line) for Windows, Mac, and Linux
 
 
-**Finally**, if you want a complete end to end tutorial: See our [Bitbucket 101](https://confluence.atlassian.com/x/cgozDQ). 
+**Finally**, if you want a complete end to end tutorial: See our [Bitbucket Tutorials](https://confluence.atlassian.com/x/Q4sFLQ). 
 
 -----------------
 ### Collaboration is the core of Git
