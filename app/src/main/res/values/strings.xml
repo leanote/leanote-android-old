@@ -1,0 +1,80 @@
+<resources>
+    <string name="app_name">leanote</string>
+    <string name="title_activity_lea_launch">LeaLaunchActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_sign_in">SignInActivity</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sign_in">Sign in to your leanote.com account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="verification_code">Verification code</string>
+    <string name="site_address">Your self-hosted address (URL)</string>
+    <string name="two_step_footer_label">Enter the code from your authenticator app.</string>
+    <string name="two_step_footer_button">Send code via text message</string>
+    <string name="forgot_password">Lost your password?</string>
+    <string name="nux_add_selfhosted_blog">Add self-hosted site</string>
+    <string name="nux_welcome_create_account">Create account</string>
+    <string name="reader_btn_share">Share</string>
+    <string name="reader_toast_err_share_intent">Unable to share</string>
+    <string name="logs_copied_to_clipboard">Application logs have been copied to the clipboard</string>
+    <string name="error_copy_to_clipboard">An error occurred while copying text to clipboard</string>
+    <string name="nux_tap_continue">Continue</string>
+    <string name="username_email">Username or email</string>
+    <string name="connecting_wpcom">Connecting to WordPress.com</string>
+    <string name="username_only_lowercase_letters_and_numbers">Username can only contain lowercase letters (a-z) and numbers</string>
+    <string name="username_required">Enter a username</string>
+    <string name="username_not_allowed">Username not allowed</string>
+    <string name="email_cant_be_used_to_signup">You can\'t use that email address to signup. We are having problems with them blocking some of our email. Use another email provider.</string>
+    <string name="username_must_be_at_least_four_characters">Username must be at least 4 characters</string>
+    <string name="username_contains_invalid_characters">Username may not contain the character “_”</string>
+    <string name="username_must_include_letters">Username must have a least 1 letter (a-z)</string>
+    <string name="email_invalid">Enter a valid email address</string>
+    <string name="email_not_allowed">That email address isn\'t allowed</string>
+    <string name="username_exists">That username already exists</string>
+    <string name="email_exists">That email address is already being used</string>
+    <string name="username_reserved_but_may_be_available">That username is currently reserved but may be available in a couple of days</string>
+    <string name="email_reserved">That email address has already been used. Check your inbox for an activation email. If you don\'t activate you can try again in a few days.</string>
+    <string name="username_invalid">Invalid username</string>
+    <string name="password_invalid">You need a more secure password. Make sure to use 7 or more characters, mix uppercase and lowercase letters, numbers or special characters.</string>
+    <string name="blog_name_required">Enter a site address</string>
+    <string name="blog_name_not_allowed">That site address isn\'t allowed</string>
+    <string name="blog_name_must_be_at_least_four_characters">Site address must be at least 4 characters</string>
+    <string name="blog_name_must_be_less_than_sixty_four_characters">The site address must be shorter than 64 characters</string>
+    <string name="blog_name_contains_invalid_characters">Site address may not contain the character “_”</string>
+    <string name="blog_name_cant_be_used">You may not use that site address</string>
+    <string name="blog_name_only_lowercase_letters_and_numbers">Site address can only contain lowercase letters (a-z) and numbers</string>
+    <string name="blog_name_must_include_letters">Site address must have at least 1 letter (a-z)</string>
+    <string name="blog_name_exists">That site already exists</string>
+    <string name="blog_name_reserved">That site is reserved</string>
+    <string name="blog_name_reserved_but_may_be_available">That site is currently reserved but may be available in a couple days</string>
+    <string name="blog_name_invalid">Invalid site address</string>
+    <string name="blog_title_invalid">Invalid site title</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="limit_reached">Limit reached. You can try again in 1 minute. Trying again before that will only increase the time you have to wait before the ban is lifted. If you think this is in error, contact support.</string>
+    <string name="error">Error</string>
+    <string name="nux_oops_not_selfhosted_blog">Sign in to Leanote.com</string>
+    <string name="two_step_sms_sent">Check your text messages for the verification code.</string>
+    <string name="verify">Verify</string>
+    <string name="no_network_message">There is no network available</string>
+    <string name="signing_in">Signing in…</string>
+    <string name="no_network_title">No network available</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_new_account">NewAccountActivity</string>
+    <string name="required_field">Required field</string>
+    <string name="faq_button">FAQ</string>
+    <string name="nux_tutorial_get_started_title">Get started!</string>
+
+    <string name="ssl_certificate_details">Details</string>
+    <string name="ssl_certificate_error">Invalid SSL certificate</string>
+    <string name="ssl_certificate_ask_trust">If you usually connect to this site without problems, this error could mean that someone is trying to impersonate the site, and you shouldn\'t continue. Would you like to trust the certificate anyway?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="view_in_browser">View in browser</string>
+    <string name="share_link">Share link</string>
+    <string name="refresh">Refresh</string>
+
+</resources>

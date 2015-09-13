@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    LeaLinearLayoutSizeBound attributes
+    -->
+    <declare-styleable name="LeaLinearLayoutSizeBound">
+        <attr name="maxWidth" format="dimension" />
+        <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+
+    <!--
+    LeaTextView attributes
+    -->
+    <declare-styleable name="LeaTextView">
+        <attr name="fontVariation" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="light" value="1" />
+        </attr>
+        <attr name="fontFamily" format="enum">
+            <enum name="openSans" value="0" />
+            <enum name="merriweather" value="1" />
+        </attr>
+        <attr name="fixWidowWords" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="PersistentEditText">
+        <attr format="boolean" name="persistenceEnabled"/>
+    </declare-styleable>
+
+</resources>

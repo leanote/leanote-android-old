@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Leanote" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Material theme -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="colorControlActivated">@color/color_control_activated</item>
+        <item name="colorControlHighlight">@color/color_control_highlight</item>
+
+        <item name="android:windowBackground">@color/grey_lighten_30</item>
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_leanote</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Leanote</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Leanote</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Leanote</item>
+        <item name="android:actionModeBackground">@color/color_primary_dark</item>
+        <item name="android:actionBarTabTextStyle">@style/TabTextStyle.Leanote</item>
+        <item name="android:actionBarTabBarStyle">@style/TabBarStyle.Leanote</item>
+        <item name="windowActionModeOverlay">true</item>
+
+        <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Leanote.Widget</item>
+
+        <!--<item name="swipeToRefreshStyle">@style/Leanote.SwipeToRefresh</item>-->
+    </style>
+
+    <style name="Leanote.DropDownListView.Light" parent="Leanote">
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Leanote.Widget" parent="Theme.AppCompat">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Leanote</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
+    </style>
+
+    <style name="SignInTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorControlActivated">@color/color_control_activated</item>
+        <item name="colorControlHighlight">@color/color_control_highlight</item>
+    </style>
+
+    <style name="TabBarStyle.Leanote" parent="@android:style/Widget.Holo.ActionBar.TabBar">
+        <item name="android:showDividers">middle</item>
+        <!--<item name="android:divider">@drawable/tab_divider_leanote</item>-->
+    </style>
+
+    <style name="PopupMenu.Leanote" parent="android:Widget.Holo.ListPopupWindow">
+        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_leanote</item>-->
+    </style>
+
+    <style name="DropDownListView.Dark.Leanote" parent="android:Widget.Holo.ListView.DropDown">
+        <!--<item name="android:listSelector">@drawable/selectable_background_Leanote</item>-->
+        <item name="android:fadeScrollbars">false</item>
+        <!--<item name="android:scrollbarThumbVertical">@drawable/scrollbar_transparent_white</item>-->
+    </style>
+
+    <style name="DropDownListView.Light.Leanote" parent="android:Widget.Holo.ListView.DropDown">
+        <!--<item name="android:listSelector">@drawable/selectable_background_Leanote</item>-->
+        <item name="android:fadeScrollbars">false</item>
+        <!--<item name="android:scrollbarThumbVertical">@drawable/scrollbar_transparent_black</item>-->
+    </style>
+
+    <style name="TabTextStyle.Leanote" parent="android:Widget.Holo.ActionBar.TabText">
+        <item name="android:textColor">@color/grey_dark</item>
+    </style>
+
+    <style name="DropDownNav.Leanote" parent="android:Widget.Holo.Light.Spinner">
+        <!--<item name="android:background">@drawable/spinner_background_ab_Leanote</item>-->
+        <!--<item name="android:dropDownSelector">@drawable/selectable_background_Leanote</item>-->
+    </style>
+
+    <style name="ProgressBar.Leanote" parent="android:Widget.Holo.ProgressBar.Horizontal">
+        <!--<item name="android:progressDrawable">@drawable/progress_horizontal_Leanote</item>-->
+    </style>
+
+    <style name="ActionButton.CloseMode.Leanote" parent="android:Widget.Holo.ActionButton.CloseMode">
+        <!--<item name="android:background">@drawable/btn_cab_done_Leanote</item>-->
+    </style>
+
+    <style name="LeanoteSettingsSectionHeader">
+        <item name="android:layout_marginTop">@dimen/margin_large</item>
+        <item name="android:layout_marginBottom">@dimen/margin_small</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">@dimen/text_sz_medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="LeanoteSubHeader">
+        <item name="android:textSize">@dimen/text_sz_medium</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_marginTop">@dimen/margin_large</item>
+        <item name="android:textColor">@color/grey</item>
+    </style>
+
+    <style name="LeanoteTitleAppearance" parent="@android:style/TextAppearance">
+        <item name="android:singleLine">true</item>
+        <item name="android:shadowColor">#BB000000</item>
+        <item name="android:shadowRadius">2.75</item>
+        <item name="android:textColor">#FFF6F6F6</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="LeanoteWelcomeStyle">
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="ThemeDetailsHeader">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MediaGalleryText">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="MediaGalleryNumOfColumns" parent="@style/MediaGalleryText">
+        <!--<item name="android:textColor">@color/media_grid_item_checkstate_text_selector</item>-->
+        <!--<item name="android:background">@drawable/media_gallery_option_selector</item>-->
+        <item name="android:button">@null</item>
+    </style>
+
+    <style name="MediaGalleryTypeCheckbox">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:button">@null</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="EmptyListText">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:gravity">center_horizontal|center_vertical</item>
+        <item name="android:textColor">@color/grey_darken_10</item>
+    </style>
+
+    <!-- NUX Styles -->
+    <style name="Leanote.NUXPrimaryButton">
+        <!--<item name="android:textColor">@color/nux_primary_button</item>-->
+        <item name="android:layout_height">@dimen/nux_button_height</item>
+        <item name="android:layout_marginLeft">4dp</item>
+        <item name="android:layout_marginRight">4dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:clickable">true</item>
+        <!--<item name="android:background">@drawable/nux_primary_button_selector</item>-->
+        <!--<item name="android:stateListAnimator">@anim/raise</item>-->
+    </style>
+
+    <style name="Leanote.NUXWhiteButtonNoBg">
+        <!--<item name="android:textColor">@drawable/nux_white_button_nobg_selector</item>-->
+        <item name="android:padding">8dp</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="Leanote.NUXGreyButtonNoBg">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">14sp</item>
+        <!--<item name="android:textColor">@drawable/nux_grey_button_nobg_selector</item>-->
+    </style>
+
+    <style name="Leanote.NUXEditText">
+        <item name="android:background">@color/white</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">#444444</item>
+        <item name="android:textColorHint">#AAAAAA</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_marginLeft">40dp</item>
+    </style>
+
+    <style name="Leanote.NUXTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">24dp</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/nux_title_font_size</item>
+        <item name="android:lineSpacingExtra">-4sp</item>
+    </style>
+
+    <style name="Leanote.EmptyList">
+        <item name="android:textColor">@color/grey_darken_30</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+    </style>
+
+    <style name="Leanote.EmptyList.Title" parent="Leanote.EmptyList">
+        <item name="android:textSize">@dimen/empty_list_title_text_size</item>
+        <item name="fontVariation">light</item>
+    </style>
+
+    <style name="Leanote.EmptyList.Description" parent="Leanote.EmptyList">
+        <item name="android:textSize">@dimen/empty_list_description_text_size</item>
+    </style>
+
+    <!--
+        moderation views on comment detail
+    -->
+    <style name="Leanote.ModerateButton">
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">@dimen/text_sz_small</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <!--<item name="android:background">@drawable/moderate_button_selector</item>-->
+        <item name="android:paddingTop">@dimen/margin_small</item>
+        <item name="android:paddingRight">@dimen/margin_small</item>
+        <item name="android:paddingLeft">@dimen/margin_small</item>
+        <item name="android:paddingBottom">@dimen/margin_medium</item>
+        <item name="android:drawablePadding">-4dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="Leanote.BorderedBackground">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!-- Dialog -->
+    <style name="Leanote.Dialog" parent="Theme.AppCompat.Light.Dialog">
+        <!-- work around a bug that causes weird styling of the dialog title on Android 5 -->
+        <item name="android:windowNoTitle">false</item>
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <!--<style name="Leanote.SwipeToRefresh">-->
+        <!--<item name="refreshIndicatorColor">@color/blue_medium</item>-->
+    <!--</style>-->
+
+    <!--My Site Styles-->
+    <style name="MySiteListRowLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/my_site_list_row_height</item>
+        <item name="android:paddingLeft">@dimen/my_site_list_row_padding_left</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="MySiteListRowIcon">
+        <item name="android:layout_width">@dimen/my_site_list_row_icon_size</item>
+        <item name="android:layout_height">@dimen/my_site_list_row_icon_size</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_marginRight">@dimen/margin_extra_large</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="MySiteListRowTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_marginRight">@dimen/margin_medium</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/grey_dark</item>
+        <item name="android:textSize">@dimen/text_sz_large</item>
+        <item name="android:paddingTop">@dimen/margin_large</item>
+        <item name="android:paddingBottom">@dimen/margin_large</item>
+        <item name="android:paddingLeft">@dimen/margin_extra_large</item>
+    </style>
+
+    <style name="MySiteListHeaderLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">@dimen/my_site_margin_general</item>
+        <item name="android:paddingLeft">@dimen/my_site_list_row_padding_left</item>
+        <item name="android:paddingTop">@dimen/my_site_margin_general</item>
+    </style>
+
+    <style name="MySiteListHeaderTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">@dimen/text_sz_medium</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="MySiteListSectionDividerView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/margin_large</item>
+        <item name="android:background">@color/grey_lighten_20</item>
+        <item name="android:layout_marginRight">@dimen/margin_extra_large</item>
+    </style>
+
+    <style name="MeListRowLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/me_list_row_height</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="MeListRowIcon">
+        <item name="android:layout_width">@dimen/me_list_row_icon_size</item>
+        <item name="android:layout_height">@dimen/me_list_row_icon_size</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/margin_medium</item>
+        <item name="android:layout_marginRight">@dimen/margin_extra_large</item>
+    </style>
+
+    <style name="MeListRowTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">@dimen/margin_extra_large</item>
+        <item name="android:textColor">@color/grey_dark</item>
+        <item name="android:textSize">@dimen/text_sz_large</item>
+    </style>
+
+    <style name="MeListSectionDividerView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@color/me_list_row_border</item>
+    </style>
+
+    <style name="fab_menu_label_style">
+        <!--<item name="android:background">@drawable/fab_menu_label_background</item>-->
+        <item name="android:textColor">@color/white</item>
+    </style>
+</resources>
