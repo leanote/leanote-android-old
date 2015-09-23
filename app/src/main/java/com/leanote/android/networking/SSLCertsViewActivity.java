@@ -4,8 +4,9 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.webkit.WebSettings;
 
-import org.wordpress.android.R;
-import org.wordpress.android.ui.WebViewActivity;
+import com.leanote.android.R;
+import com.leanote.android.ui.WebViewActivity;
+
 
 /**
  * Display details of a SSL cert

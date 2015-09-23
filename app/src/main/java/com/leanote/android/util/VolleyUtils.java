@@ -7,6 +7,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.ImageRequest;
+import com.leanote.android.model.Blog;
+import com.leanote.android.networking.WPDelayedHurlStack;
 
 import org.json.JSONException;
 import org.json.JSONObject;

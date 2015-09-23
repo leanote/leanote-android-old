@@ -6,12 +6,12 @@ import android.content.DialogInterface;
 import android.net.http.SslCertificate;
 import android.os.Bundle;
 
+import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
 import com.leanote.android.util.GenericCallback;
-import com.leanote.android.BuildConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -96,7 +96,7 @@ public class SelfSignedSSLCertsManager {
         }
         saveTrustStore();
         // reset the Volley queue Otherwise new certs are not used
-        WordPress.setupVolleyQueue();
+        Leanote.setupVolleyQueue();
     }
 
     public void addCertificate(X509Certificate cert) throws IOException, GeneralSecurityException {
@@ -117,7 +117,7 @@ public class SelfSignedSSLCertsManager {
         KeyStore localTrustStore = KeyStore.getInstance("BKS");
         InputStream in = new FileInputStream(mLocalTrustStoreFile);
         try {
-            localTrustStore.load(in, BuildConfig.DB_SECRET.toCharArray());
+            localTrustStore.load(in, "leanote".toCharArray());
         } finally {
             in.close();
         }
@@ -128,7 +128,7 @@ public class SelfSignedSSLCertsManager {
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(mLocalTrustStoreFile);
-            mLocalKeyStore.store(out, BuildConfig.DB_SECRET.toCharArray());
+            mLocalKeyStore.store(out, "leanote".toCharArray());
         } finally {
             if (out!=null){
                 try {
@@ -149,8 +149,8 @@ public class SelfSignedSSLCertsManager {
             try {
                 out = new FileOutputStream(mLocalTrustStoreFile);
                 KeyStore localTrustStore = KeyStore.getInstance("BKS");
-                localTrustStore.load(null, BuildConfig.DB_SECRET.toCharArray());
-                localTrustStore.store(out, BuildConfig.DB_SECRET.toCharArray());
+                localTrustStore.load(null, "leanote".toCharArray());
+                localTrustStore.store(out, "leanote".toCharArray());
             } finally {
                 if (out != null) {
                     try {

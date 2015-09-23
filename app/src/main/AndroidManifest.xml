@@ -10,7 +10,7 @@
         android:icon="@drawable/leanote_launch_screen"
         android:label="@string/app_name"
         android:theme="@style/Leanote"
-        tools:replace="android:allowBackup" >
+        tools:replace="android:icon, android:allowBackup" >
         <activity
             android:name=".ui.LeaLaunchActivity"
             android:label="@string/title_activity_lea_launch"
