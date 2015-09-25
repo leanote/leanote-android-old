@@ -7,6 +7,8 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.toolbox.HttpStack;
+import com.leanote.android.Leanote;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.Blog;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.StringUtils;
@@ -67,13 +69,13 @@ public class LeaDelayedHurlStack implements HttpStack {
                     context.init(null, trustAllowedCerts, new SecureRandom());
                     mSslSocketFactory = context.getSocketFactory();
                 } catch (NoSuchAlgorithmException e) {
-                    AppLog.e(T.API, e);
+                    AppLog.e(AppLog.T.API, e);
                 } catch (KeyManagementException e) {
-                    AppLog.e(T.API, e);
+                    AppLog.e(AppLog.T.API, e);
                 } catch (GeneralSecurityException e) {
-                    AppLog.e(T.API, e);
+                    AppLog.e(AppLog.T.API, e);
                 } catch (IOException e) {
-                    AppLog.e(T.API, e);
+                    AppLog.e(AppLog.T.API, e);
                 }
             }
         };
@@ -98,7 +100,7 @@ public class LeaDelayedHurlStack implements HttpStack {
             }
         }
 
-        additionalHeaders.put("User-Agent", WordPress.getUserAgent());
+        additionalHeaders.put("User-Agent", Leanote.getUserAgent());
 
         String url = request.getUrl();
         HashMap<String, String> map = new HashMap<String, String>();
@@ -123,7 +125,7 @@ public class LeaDelayedHurlStack implements HttpStack {
                 connection.getResponseCode(), connection.getResponseMessage());
         BasicHttpResponse response = new BasicHttpResponse(responseStatus);
         response.setEntity(entityFromConnection(connection));
-        for (Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
+        for (Map.Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
             if (header.getKey() != null) {
                 Header h = new BasicHeader(header.getKey(), header.getValue().get(0));
                 response.addHeader(h);

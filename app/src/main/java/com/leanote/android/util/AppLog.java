@@ -18,7 +18,7 @@ public class AppLog {
     public enum T {READER, EDITOR, MEDIA, NUX, API, STATS, UTILS, NOTIFS, DB, POSTS, COMMENTS, THEMES, TESTS, PROFILING,
         SIMPERIUM, SUGGESTION, MAIN}
 
-    public static final String TAG = "WordPress";
+    public static final String TAG = "Leanote";
     public static final int HEADER_LINE_COUNT = 2;
 
     private static boolean mEnableRecording = false;

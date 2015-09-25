@@ -1,20 +1,18 @@
 package com.leanote.android.accounts.helpers;
 
-import android.annotation.SuppressLint;
+import android.util.Log;
 
 import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.leanote.android.BuildConfig;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
+import com.leanote.android.networking.CustomRequest;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
 import com.leanote.android.util.VolleyUtils;
-import com.wordpress.rest.Oauth;
-import com.wordpress.rest.Oauth.ErrorListener;
-import com.wordpress.rest.Oauth.Listener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,26 +24,48 @@ public class LoginLeanote extends LoginAbstract {
 
     @Override
     protected void login() {
-        Leanote.requestQueue.add(makeOAuthRequest(mUsername, mPassword, new Oauth.Listener() {
-            @SuppressLint("CommitPrefEdits")
-            @Override
-            public void onResponse(final Oauth.Token token) {
 
-                Account account = AccountHelper.getDefaultAccount();
+        String login_url = String.format("https://leanote.com/api/auth/login?email=%s&pwd=%s", mUsername, mPassword);
+
+        CustomRequest login_req = new CustomRequest(Request.Method.GET, login_url, null, new Response.Listener<JSONObject>(){
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("json:", response.toString());
+                try {
+                    boolean isOk = (boolean) response.get("Ok");
+                    if (isOk) {
+                        Account account = AccountHelper.getDefaultAccount();
+                        String token = (String) response.get("Token");
+                        account.setAccessToken(token.toString());
+                        account.setUserName(mUsername);
+                        account.save();
+                        //account.fetchAccountDetails();
+
+                        mCallback.onSuccess();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
 
                 // Once we have a token, start up Simperium
                 //SimperiumUtils.configureSimperium(Leanote.getContext(), token.toString());
-
-                mCallback.onSuccess();
             }
-        }, new Oauth.ErrorListener() {
+        }, new Response.ErrorListener(){
+
             @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                JSONObject errorObject = VolleyUtils.volleyErrorToJSON(volleyError);
+            public void onErrorResponse(VolleyError error) {
+                JSONObject errorObject = VolleyUtils.volleyErrorToJSON(error);
                 int errorMsgId = restLoginErrorToMsgId(errorObject);
                 mCallback.onError(errorMsgId, errorMsgId == R.string.account_two_step_auth_enabled, false, false);
+
             }
-        }));
+        });
+
+        Leanote.requestQueue.add(login_req);
+
 
     }
 
@@ -72,16 +92,6 @@ public class LoginLeanote extends LoginAbstract {
             }
         }
         return errorMsgId;
-    }
-
-    private Request makeOAuthRequest(final String username, final String password, final Listener listener,
-                                     final ErrorListener errorListener) {
-        Oauth oauth = new Oauth(com.leanote.android.BuildConfig.OAUTH_APP_ID,
-                BuildConfig.OAUTH_APP_SECRET,
-                BuildConfig.OAUTH_REDIRECT_URI);
-        Request oauthRequest;
-        oauthRequest = oauth.makeRequest(username, password, mTwoStepCode, mShouldSendTwoStepSMS, listener, errorListener);
-        return oauthRequest;
     }
 
 

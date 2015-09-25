@@ -14,6 +14,7 @@ import org.json.JSONObject;
  * Class for managing logged in user informations.
  */
 public class Account extends AccountModel {
+
     public void fetchAccountDetails() {
         RestRequest.Listener listener = new RestRequest.Listener() {
             @Override

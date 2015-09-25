@@ -50,6 +50,8 @@ public class Leanote extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        mContext = this;
         setupVolleyQueue();
     }
 

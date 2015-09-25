@@ -8,7 +8,7 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="sign_in">Sign in to your leanote.com account</string>
+    <string name="sign_in">Sign in</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="verification_code">Verification code</string>
@@ -24,7 +24,7 @@
     <string name="error_copy_to_clipboard">An error occurred while copying text to clipboard</string>
     <string name="nux_tap_continue">Continue</string>
     <string name="username_email">Username or email</string>
-    <string name="connecting_wpcom">Connecting to WordPress.com</string>
+    <string name="connecting_wpcom">Connecting to leanote.com</string>
     <string name="username_only_lowercase_letters_and_numbers">Username can only contain lowercase letters (a-z) and numbers</string>
     <string name="username_required">Enter a username</string>
     <string name="username_not_allowed">Username not allowed</string>
