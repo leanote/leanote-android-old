@@ -12,7 +12,6 @@ import com.leanote.android.model.AccountHelper;
 import com.leanote.android.networking.CustomRequest;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
-import com.leanote.android.util.VolleyUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +24,7 @@ public class LoginLeanote extends LoginAbstract {
     @Override
     protected void login() {
 
-        String login_url = String.format("https://leanote.com/api/auth/login?email=%s&pwd=%s", mUsername, mPassword);
+        String login_url = String.format("http://leanote.com/api/auth/login?email=%s&pwd=%s", mUsername, mPassword);
 
         CustomRequest login_req = new CustomRequest(Request.Method.GET, login_url, null, new Response.Listener<JSONObject>(){
 
@@ -43,6 +42,9 @@ public class LoginLeanote extends LoginAbstract {
                         //account.fetchAccountDetails();
 
                         mCallback.onSuccess();
+                    } else {
+                        //mCallback.onError(errorMsgId, errorMsgId == R.string.account_two_step_auth_enabled, false, false);
+                        mCallback.onError();
                     }
 
                 } catch (JSONException e) {
@@ -57,9 +59,7 @@ public class LoginLeanote extends LoginAbstract {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                JSONObject errorObject = VolleyUtils.volleyErrorToJSON(error);
-                int errorMsgId = restLoginErrorToMsgId(errorObject);
-                mCallback.onError(errorMsgId, errorMsgId == R.string.account_two_step_auth_enabled, false, false);
+                mCallback.onError();
 
             }
         });

@@ -67,6 +67,7 @@
     <string name="required_field">Required field</string>
     <string name="faq_button">FAQ</string>
     <string name="nux_tutorial_get_started_title">Get started!</string>
+    <string name="invalid_url_message">Check that the blog URL entered is valid</string>
 
     <string name="ssl_certificate_details">Details</string>
     <string name="ssl_certificate_error">Invalid SSL certificate</string>
@@ -80,5 +81,7 @@
     <string name="nux_cannot_log_in">We can\'t log you in</string>
     <string name="username_or_password_incorrect">The username or password you entered is incorrect</string>
     <string name="invalid_verification_code">Invalid verification code</string>
+    <string name="reader_timespan_now">now</string>
+    <string name="reader_title_applog">Application log</string>
 
 </resources>

@@ -29,8 +29,9 @@ import com.leanote.android.accounts.helpers.LoginAbstract;
 import com.leanote.android.accounts.helpers.LoginLeanote;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.accounts.NewAccountActivity;
+import com.leanote.android.util.ABTestingUtils;
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.EditTextUtils;
-
 import com.leanote.android.widget.LeaTextView;
 
 import org.wordpress.emailchecker.EmailChecker;
@@ -277,6 +278,10 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         }
     };
 
+
+
+
+
     private final TextView.OnEditorActionListener mEditorAction = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -365,10 +370,86 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
             }
 
             @Override
-            public void onError(int errorMessageId, boolean twoStepCodeRequired, boolean httpAuthRequired, boolean erroneousSslCertificate) {
-                System.out.print("login in fail");
+            public void onError() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        signInError(R.string.username_or_password_incorrect, "client response");
+                        endProgress();
+                        return;
+                    }
+                });
             }
         });
+    }
+
+    protected void signInError(int messageId, String clientResponse) {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        SignInDialogFragment nuxAlert;
+        if (messageId == com.leanote.android.R.string.username_or_password_incorrect) {
+            handleInvalidUsernameOrPassword(messageId);
+            return;
+        } else if (messageId == com.leanote.android.R.string.invalid_url_message) {
+            showUrlError(messageId);
+            endProgress();
+            return;
+        } else {
+            AppLog.e(AppLog.T.NUX, "Server response: " + clientResponse);
+            nuxAlert = SignInDialogFragment.newInstance(getString(com.leanote.android.R.string.nux_cannot_log_in),
+                    getString(messageId), R.drawable.noticon_alert_big, 3,
+                    getString(R.string.cancel), "contact us", getString(R.string.reader_title_applog),
+                    SignInDialogFragment.ACTION_OPEN_SUPPORT_CHAT,
+                    SignInDialogFragment.ACTION_OPEN_APPLICATION_LOG);
+        }
+        ft.add(nuxAlert, "alert");
+        ft.commitAllowingStateLoss();
+        endProgress();
+    }
+
+    protected void handleInvalidUsernameOrPassword(int messageId) {
+        mErroneousLogInCount += 1;
+        if (mErroneousLogInCount >= WPCOM_ERRONEOUS_LOGIN_THRESHOLD) {
+            // Clear previous errors
+            mPasswordEditText.setError(null);
+            mUsernameEditText.setError(null);
+            showInvalidUsernameOrPasswordDialog();
+        } else {
+            showUsernameError(messageId);
+            showPasswordError(messageId);
+        }
+        endProgress();
+    }
+
+    protected void showInvalidUsernameOrPasswordDialog() {
+        // Show a dialog
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        SignInDialogFragment nuxAlert;
+        if (ABTestingUtils.isFeatureEnabled(ABTestingUtils.Feature.HELPSHIFT)) {
+            // create a 3 buttons dialog ("Contact us", "Forget your password?" and "Cancel")
+            nuxAlert = SignInDialogFragment.newInstance(getString(com.leanote.android.R.string.nux_cannot_log_in),
+                    getString(com.leanote.android.R.string.username_or_password_incorrect),
+                    com.leanote.android.R.drawable.noticon_alert_big, 3, getString(
+                            com.leanote.android.R.string.cancel), getString(
+                            com.leanote.android.R.string.forgot_password), "", SignInDialogFragment.ACTION_OPEN_URL,
+                    SignInDialogFragment.ACTION_OPEN_SUPPORT_CHAT);
+        } else {
+            // create a 2 buttons dialog ("Forget your password?" and "Cancel")
+            nuxAlert = SignInDialogFragment.newInstance(getString(com.leanote.android.R.string.nux_cannot_log_in),
+                    getString(com.leanote.android.R.string.username_or_password_incorrect),
+                    com.leanote.android.R.drawable.noticon_alert_big, 2, getString(
+                            com.leanote.android.R.string.cancel), getString(
+                            com.leanote.android.R.string.forgot_password), null, SignInDialogFragment.ACTION_OPEN_URL,
+                    0);
+        }
+
+        // Put entered url and entered username args, that could help our support team
+        Bundle bundle = nuxAlert.getArguments();
+        bundle.putString(SignInDialogFragment.ARG_OPEN_URL_PARAM, getForgotPasswordURL());
+        bundle.putString(ENTERED_URL_KEY, EditTextUtils.getText(mUrlEditText));
+        bundle.putString(ENTERED_USERNAME_KEY, EditTextUtils.getText(mUsernameEditText));
+        nuxAlert.setArguments(bundle);
+        ft.add(nuxAlert, "alert");
+        ft.commitAllowingStateLoss();
     }
 
     protected void startProgress(String message) {
