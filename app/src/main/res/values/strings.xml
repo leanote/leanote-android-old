@@ -84,4 +84,10 @@
     <string name="reader_timespan_now">now</string>
     <string name="reader_title_applog">Application log</string>
 
+
+    <string name="tabbar_accessibility_label_me">Me</string>
+    <string name="tabbar_note">Note</string>
+    <string name="tabbar_post">Post</string>
+    <string name="tabbar_category">Category</string>
+    <string name="connectionbar_no_connection">No connection</string>
 </resources>

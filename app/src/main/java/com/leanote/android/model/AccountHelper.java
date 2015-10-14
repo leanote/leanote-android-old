@@ -25,7 +25,8 @@ public class AccountHelper {
     }
 
     public static boolean isSignedIn() {
-        return getDefaultAccount().hasAccessToken() || (Leanote.leaDB.getNumVisibleBlogs() != 0);
+        return true;
+        //return getDefaultAccount().hasAccessToken() || (Leanote.leaDB.getNumVisibleBlogs() != 0);
     }
 
     public static boolean isSignedInWordPressDotCom() {
