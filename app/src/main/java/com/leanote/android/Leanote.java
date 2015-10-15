@@ -41,10 +41,21 @@ public class Leanote extends Application {
     private static RestClientUtils mRestClientUtilsVersion1_1;
     private static String mUserAgent;
 
+    private static String accessToken = "561f93d438f4111a580007a9";
+
     private static final String USER_AGENT_APPNAME = "leanote-android";
 
     public static Context getContext() {
         return mContext;
+    }
+
+    public static void setAccessToken(String accessToken) {
+        Leanote.accessToken = accessToken;
+    }
+
+    public static String getAccessToken() {
+        return accessToken;
+
     }
 
     @Override
