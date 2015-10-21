@@ -1,7 +1,6 @@
 package com.leanote.android.networking;
 
 
-import com.leanote.android.Leanote;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.Blog;
 import com.leanote.android.util.StringUtils;
@@ -14,8 +13,8 @@ public class OAuthAuthenticator implements Authenticator {
 
         if (siteId != null) {
             // Get the token for a Jetpack site if needed
-            Blog blog = Leanote.leaDB.getBlogForDotComBlogId(siteId);
-
+            //Blog blog = Leanote.leaDB.getBlogForDotComBlogId(siteId);
+            Blog blog = null;
             if (blog != null) {
                 String jetpackToken = blog.getApi_key();
 

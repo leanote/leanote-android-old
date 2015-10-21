@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:id="@+id/success_view"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:gravity="center"
-              android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/success_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -22,7 +22,7 @@
             android:layout_height="52dp"
             android:src="@drawable/nux_icon_wp"
             android:tint="@color/white"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/nux_dialog_title"
@@ -39,7 +39,7 @@
             android:shadowRadius="2"
             app:fontVariation="light"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="16dp" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/nux_dialog_description"
@@ -55,7 +55,7 @@
             android:shadowDy="1"
             android:shadowRadius="2"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="16dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -78,7 +78,7 @@
             android:padding="8dp"
             android:singleLine="true"
             android:gravity="center_horizontal"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_gravity="center_horizontal" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/nux_dialog_right_button"
@@ -89,7 +89,7 @@
             android:padding="8dp"
             android:singleLine="true"
             android:layout_gravity="center_horizontal"
-            android:gravity="center"/>
+            android:gravity="center" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/nux_dialog_left_button"
@@ -100,6 +100,6 @@
             android:padding="8dp"
             android:singleLine="true"
             android:layout_gravity="center_horizontal"
-            android:gravity="center"/>
+            android:gravity="center" />
     </LinearLayout>
 </LinearLayout>

@@ -50,7 +50,7 @@ public class LeaMainTabAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case TAB_NOTE:
-                return NoteFragment.newInstance();
+                return NoteListFragment.newInstance();
             case TAB_POST:
                 return PostFragment.newInstance();
             case TAB_CATEGORY:

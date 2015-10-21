@@ -8,11 +8,11 @@
         colorControlActivated   controls in their activated/checked state (search highlight, checked checkboxes)
         colorControlHighlight   control highlights (ripples, list selectors)
     -->
-    <color name="color_primary">@color/blue_Leanote</color>
+    <color name="color_primary">@color/blue_wordpress</color>
     <color name="color_primary_dark">@color/status_bar_tint</color>
     <color name="color_accent">@color/orange_jazzy</color>
     <color name="color_control_activated">@color/blue_light</color>
-    <color name="color_control_highlight">@color/pressed_Leanote</color>
+    <color name="color_control_highlight">@color/pressed_wordpress</color>
 
     <color name="fab_normal">@color/color_accent</color>
     <color name="fab_pressed">@color/orange_fire</color>
@@ -29,10 +29,10 @@
     <color name="default_background">@color/grey_lighten_30</color>
 
     <!-- ==================================== -->
-    <!-- Leanote.com Colors                 -->
-    <!-- Leanote.com/design-handbook/colors -->
+    <!-- WordPress.com Colors                 -->
+    <!-- wordpress.com/design-handbook/colors -->
     <!-- Blues -->
-    <color name="blue_Leanote">#0087be</color>
+    <color name="blue_wordpress">#0087be</color>
     <color name="blue_light">#78dcfa</color>
     <color name="blue_medium">#00aadc</color>
     <color name="blue_dark">#005082</color>
@@ -69,12 +69,12 @@
     <color name="translucent_grey_lighten_30">#80e9eff3</color>
     <color name="translucent_grey">#80888888</color>
 
-    <!-- END Leanote.com Colors -->
+    <!-- END WordPress.com Colors -->
     <!-- ======================== -->
 
     <!-- App specific colors -->
     <!-- We could use blue_dark for the status bar color, but to adhere to the material design spec very closely,
-      we're using a shade of blue_Leanote -->
+      we're using a shade of blue_wordpress -->
     <color name="status_bar_tint">#006b98</color>
 
     <!-- Media Gallery -->
@@ -98,12 +98,13 @@
 
     <!-- Stats -->
     <color name="stats_text_color">@color/grey_dark</color>
-    <color name="stats_link_text_color">@color/blue_Leanote</color>
+    <color name="stats_link_text_color">@color/blue_wordpress</color>
     <color name="stats_module_content_list_header">@color/grey</color>
     <color name="stats_blue_labels">@color/grey_darken_20</color>
-    <color name="stats_bar_graph_main_series">@color/blue_Leanote</color>
+    <color name="stats_bar_graph_main_series">@color/blue_wordpress</color>
     <color name="stats_bar_graph_main_series_highlight">@color/orange_jazzy</color>
-    <color name="stats_bar_graph_outer_highlight">#1Af0821e</color> <!-- 10% Opacity on orange_jazzy #f0821e -->
+    <color name="stats_bar_graph_outer_highlight">#1Af0821e</color>
+    <!-- 10% Opacity on orange_jazzy #f0821e -->
     <color name="stats_bar_graph_secondary_series">@color/blue_dark</color>
     <color name="stats_empty_placeholder_color">@color/translucent_grey_lighten_30</color>
 
@@ -123,19 +124,19 @@
     <!-- NUX -->
     <color name="nux_grey_button">@color/grey_lighten_20</color>
     <color name="nux_alert_bg">@color/grey_dark</color>
-    <color name="nux_background">@color/blue_Leanote</color>
+    <color name="nux_background">@color/blue_wordpress</color>
     <color name="nux_eye_icon_color_closed">@color/grey_lighten_20</color>
     <color name="nux_eye_icon_color_open">@color/grey_lighten_10</color>
 
     <!-- Editor -->
     <color name="post_detail_icon_tint">@color/grey_darken_20</color>
     <color name="format_bar_button_selected">@color/blue_medium</color>
-    <color name="placeholder_content_text">@color/blue_Leanote</color>
+    <color name="placeholder_content_text">@color/blue_wordpress</color>
     <color name="format_bar_background">@color/grey_lighten_30</color>
     <color name="image_options_label">@color/grey_lighten_20</color>
 
     <!-- Misc -->
-    <color name="pressed_Leanote">@color/semi_transparent_blue_light</color>
+    <color name="pressed_wordpress">@color/semi_transparent_blue_light</color>
     <color name="background_grey">@color/grey_lighten_30</color>
 
     <!--Me-->

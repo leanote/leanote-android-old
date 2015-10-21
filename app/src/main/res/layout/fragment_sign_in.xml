@@ -182,6 +182,7 @@
                     android:src="@drawable/self_hosted_site"
                     android:tint="@color/grey_darken_10" />
             </RelativeLayout>
+
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/nux_button_height"

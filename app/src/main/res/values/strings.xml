@@ -6,7 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_sign_in">SignInActivity</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sign_in">Sign in</string>
     <string name="email">Email</string>
@@ -90,4 +90,28 @@
     <string name="tabbar_post">Post</string>
     <string name="tabbar_category">Category</string>
     <string name="connectionbar_no_connection">No connection</string>
+    <string name="title_activity_note_detail">NoteDetailActivity</string>
+    <string name="note_actionbar">Note</string>
+    <string name="empty_list_default">This list is empty</string>
+    <string name="notes_fetching">Fetching notes ...</string>
+    <string name="error_refresh_notes">Fetching notes fail</string>
+    <string name="note_not_found">note not found</string>
+    <string name="note_trashed">delete note</string>
+    <string name="undo">Undo</string>
+
+    <!-- buttons on post cards -->
+    <string name="button_edit">Edit</string>
+    <string name="button_publish">Publish</string>
+    <string name="button_view">View</string>
+    <string name="button_preview">Preview</string>
+    <string name="button_stats">Stats</string>
+    <string name="button_trash">Trash</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_more">More</string>
+    <string name="button_back">Back</string>
+    <string name="button_revert">Revert</string>
+    <string name="title_activity_edit_note">EditNoteActivity</string>
+    <string name="untitled">Untitled</string>
+
+
 </resources>

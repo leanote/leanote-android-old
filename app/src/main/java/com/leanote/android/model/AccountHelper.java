@@ -3,7 +3,6 @@ package com.leanote.android.model;
 
 import android.text.TextUtils;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.datasets.AccountTable;
 
 
@@ -33,9 +32,6 @@ public class AccountHelper {
         return getDefaultAccount().hasAccessToken();
     }
 
-    public static boolean isJetPackUser() {
-        return Leanote.leaDB.hasAnyJetpackBlogs();
-    }
 
     public static String getCurrentUsernameForBlog(Blog blog) {
         if (!TextUtils.isEmpty(getDefaultAccount().getUserName())) {

@@ -49,6 +49,16 @@ public class Leanote extends Application {
         return mContext;
     }
 
+    private static String userID;
+
+    public static String getUserID() {
+        return userID;
+    }
+
+    public static void setUserID(String uID) {
+        userID = uID;
+    }
+
     public static void setAccessToken(String accessToken) {
         Leanote.accessToken = accessToken;
     }
@@ -64,6 +74,12 @@ public class Leanote extends Application {
 
         mContext = this;
         setupVolleyQueue();
+
+        setUserID("54a47c6b38f4116e57000339");
+        setAccessToken("5627b49938f4110bc5000464");
+        leaDB = new LeanoteDB(this);
+        //LeanoteDB.deleteDatabase(this);
+
     }
 
     public static void setupVolleyQueue() {
