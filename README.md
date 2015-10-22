@@ -4,5 +4,5 @@ leanote android app is still in developing phase, so if you are interested in co
 
 
 ###Preview:
-![](./preview/login.png)
-![](./preview/note_list.png)
+![](./preview/login.jpg)
+![](./preview/note_list.jpg)
