@@ -96,7 +96,7 @@ public class LeaDelayedHurlStack implements HttpStack {
             if (StringUtils.getHost(request.getUrl()).endsWith("files.wordpress.com") && mCtx != null
                     && AccountHelper.isSignedInWordPressDotCom()) {
                 // Add the auth header to access private WP.com files
-                additionalHeaders.put("Authorization", "Bearer " + AccountHelper.getDefaultAccount().getAccessToken());
+                additionalHeaders.put("Authorization", "Bearer " + AccountHelper.getDefaultAccount().getmAccessToken());
             }
         }
 

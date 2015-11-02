@@ -1,126 +1,74 @@
 package com.leanote.android.model;
 
-import android.text.TextUtils;
-
-import com.leanote.android.util.StringUtils;
-
-import org.json.JSONObject;
-
 /**
  * Created by binnchx on 8/26/15.
  */
 public class AccountModel {
+    private long localUserId;
+    private String mUserId;
     private String mUserName;
-    private long mUserId;
-    private String mDisplayName;
-    private String mProfileUrl;
-    private String mAvatarUrl;
-    private long mPrimaryBlogId;
-    private int mSiteCount;
-    private int mVisibleSiteCount;
+    private String mEmail;
+    private boolean verified;
+    private String mAvatar;
     private String mAccessToken;
 
     public AccountModel() {
-        init();
+        localUserId = 0L;
     }
 
-    public void init() {
-        mUserName = "";
-        mUserId = 0;
-        mDisplayName = "";
-        mProfileUrl = "";
-        mAvatarUrl = "";
-        mPrimaryBlogId = 0;
-        mSiteCount = 0;
-        mVisibleSiteCount = 0;
-        mAccessToken = "";
+    public long getLocalUserId() {
+        return localUserId;
     }
 
-    public void updateFromRestResponse(JSONObject json) {
-        mUserId = json.optLong("ID");
-        mUserName = json.optString("username");
-        mDisplayName = json.optString("display_name");
-        mProfileUrl = json.optString("profile_URL");
-        mAvatarUrl = json.optString("avatar_URL");
-        mPrimaryBlogId = json.optLong("primary_blog");
-        mSiteCount = json.optInt("site_count");
-        mVisibleSiteCount = json.optInt("visible_site_count");
+    public void setLocalUserId(long localUserId) {
+        this.localUserId = localUserId;
     }
 
-    public long getUserId() {
+    public String getmUserId() {
         return mUserId;
     }
 
-    public void setUserId(long userId) {
-        mUserId = userId;
+    public void setmUserId(String mUserId) {
+        this.mUserId = mUserId;
     }
 
-    public void setPrimaryBlogId(long primaryBlogId) {
-        mPrimaryBlogId = primaryBlogId;
+    public String getmUserName() {
+        return mUserName;
     }
 
-    public long getPrimaryBlogId() {
-        return mPrimaryBlogId;
+    public void setmUserName(String mUserName) {
+        this.mUserName = mUserName;
     }
 
-    public String getUserName() {
-        return StringUtils.notNullStr(mUserName);
+    public String getmEmail() {
+        return mEmail;
     }
 
-    public void setUserName(String userName) {
-        mUserName = userName;
+    public void setmEmail(String mEmail) {
+        this.mEmail = mEmail;
     }
 
-    public String getAccessToken() {
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public String getmAvatar() {
+        return mAvatar;
+    }
+
+    public void setmAvatar(String mAvatar) {
+        this.mAvatar = mAvatar;
+    }
+
+    public String getmAccessToken() {
         return mAccessToken;
     }
 
-    public void setAccessToken(String accessToken) {
-        mAccessToken = accessToken;
+    public void setmAccessToken(String mAccessToken) {
+        this.mAccessToken = mAccessToken;
     }
-
-    boolean hasAccessToken() {
-        return !TextUtils.isEmpty(getAccessToken());
-    }
-
-    public String getDisplayName() {
-        return StringUtils.notNullStr(mDisplayName);
-    }
-
-    public void setDisplayName(String displayName) {
-        mDisplayName = displayName;
-    }
-
-    public String getProfileUrl() {
-        return StringUtils.notNullStr(mProfileUrl);
-    }
-
-    public void setProfileUrl(String profileUrl) {
-        mProfileUrl = profileUrl;
-    }
-
-    public String getAvatarUrl() {
-        return StringUtils.notNullStr(mAvatarUrl);
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        mAvatarUrl = avatarUrl;
-    }
-
-    public int getSiteCount() {
-        return mSiteCount;
-    }
-
-    public void setSiteCount(int siteCount) {
-        mSiteCount = siteCount;
-    }
-
-    public int getVisibleSiteCount() {
-        return mVisibleSiteCount;
-    }
-
-    public void setVisibleSiteCount(int visibleSiteCount) {
-        mVisibleSiteCount = visibleSiteCount;
-    }
-
 }

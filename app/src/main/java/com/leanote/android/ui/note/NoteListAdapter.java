@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.util.AppLog;
@@ -144,6 +145,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         final NoteDetail note = mNotes.get(position);
+        Log.i("note", note.toString());
         Context context = holder.itemView.getContext();
 
         if (holder instanceof NoteViewHolder) {
@@ -349,9 +351,15 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mHiddenNotes.add(note);
 
         int position = mNotes.indexOfPost(note);
+        AppLog.i("note position:" + position);
         if (position > -1) {
             mNotes.remove(position);
-            notifyItemRemoved(position);
+            if (mNotes.size() > 0) {
+                notifyItemRemoved(position);
+            } else {
+                notifyDataSetChanged();
+            }
+
         }
     }
 
@@ -424,23 +432,15 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            //Leanote.getUserID();
-            //5620f9af38f411671600050d
-            tmpNotes = Leanote.leaDB.getNotesList(Leanote.getUserID());
+
+            tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
             Log.i("load notes from local:", String.valueOf(tmpNotes.size()));
             // make sure we don't return any hidden posts
+            Log.i("hidden note size:", String.valueOf(mHiddenNotes.size()));
             for (NoteDetail hiddenNote : mHiddenNotes) {
-                tmpNotes.remove(hiddenNote);
+                int index = tmpNotes.indexOfPost(hiddenNote);
+                tmpNotes.remove(index);
             }
-
-//            List<NoteDetail> notes = new ArrayList<>();
-//            NoteDetail note = new NoteDetail();
-//            Random rand = new Random();
-//            note.setTitle(String.valueOf(rand.nextInt(100)));
-//            note.setUpdatedTime("2015/10/20");
-//            notes.add(note);
-//
-//            tmpNotes.addAll(notes);
 
             Log.i("after remove, size:", String.valueOf(tmpNotes.size()));
             return true;

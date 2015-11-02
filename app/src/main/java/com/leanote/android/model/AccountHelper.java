@@ -1,9 +1,9 @@
 package com.leanote.android.model;
 
 
-import android.text.TextUtils;
-
 import com.leanote.android.datasets.AccountTable;
+
+import org.apache.commons.lang.StringUtils;
 
 
 /**
@@ -24,21 +24,11 @@ public class AccountHelper {
     }
 
     public static boolean isSignedIn() {
-        return true;
-        //return getDefaultAccount().hasAccessToken() || (Leanote.leaDB.getNumVisibleBlogs() != 0);
+        return StringUtils.isNotEmpty(getDefaultAccount().getmAccessToken());
     }
 
     public static boolean isSignedInWordPressDotCom() {
-        return getDefaultAccount().hasAccessToken();
+        return StringUtils.isNotEmpty(getDefaultAccount().getmAccessToken());
     }
 
-
-    public static String getCurrentUsernameForBlog(Blog blog) {
-        if (!TextUtils.isEmpty(getDefaultAccount().getUserName())) {
-            return getDefaultAccount().getUserName();
-        } else if (blog != null) {
-            return blog.getUsername();
-        }
-        return "";
-    }
 }

@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -34,6 +35,7 @@ import com.leanote.android.util.AppLog;
 import com.leanote.android.util.EditTextUtils;
 import com.leanote.android.widget.LeaTextView;
 
+import org.apache.commons.lang.StringUtils;
 import org.wordpress.emailchecker.EmailChecker;
 
 import java.util.regex.Matcher;
@@ -90,8 +92,20 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+        if (fieldsFilled()) {
+            mSignInButton.setEnabled(true);
+        } else {
+            mSignInButton.setEnabled(false);
+        }
+        mPasswordEditText.setError(null);
+        mUsernameEditText.setError(null);
     }
+
+    private boolean fieldsFilled() {
+        return EditTextUtils.getText(mUsernameEditText).trim().length() > 0
+                && EditTextUtils.getText(mPasswordEditText).trim().length() > 0;
+    }
+
 
     @Override
     public void afterTextChanged(Editable s) {
@@ -161,30 +175,7 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         mPasswordEditText.setOnEditorActionListener(mEditorAction);
         mUrlEditText.setOnEditorActionListener(mEditorAction);
 
-//        mTwoStepEditText = (EditText) rootView.findViewById(R.id.nux_two_step);
-//        mTwoStepEditText.addTextChangedListener(this);
-//        mTwoStepEditText.setOnKeyListener(new View.OnKeyListener() {
-//            @Override
-//            public boolean onKey(View v, int keyCode, KeyEvent event) {
-//                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (keyCode == EditorInfo.IME_ACTION_DONE)) {
-//                    if (fieldsFilled()) {
-//                        signIn();
-//                    }
-//                }
-//
-//                return false;
-//            }
-//        });
 
-
-        //LeaTextView twoStepFooterButton = (LeaTextView) rootView.findViewById(R.id.two_step_footer_button);
-        //twoStepFooterButton.setText(Html.fromHtml("<u>" + getString(R.string.two_step_footer_button) + "</u>"));
-//        twoStepFooterButton.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                requestSMSTwoStepCode();
-//            }
-//        });
 
         mBottomButtonsLayout = (LinearLayout) rootView.findViewById(R.id.nux_bottom_buttons);
         initPasswordVisibilityButton(rootView, mPasswordEditText);
@@ -274,6 +265,7 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
     private final OnClickListener mSignInClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.i("start to signin...", "");
             signIn();
         }
     };
@@ -366,7 +358,9 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         login.execute(new LoginAbstract.Callback() {
             @Override
             public void onSuccess() {
-                System.out.print("login in success");
+                Log.i("login in success", "");
+                finishCurrentActivity();
+                //NoteUpdateService.startServiceForNote(getActivity());
             }
 
             @Override
@@ -379,6 +373,32 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
                         return;
                     }
                 });
+            }
+        });
+    }
+
+    protected void endProgress() {
+        mProgressBarSignIn.setVisibility(View.GONE);
+        mProgressTextSignIn.setVisibility(View.GONE);
+        mSignInButton.setVisibility(View.VISIBLE);
+        mUsernameEditText.setEnabled(true);
+        mPasswordEditText.setEnabled(true);
+        mUrlEditText.setEnabled(true);
+        mAddSelfHostedButton.setEnabled(true);
+        mCreateAccountButton.setEnabled(true);
+        mForgotPassword.setEnabled(true);
+    }
+
+    private void finishCurrentActivity() {
+        if (!isAdded()) {
+            return;
+        }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setResult(Activity.RESULT_OK);
+                getActivity().finish();
             }
         });
     }
@@ -460,7 +480,6 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         mProgressTextSignIn.setText(message);
         mUsernameEditText.setEnabled(false);
         mPasswordEditText.setEnabled(false);
-        //mTwoStepEditText.setEnabled(false);
         mUrlEditText.setEnabled(false);
         mAddSelfHostedButton.setEnabled(false);
         mCreateAccountButton.setEnabled(false);
@@ -517,11 +536,18 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
             retValue = false;
         }
 
-        if (password.equals("")) {
+        if (StringUtils.isEmpty(password)) {
             mPasswordEditText.setError(getString(R.string.required_field));
             mPasswordEditText.requestFocus();
             retValue = false;
         }
+
+        if (password.length() < 6) {
+            mPasswordEditText.setError(getString(R.string.pwd_size_alert));
+            mPasswordEditText.requestFocus();
+            retValue = false;
+        }
+
         return retValue;
     }
 

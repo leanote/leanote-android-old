@@ -2,12 +2,14 @@ package com.leanote.android.ui.main;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leanote.android.Constants;
+import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
@@ -24,8 +27,8 @@ import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.note.NoteListAdapter;
-import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.ui.note.service.NoteEvents;
+import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.util.AniUtils;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.SwipeToRefreshHelper;
@@ -298,7 +301,7 @@ public class NoteListFragment extends Fragment
         if (!isAdded()) {
             return;
         }
-        Log.i("postcount:", String.valueOf(postCount));
+
         if (postCount == 0 && !mIsFetchingPosts) {
             if (NetworkUtils.isNetworkAvailable(getActivity())) {
                 updateEmptyView(EmptyViewMessageType.NO_CONTENT);
@@ -337,7 +340,7 @@ public class NoteListFragment extends Fragment
 
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());
         //load note detail
-        NoteDetail fullNote = new NoteDetail();
+        NoteDetail fullNote = Leanote.leaDB.getLocalNoteByNoteId(note.getNoteId());
         if (fullNote == null) {
             ToastUtils.showToast(getActivity(), R.string.note_not_found);
             return;
@@ -345,10 +348,10 @@ public class NoteListFragment extends Fragment
 
         switch (buttonType) {
             case PostListButton.BUTTON_EDIT:
-                ActivityLauncher.editNoteForResult(getActivity(), fullNote.getNoteId());
+                ActivityLauncher.editNoteForResult(getActivity(), fullNote.getId());
                 break;
             case PostListButton.BUTTON_VIEW:
-                //ActivityLauncher.browsePostOrPage(getActivity(), WordPress.getCurrentBlog(), fullPost);
+                //ActivityLauncher.browseNote(getActivity(), WordPress.getCurrentBlog(), fullPost);
                 break;
             case PostListButton.BUTTON_TRASH:
             case PostListButton.BUTTON_DELETE:
@@ -382,9 +385,9 @@ public class NoteListFragment extends Fragment
         };
 
         // different undo text if this is a local draft since it will be deleted rather than trashed
-        String text = getString(R.string.note_trashed);
+//        String text = getString(R.string.note_trashed);
 
-        Snackbar.make(getView().findViewById(R.id.coordinator), text, Snackbar.LENGTH_LONG)
+        Snackbar.make(getView().findViewById(R.id.coordinator), R.string.note_trashed, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, undoListener)
                 .show();
 
@@ -399,11 +402,21 @@ public class NoteListFragment extends Fragment
                     return;
                 }
 
-                //WordPress.wpDB.deletePost(fullPost);
-
-                //delete note
+                //delete note in local
+                Leanote.leaDB.deleteNote(note);
+                //delete note in server
+                new deleteNoteTask().execute(note.getNoteId());
             }
         }, Constants.SNACKBAR_LONG_DURATION_MS);
+    }
+
+    private class deleteNoteTask extends AsyncTask<String, Spanned, Void> {
+
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            return null;
+        }
     }
 
     

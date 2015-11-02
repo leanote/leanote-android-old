@@ -9,7 +9,7 @@ public class OAuthAuthenticator implements Authenticator {
     @Override
     public void authenticate(final AuthenticatorRequest request) {
         String siteId = request.getSiteId();
-        String token = AccountHelper.getDefaultAccount().getAccessToken();
+        String token = AccountHelper.getDefaultAccount().getmAccessToken();
 
         if (siteId != null) {
             // Get the token for a Jetpack site if needed

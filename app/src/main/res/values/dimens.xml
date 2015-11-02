@@ -62,6 +62,8 @@
     <dimen name="margin_large">12dp</dimen>
     <dimen name="margin_extra_large">16dp</dimen>
 
+    <dimen name="nux_main_button_height">48dp</dimen>
+
     <!-- left/right margin for reader cards -->
     <dimen name="reader_card_margin_normal">0dp</dimen>
     <dimen name="reader_card_margin_normal_landscape">48dp</dimen>
@@ -189,5 +191,39 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <dimen name="format_bar_height_tablet">49dp</dimen>
+    <dimen name="format_bar_left_margin">5dp</dimen>
+    <dimen name="format_bar_right_margin">2dp</dimen>
+    <dimen name="format_bar_html_button_left_margin">3dp</dimen>
+    <dimen name="format_bar_scroll_right_margin">-7dp</dimen>
+
+    <dimen name="format_bar_button_margin_tablet">@dimen/format_bar_button_margin_tablet_small</dimen>
+    <dimen name="format_bar_button_margin_tablet_small">2dp</dimen>
+    <dimen name="format_bar_button_margin_tablet_large">7dp</dimen>
+    <dimen name="format_bar_button_margin_tablet_extra_large">12dp</dimen>
+
+    <dimen name="format_bar_button_group_tablet">@dimen/format_bar_button_group_tablet_small</dimen>
+    <dimen name="format_bar_button_group_tablet_small">15dp</dimen>
+    <dimen name="format_bar_button_group_tablet_large">25dp</dimen>
+    <dimen name="format_bar_button_group_tablet_extra_large">35dp</dimen>
+
+    <dimen name="format_bar_horizontal_divider_height">1dp</dimen>
+    <dimen name="format_bar_vertical_divider_width">0.6dp</dimen>
+    <dimen name="format_bar_vertical_divider_height">28dp</dimen>
+
+    <dimen name="sourceview_side_margin">15dp</dimen>
+    <dimen name="sourceview_side_margin_large">90dp</dimen>
+    <dimen name="sourceview_side_margin_extra_large">170dp</dimen>
+    <dimen name="sourceview_top_margin">15dp</dimen>
+    <dimen name="sourceview_title_bottom_margin">15dp</dimen>
+
+    <dimen name="link_dialog_margin_inner">4dp</dimen>
+    <dimen name="link_dialog_margin_outer">16dp</dimen>
+
+
+    <dimen name="legacy_format_bar_height">40dp</dimen>
+
 
 </resources>

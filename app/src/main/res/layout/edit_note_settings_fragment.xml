@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_fragment_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/margin_medium"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.leanote.android.widget.LeaTextView
+            android:id="@+id/statusLabel"
+            style="@style/LeanoteSubHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status" />
+
+        <Spinner
+            android:id="@+id/status"
+            android:paddingTop="@dimen/margin_small"
+            android:paddingBottom="@dimen/margin_small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+        <com.leanote.android.widget.LeaTextView
+            android:id="@+id/notebookLabel"
+            style="@style/LeanoteSubHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/note_book" />
+
+        <Spinner
+            android:id="@+id/notebook"
+            android:paddingTop="@dimen/margin_small"
+            android:paddingBottom="@dimen/margin_small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.leanote.android.widget.LeaTextView
+            android:id="@+id/tagsLabel"
+            style="@style/LeanoteSubHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tags" />
+
+        <com.leanote.android.widget.SuggestionAutoCompleteText
+            android:id="@+id/tags"
+            android:layout_width="match_parent"
+            android:layout_marginTop="@dimen/margin_small"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_sz_large"
+            android:hint="@string/tags_separate_with_commas"
+            android:inputType="textAutoCorrect" />
+
+    </LinearLayout>
+</ScrollView>

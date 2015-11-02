@@ -52,6 +52,12 @@ public class AppLog {
         addEntry(tag, LogLevel.i, message);
     }
 
+    public static void i(Object message) {
+        String msg = StringUtils.notNullStr(message.toString());
+        Log.i(TAG + "-debug:", msg);
+    }
+
+
     public static void w(T tag, String message) {
         message = StringUtils.notNullStr(message);
         Log.w(TAG + "-" + tag.toString(), message);

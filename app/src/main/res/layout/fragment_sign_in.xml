@@ -185,7 +185,7 @@
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/nux_button_height"
+                android:layout_height="@dimen/nux_main_button_height"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="16dp">
@@ -194,6 +194,7 @@
                     android:id="@+id/nux_sign_in_button"
                     style="@style/Leanote.NUXPrimaryButton"
                     android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:clickable="true"
                     android:enabled="false"
                     android:gravity="center"
@@ -203,6 +204,7 @@
                     android:id="@+id/nux_sign_in_progress_bar"
                     style="@style/Leanote.NUXPrimaryButton"
                     android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:enabled="false"
                     android:visibility="gone">
 

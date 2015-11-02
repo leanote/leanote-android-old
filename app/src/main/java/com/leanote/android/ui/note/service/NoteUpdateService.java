@@ -11,9 +11,11 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.leanote.android.Leanote;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -58,7 +60,12 @@ public class NoteUpdateService extends Service {
     }
 
     private void fetchNotes() {
-        String noteApi = String.format("http://leanote.com/api/note/getSyncNotes?token=%s", Leanote.getAccessToken());
+        String accessToken = AccountHelper.getDefaultAccount().getmAccessToken();
+
+        if (StringUtils.isEmpty(accessToken)) {
+            return;
+        }
+        String noteApi = String.format("http://leanote.com/api/note/getSyncNotes?token=%s", accessToken);
 
         RequestFuture<String> future = RequestFuture.newFuture();
 
@@ -92,6 +99,7 @@ public class NoteUpdateService extends Service {
             Leanote.leaDB.saveNotes(noteList);
         } catch (Exception e) {
             e.printStackTrace();
+            //ToastUtils.showToast(getBaseContext(), "load notes fail");
         }
         EventBus.getDefault().post(event);
     }

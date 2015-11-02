@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.networking.SSLCertsViewActivity;
@@ -54,17 +55,17 @@ public class ActivityLauncher {
         // Create a new post object
         NoteDetail newNote = new NoteDetail();
         //WordPress.wpDB.savePost(newPost);
-
+        Leanote.leaDB.saveNote(newNote);
         Intent intent = new Intent(context, EditNoteActivity.class);
-        intent.putExtra(EditNoteActivity.EXTRA_NOTEID, newNote.getNoteId());
-        intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_POST, true);
+        intent.putExtra(EditNoteActivity.EXTRA_NOTEID, newNote.getId());
+        intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_NOTE, true);
         context.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 
-    public static void editNoteForResult(Activity activity, String noteId) {
+    public static void editNoteForResult(Activity activity, long noteId) {
         Intent intent = new Intent(activity.getApplicationContext(), EditNoteActivity.class);
         intent.putExtra(EditNoteActivity.EXTRA_NOTEID, noteId);
-        intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_POST, false);
+        intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_NOTE, false);
         activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 

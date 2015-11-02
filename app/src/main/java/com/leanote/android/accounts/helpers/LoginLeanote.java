@@ -25,7 +25,6 @@ public class LoginLeanote extends LoginAbstract {
     protected void login() {
 
         String login_url = String.format("http://leanote.com/api/auth/login?email=%s&pwd=%s", mUsername, mPassword);
-
         CustomRequest login_req = new CustomRequest(Request.Method.GET, login_url, null, new Response.Listener<JSONObject>(){
 
             @Override
@@ -35,9 +34,11 @@ public class LoginLeanote extends LoginAbstract {
                     boolean isOk = (boolean) response.get("Ok");
                     if (isOk) {
                         Account account = AccountHelper.getDefaultAccount();
-                        String token = (String) response.get("Token");
-                        account.setAccessToken(token.toString());
-                        account.setUserName(mUsername);
+                        String token = response.getString("Token");
+                        account.setmAccessToken(token);
+                        account.setmUserId(response.getString("UserId"));
+                        account.setmUserName(response.getString("Username"));
+                        account.setmEmail(response.getString("Email"));
                         account.save();
                         //account.fetchAccountDetails();
 
@@ -48,7 +49,7 @@ public class LoginLeanote extends LoginAbstract {
                     }
 
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    mCallback.onError();
                 }
 
 

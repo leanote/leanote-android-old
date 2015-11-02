@@ -168,10 +168,20 @@ public class LeaMainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RequestCodes.ADD_ACCOUNT && resultCode == RESULT_OK) {
-
+            resetFragments();
         }
     }
 
+    private void resetFragments() {
+        int position = mViewPager.getCurrentItem();
+        mTabAdapter = new LeaMainTabAdapter(getFragmentManager());
+        mViewPager.setAdapter(mTabAdapter);
+
+        // restore previous position
+        if (mTabAdapter.isValidPosition(position)) {
+            mViewPager.setCurrentItem(position);
+        }
+    }
 
 
     private void trackLastVisibleTab(int position) {
