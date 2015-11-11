@@ -11,9 +11,21 @@ public class AccountModel {
     private boolean verified;
     private String mAvatar;
     private String mAccessToken;
+    private boolean useMarkdown;
+    private int lastSyncUsn;
 
     public AccountModel() {
         localUserId = 0L;
+    }
+
+    public void init() {
+        mUserId = "";
+        mUserName = "";
+        mEmail = "";
+        verified = false;
+        mAvatar = "";
+        mAccessToken = "";
+        lastSyncUsn = 0;
     }
 
     public long getLocalUserId() {
@@ -71,4 +83,22 @@ public class AccountModel {
     public void setmAccessToken(String mAccessToken) {
         this.mAccessToken = mAccessToken;
     }
+
+    public int getLastSyncUsn() {
+        return lastSyncUsn;
+    }
+
+    public void setLastSyncUsn(int lastSyncUsn) {
+        this.lastSyncUsn = lastSyncUsn;
+    }
+
+    public boolean isUseMarkdown() {
+        return useMarkdown;
+    }
+
+    public void setUseMarkdown(boolean useMarkdown) {
+        this.useMarkdown = useMarkdown;
+    }
+
+
 }

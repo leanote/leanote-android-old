@@ -55,7 +55,7 @@ public class ActivityLauncher {
         // Create a new post object
         NoteDetail newNote = new NoteDetail();
         //WordPress.wpDB.savePost(newPost);
-        Leanote.leaDB.saveNote(newNote);
+        Leanote.leaDB.addNote(newNote);
         Intent intent = new Intent(context, EditNoteActivity.class);
         intent.putExtra(EditNoteActivity.EXTRA_NOTEID, newNote.getId());
         intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_NOTE, true);

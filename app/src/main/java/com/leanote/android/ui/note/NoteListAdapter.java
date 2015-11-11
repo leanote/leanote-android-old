@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -20,6 +21,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
 import com.leanote.android.widget.PostListButton;
@@ -52,7 +54,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private boolean mIsLoadingPosts;
 
-    private final NoteDetailList mNotes = new NoteDetailList();
+    private NoteDetailList mNotes = new NoteDetailList();
     private final List<NoteDetail> mHiddenNotes = new ArrayList<>();
 
     private final LayoutInflater mLayoutInflater;
@@ -63,6 +65,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private static final int VIEW_TYPE_POST_OR_PAGE = 0;
     private static final int VIEW_TYPE_ENDLIST_INDICATOR = 1;
+    private static final int VIEW_TYPE_SEARCH = 2;
 
     public NoteListAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
@@ -78,6 +81,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         // on larger displays we can always show all buttons
         mAlwaysShowAllButtons = (displayWidth >= 1080);
+
     }
 
 //    public void setOnLoadMoreListener(OnLoadMoreListener listener) {
@@ -104,13 +108,16 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position < mNotes.size());
+        return (position >= 0 && position <= mNotes.size());
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == mNotes.size()) {
+
+        if (position == (mNotes.size() + 1)) {
             return VIEW_TYPE_ENDLIST_INDICATOR;
+        } else if (position == 0) {
+            return VIEW_TYPE_SEARCH;
         }
         return VIEW_TYPE_POST_OR_PAGE;
     }
@@ -120,7 +127,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (mNotes.size() == 0) {
             return 0;
         } else {
-            return mNotes.size() + 1; // +1 for the endlist indicator
+            return mNotes.size() + 2; // +1 for the endlist indicator
         }
     }
 
@@ -130,21 +137,58 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             View view = mLayoutInflater.inflate(R.layout.endlist_indicator, parent, false);
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
-        } else {
+        } else if (viewType == VIEW_TYPE_SEARCH) {
+            return new SearchViewHolder(new SearchToolbar(parent.getContext()));
+        } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NoteViewHolder(view);
         }
     }
 
+//    private class SearchChangeListener implements SearchView.OnQueryTextListener {
+//
+//        @Override
+//        public boolean onQueryTextSubmit(String query) {
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean onQueryTextChange(String queryText) {
+//            NoteDetailList filteredNotes = new NoteDetailList();
+//            NoteDetailList noteList = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+//
+//            for (NoteDetail note : noteList) {
+//                String content = note.getContent().getContent();
+//
+//                if (!TextUtils.isEmpty(content) && content.contains(queryText)) {
+//                    filteredNotes.add(note);
+//                    continue;
+//                }
+//
+//                if (!TextUtils.isEmpty(note.getTitle()) && note.getTitle().contains(queryText)) {
+//                    filteredNotes.add(note);
+//                }
+//            }
+//
+//            mNotes = filteredNotes;
+//            notifyDataSetChanged();
+//            return true;
+//        }
+//    }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         // nothing to do if this is the static endlist indicator
-        if (getItemViewType(position) == VIEW_TYPE_ENDLIST_INDICATOR) {
+        int posType = getItemViewType(position);
+        if (posType == VIEW_TYPE_ENDLIST_INDICATOR) {
+            return;
+        } else if (posType == VIEW_TYPE_SEARCH) {
+            SearchViewHolder searchViewHolder = (SearchViewHolder) holder;
+            //searchViewHolder.mSearchToolbar.getmSearchView().setOnQueryTextListener(new SearchChangeListener());
             return;
         }
 
-        final NoteDetail note = mNotes.get(position);
+        final NoteDetail note = mNotes.get(position - 1);
         Log.i("note", note.toString());
         Context context = holder.itemView.getContext();
 
@@ -351,7 +395,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mHiddenNotes.add(note);
 
         int position = mNotes.indexOfPost(note);
-        AppLog.i("note position:" + position);
+
         if (position > -1) {
             mNotes.remove(position);
             if (mNotes.size() > 0) {
@@ -413,6 +457,33 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super(view);
         }
     }
+
+    class SearchViewHolder extends RecyclerView.ViewHolder {
+        private final SearchToolbar mSearchToolbar;
+        public SearchViewHolder(View itemView) {
+            super(itemView);
+            mSearchToolbar = (SearchToolbar) itemView;
+            mSearchToolbar.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    ActivityLauncher.addNewNoteForResult(
+                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
+
+                    return true;
+                }
+
+            });
+            mSearchToolbar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    ActivityLauncher.addNewNoteForResult(
+                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
+
+                }
+            });
+        }
+    }
+
 
 
     private class LoadNotesTask extends AsyncTask<Void, Void, Boolean> {

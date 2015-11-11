@@ -91,4 +91,10 @@ public class DisplayUtils {
     public static boolean hasActionBarOverlay(Window window) {
         return window.hasFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
     }
+
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+
+    }
 }

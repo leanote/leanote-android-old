@@ -9,8 +9,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.leanote.android.datasets.AccountTable;
 import com.leanote.android.model.AccountHelper;
+import com.leanote.android.model.NoteContent;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.SqlUtils;
 import com.leanote.android.util.StringUtils;
@@ -56,22 +59,40 @@ public class LeanoteDB extends SQLiteOpenHelper {
             + "isMarkDown integer default 0,"
             + "isBlog integer default 0,"
             + "isTrash integer default 0,"
+            + "isDirty integer default 0,"
             + "files text default '',"
             + "createdTime text default '',"
             + "updatedTime text default '',"
-            + "publicTime text default '')";
+            + "publicTime text default '',"
+            + "usn  integer)";
+
+    private static final String CREATE_TABLE_NOTE_CONTENT =
+            "create table if not exists note_content ("
+                    + "noteId text primary key,"
+                    + "userId text,"
+                    + "content text);";
 
 
     private static final String CREATE_TABLE_NOTEBOOKS =
             "create table if not exists notebooks ("
                     + "id integer primary key autoincrement,"
                     + "notebookId text,"
+                    + "parentNotebookId text,"
                     + "userId text,"
                     + "title text default '',"
+                    + "urlTitle text default '',"
+                    + "isBlog integer default 0,"
+                    + "isTrash integer default 0,"
+                    + "isDirty integer default 0,"
                     + "createdTime text default '',"
-                    + "updatedTime text default '')";
+                    + "updatedTime text default '',"
+                    + "usn integer)";
 
     private static final String NOTES_TABLE = "notes";
+
+    private static final String NOTEBOOKS_TABLE = "notebooks";
+
+    private static final String NOTE_CONTENT_TABLE = "note_content";
 
     private static final String MEDIA_TABLE = "media";
 
@@ -99,6 +120,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_NOTES);
         db.execSQL(CREATE_TABLE_NOTEBOOKS);
+        db.execSQL(CREATE_TABLE_NOTE_CONTENT);
         AccountTable.createTables(db);
     }
 
@@ -154,7 +176,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 detail.setId(c.getLong(0));
                 detail.setNoteId(c.getString(1));
                 detail.setTitle(title);
-                detail.setContent(c.getString(6));
+                detail.setContent(getNoteContentByNoteId(c.getString(1)));
                 detail.setUpdatedTime(updateTime);
 
                 listPosts.add(detail);
@@ -173,7 +195,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
     }
 
-    private List<String> getLocalNoteIds(String userId) {
+    public List<String> getLocalNoteIds(String userId) {
 
         String[] args = {userId};
         //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
@@ -201,13 +223,26 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 detail = new NoteDetail();
                 detail.setNoteId(c.getString(1));
                 detail.setTitle(c.getString(4));
-                detail.setContent(c.getString(6));
+
+                detail.setContent(getNoteContentByNoteId(c.getString(1)));
                 detail.setUpdatedTime(c.getString(12));
             }
             return detail;
         } finally {
             SqlUtils.closeCursor(c);
         }
+    }
+
+    public NoteContent getNoteContentByNoteId(String noteId) {
+        String[] args = {String.valueOf(noteId)};
+        Cursor c = db.query(NOTE_CONTENT_TABLE, null, "noteId=?", args, null, null, "");
+        NoteContent content = new NoteContent();
+        if (c.moveToNext()) {
+            content.setNoteId(noteId);
+            content.setUserId(c.getString(1));
+            content.setNoteId(c.getString(2));
+        }
+        return content;
     }
 
     public void saveMediaFile(MediaFile mf) {
@@ -261,15 +296,16 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void saveNoteContent(String noteId, String content) {
+    public void saveNoteContent(String noteId, String content, String userId) {
         ContentValues values = new ContentValues();
+        values.put("noteId", noteId);
         values.put("content", content);
-        db.update(NOTES_TABLE, values, "noteId=?",
-                new String[]{noteId});
+        values.put("userId", userId);
+        db.insert(NOTE_CONTENT_TABLE, null, values);
 
     }
 
-    public long saveNote(NoteDetail newNote) {
+    public long addNote(NoteDetail newNote) {
         ContentValues values = new ContentValues();
 
         values.put("noteId", newNote.getNoteId());
@@ -285,6 +321,28 @@ public class LeanoteDB extends SQLiteOpenHelper {
         return result;
     }
 
+    public void updateNote(NoteDetail note) {
+        ContentValues values = new ContentValues();
+
+        values.put("noteId", note.getNoteId());
+        values.put("notebookId", note.getNoteBookId());
+        values.put("userId", note.getUserId());
+        values.put("title", note.getTitle());
+        values.put("tags", note.getTags());
+        values.put("updatedTime", note.getUpdatedTime());
+
+        db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+
+        NoteContent content = note.getContent();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("noteId", content.getNoteId());
+        contentValues.put("userId", content.getUserId());
+        contentValues.put("content", content.getContent());
+
+        db.update(NOTE_CONTENT_TABLE, contentValues, "noteId=?", new String[]{note.getNoteId()});
+    }
+
+
     public NoteDetail getLocalNoteByNoteId(String noteId) {
         String[] args = {String.valueOf(noteId)};
         //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
@@ -297,7 +355,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 detail.setId(c.getLong(0));
                 detail.setNoteId(c.getString(1));
                 detail.setTitle(c.getString(4));
-                detail.setContent(c.getString(6));
+                detail.setContent(getNoteContentByNoteId(c.getString(1)));
                 detail.setUpdatedTime(c.getString(12));
             }
             return detail;
@@ -306,13 +364,132 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public String[] getNotebookTitles() {
+    public List<String> getNotebookTitles() {
+        Cursor c = db.query(NOTEBOOKS_TABLE, null, null, null, null, null, "");
+        List<String> notebookTitles = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+                notebookTitles.add(c.getString(4));
+            }
+            return notebookTitles;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }    }
 
-        return null;
+    public void deleteNote(String noteId) {
+        String sql = "delete from notes where noteId='" + noteId + "'" ;
+        db.execSQL(sql);
     }
 
-    public void deleteNote(NoteDetail note) {
-        String sql = "delete from notes where noteId='" + note.getNoteId() + "'" ;
+    public void deleteNotebook(String notebookId) {
+        String sql = "delete from notebooks where notebookId='" + notebookId + "'" ;
         db.execSQL(sql);
+    }
+
+    public List<String> getLocalNotebookIds() {
+        Cursor c = db.query(NOTEBOOKS_TABLE, null, null, null, null, null, "");
+        List<String> notebookIds = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+
+                notebookIds.add(c.getString(1));
+            }
+            return notebookIds;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
+    public void updateNotebook(NotebookInfo serverNotebook) {
+        ContentValues values = new ContentValues();
+
+        values.put("notebookId", serverNotebook.getNotebookId());
+        values.put("userId", serverNotebook.getUserId());
+        values.put("title", serverNotebook.getTitle());
+        values.put("urlTitle", serverNotebook.getUrlTitle());
+        values.put("updatedTime", serverNotebook.getUpdateTime());
+        values.put("createdTime", serverNotebook.getCreateTime());
+        values.put("isBlog", serverNotebook.isBlog());
+        db.update(NOTEBOOKS_TABLE, values, "notebookId=?", new String[]{serverNotebook.getNotebookId()});
+
+    }
+
+    public NotebookInfo getLocalNotebookByNotebookId(String notebookId) {
+        String[] args = {String.valueOf(notebookId)};
+        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = db.query(NOTEBOOKS_TABLE, null, "notebookId=?", args, null, null, "");
+
+        NotebookInfo notebook = null;
+        try {
+            if (c.moveToNext()) {
+                notebook = new NotebookInfo();
+                notebook.setId(c.getInt(0));
+                notebook.setNotebookId(c.getString(1));
+                notebook.setTitle(c.getString(4));
+                notebook.setIsDirty(c.getInt(8) == 1);
+            }
+            return notebook;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
+    public void saveNotebooks(List<NotebookInfo> newNotebooks) {
+
+        AppLog.i("notebook size:" + newNotebooks.size());
+
+        if (newNotebooks != null && newNotebooks.size() != 0) {
+            db.beginTransaction();
+            try {
+                for (int i = 0; i < newNotebooks.size(); i++) {
+                    ContentValues values = new ContentValues();
+                    NotebookInfo notebook = (NotebookInfo) newNotebooks.get(i);
+
+                    values.put("notebookId", notebook.getNotebookId());
+                    values.put("parentNotebookId", notebook.getParentNotebookId());
+                    values.put("userId", notebook.getUserId());
+                    values.put("title", notebook.getTitle());
+                    values.put("urlTitle", notebook.getUrlTitle());
+                    values.put("isBlog", notebook.isBlog() ? 1 : 0);
+                    values.put("isTrash", notebook.isTrash() ? 1 : 0);
+                    values.put("title", notebook.getTitle());
+                    values.put("updatedTime", notebook.getUpdateTime());
+                    values.put("createdTime", notebook.getCreateTime());
+                    values.put("usn", notebook.getUsn());
+
+                    db.insert(NOTEBOOKS_TABLE, null, values);
+                }
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
+    }
+
+    public void updateUsn(String userId, int usn) {
+        String sql = "update accounts set usn = " + usn + " where user_id = '" + userId + "'";
+        db.execSQL(sql);
+    }
+
+    public void dangerouslyDeleteAllContent() {
+        db.delete(NOTES_TABLE, null, null);
+        db.delete(NOTEBOOKS_TABLE, null, null);
+        db.delete(NOTE_CONTENT_TABLE, null, null);
+
+    }
+
+    public void publicNote(String noteId, boolean isPublic) {
+        int publicNote = isPublic ? 1 : 0;
+        String sql = "update notes set isBlog = " + publicNote + " where noteId = '" + noteId + "'";
+        db.execSQL(sql);
+
+    }
+
+    public void updateMarkdown(boolean useMarkdown) {
+        int mkd = useMarkdown ? 1 : 0;
+        String sql = "update accounts set isMarkDown = " + mkd + " where local_id = 0";
+        db.execSQL(sql);
+
     }
 }

@@ -1,24 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:background="#FF0000">
+    android:id="@+id/scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_button"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:layout_marginRight="@dimen/fab_margin"
-        android:src="@drawable/gridicon_create_light"
-        android:visibility="gone"
-        app:borderWidth="0dp"
-        app:elevation="@dimen/fab_elevation"
-        app:rippleColor="@color/fab_pressed"
-        tools:visibility="visible" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/content_margin"
+        android:paddingRight="@dimen/content_margin">
 
-</LinearLayout>
+        <FrameLayout
+            android:id="@+id/frame_avatar"
+            android:layout_width="@dimen/avatar_sz_large"
+            android:layout_height="@dimen/avatar_sz_large"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/me_avatar_margin_top">
+
+            <com.leanote.android.widget.LeaNetworkImageView
+                android:id="@+id/me_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </FrameLayout>
+
+        <com.leanote.android.widget.LeaTextView
+            android:id="@+id/me_display_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/margin_large"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/grey_dark"
+            android:textSize="@dimen/text_sz_large"
+            android:textStyle="bold"
+            app:fontVariation="light"
+            tools:text="Full Name" />
+
+        <com.leanote.android.widget.LeaTextView
+            android:id="@+id/me_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/text_sz_medium"
+            tools:text="username" />
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/row_settings"-->
+            <!--style="@style/MeListRowLayout"-->
+            <!--android:layout_marginTop="@dimen/me_list_margin_top">-->
+
+            <!--<com.leanote.android.widget.LeaTextView-->
+                <!--android:id="@+id/me_settings_text_view"-->
+                <!--style="@style/MeListRowTextView"-->
+                <!--android:text="@string/default_editor" />-->
+
+
+            <!--<CheckBox-->
+                <!--android:id="@+id/isPublicCheckBox"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:checked="false"-->
+                <!--android:text="" />-->
+
+        <!--</LinearLayout>-->
+
+        <LinearLayout
+            android:id="@+id/markdown_editor_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical" >
+
+            <com.leanote.android.widget.LeaTextView
+                android:id="@+id/markdown_label"
+                style="@style/LeanoteSubHeader"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:singleLine="true"
+                android:text="@string/markdown_editor" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="10dp" >
+
+                <ToggleButton
+                    android:id="@+id/switch_markdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:gravity="left|center_vertical"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:textColor="#ffffff"
+                    android:textOff="OFF"
+                    android:textOn="ON"
+                    android:layout_alignParentTop="true" />
+
+                <ImageButton
+                    android:id="@+id/switch_markdown_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignRight="@+id/toggle_public_blog"
+                    android:background="#00000000"
+                    android:src="@drawable/progress_thumb_selector" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <View style="@style/MeListSectionDividerView" />
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/row_notifications"-->
+            <!--style="@style/MeListRowLayout">-->
+
+            <!--<ImageView-->
+                <!--android:id="@+id/me_notifications_icon"-->
+                <!--style="@style/MeListRowIcon"-->
+                <!--android:contentDescription="@string/me_btn_settings"-->
+                <!--android:src="@drawable/me_icon_notifications" />-->
+
+            <!--<com.leanote.android.widget.LeaTextView-->
+                <!--android:id="@+id/me_notifications_text_view"-->
+                <!--style="@style/MeListRowTextView"-->
+                <!--android:text="@string/notification_settings" />-->
+
+        <!--</LinearLayout>-->
+
+
+        <View style="@style/MeListSectionDividerView" />
+
+        <LinearLayout
+            android:id="@+id/row_logout"
+            style="@style/MeListRowLayout">
+
+            <ImageView
+                android:id="@+id/me_login_logout_icon"
+                style="@style/MeListRowIcon"
+                android:contentDescription="@string/me_btn_login_logout"
+                android:src="@drawable/me_icon_login_logout" />
+
+            <com.leanote.android.widget.LeaAutoResizeTextView
+                android:id="@+id/me_login_logout_text_view"
+                style="@style/MeListRowTextView"
+                tools:text="@string/me_btn_login_logout" />
+
+        </LinearLayout>
+
+        <View style="@style/MeListSectionDividerView" />
+
+    </LinearLayout>
+</ScrollView>

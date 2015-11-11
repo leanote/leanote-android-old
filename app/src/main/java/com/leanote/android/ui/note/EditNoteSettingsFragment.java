@@ -3,25 +3,29 @@ package com.leanote.android.ui.note;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.util.EditTextUtils;
+import com.leanote.android.util.ToggleListener;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by binnchx on 10/27/15.
@@ -33,13 +37,15 @@ public class EditNoteSettingsFragment extends Fragment
 
     private NoteDetail mNote;
 
-    private Spinner mStatusSpinner;
+    private LinearLayout notePublicSettings;
+    private ToggleButton togglePublicBlog;
+    private ImageButton toggleButtonPublicBlog;
+
     private Spinner mNotebookSpinner;
     private EditText mTagsEditText;
     private ViewGroup mRootView;
-    private Integer isNotePublic;
 
-    private ArrayList<String> mNoteBook;
+    private List<String> mNotebooks;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,73 +57,68 @@ public class EditNoteSettingsFragment extends Fragment
             return null;
         }
 
-        mNoteBook = new ArrayList<String>();
+        notePublicSettings = (LinearLayout) mRootView.findViewById(R.id.note_public_settings);
+        togglePublicBlog = (ToggleButton) mRootView.findViewById(R.id.toggle_public_blog);
+        toggleButtonPublicBlog = (ImageButton) mRootView.findViewById(R.id.toggleButton_public_blog);
 
-
-        mStatusSpinner = (Spinner) mRootView.findViewById(R.id.status);
-        mStatusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updatePostSettingsAndSaveButton();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
+        mNotebooks = Leanote.leaDB.getNotebookTitles();
         mNotebookSpinner = (Spinner) mRootView.findViewById(R.id.notebook);
-
 
         mTagsEditText = (EditText) mRootView.findViewById(R.id.tags);
 
 
         initSettingsFields();
-
+        setListeners();
 
         return mRootView;
     }
 
+    private void setListeners() {
+
+        togglePublicBlog.setOnCheckedChangeListener(new ToggleListener(getActivity(),
+                "public_note", togglePublicBlog, toggleButtonPublicBlog, mNote.getNoteId()));
+
+
+        View.OnClickListener clickToToggleListener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                togglePublicBlog.toggle();
+            }
+        };
+
+        toggleButtonPublicBlog.setOnClickListener(clickToToggleListener);
+        notePublicSettings.setOnClickListener(clickToToggleListener);
+
+    }
+
     private void initSettingsFields() {
-
-        String[] items = new String[]{ getResources().getString(R.string.publish_note),
-                getResources().getString(R.string.private_note)};
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mStatusSpinner.setAdapter(adapter);
-        mStatusSpinner.setOnTouchListener(
-                new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        return false;
-                    }
-                }
-        );
-
-        String[] notebookItems = new String[]{};
-
-        ArrayAdapter<String> notebookAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, items);
-        notebookAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mStatusSpinner.setAdapter(adapter);
-        mStatusSpinner.setOnTouchListener(
-                new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        return false;
-                    }
-                }
-        );
+        boolean isPublic = mNote.isPublicBlog();
+        togglePublicBlog.setChecked(isPublic);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) toggleButtonPublicBlog
+                .getLayoutParams();
 
 
-        if (mNote.isPublicBlog()) {
-            mStatusSpinner.setSelection(0, true);
+        if (isPublic) {
+            params.addRule(RelativeLayout.ALIGN_RIGHT, -1);
+            params.addRule(RelativeLayout.ALIGN_LEFT,
+                    R.id.toggleButton_public_blog);
+            toggleButtonPublicBlog.setLayoutParams(params);
+            toggleButtonPublicBlog
+                    .setImageResource(R.drawable.progress_thumb_selector);
+            togglePublicBlog.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         } else {
-            mStatusSpinner.setSelection(1, true);
+            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.note_public_settings);
+            params.addRule(RelativeLayout.ALIGN_LEFT, -1);
+            toggleButtonPublicBlog.setLayoutParams(params);
+            toggleButtonPublicBlog
+                    .setImageResource(R.drawable.progress_thumb_off_selector);
+            togglePublicBlog.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
 
 
+        ArrayAdapter<String> notebookAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, mNotebooks);
+        notebookAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         String tags = mNote.getTags();
 
@@ -126,14 +127,6 @@ public class EditNoteSettingsFragment extends Fragment
         }
     }
 
-    private String getPostStatusForSpinnerPosition(int position) {
-        if (position == 0) {
-            return getString(R.string.private_note);
-        } else {
-            return getString(R.string.publish_note);
-        }
-
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -182,17 +175,10 @@ public class EditNoteSettingsFragment extends Fragment
 
         String tags = EditTextUtils.getText(mTagsEditText);
 
-        String status = getPostStatusForSpinnerPosition(mStatusSpinner.getSelectedItemPosition());;
-//        if (mStatusSpinner != null) {
-//            status = getPostStatusForSpinnerPosition(mStatusSpinner.getSelectedItemPosition());
-//        } else {
-//            status = mNote.getPostStatus();
-//        }
 
-
-        mNote.setIsPublicBlog(StringUtils.equals(status, getString(R.string.private_note)) ? false : true);
+        //mNote.setIsPublicBlog(StringUtils.equals(status, getString(R.string.private_note)) ? false : true);
         mNote.setTags(tags);
-        Leanote.leaDB.saveNote(mNote);
+        Leanote.leaDB.addNote(mNote);
     }
 
     /*

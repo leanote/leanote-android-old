@@ -23,14 +23,14 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.toolbox.RequestFuture;
-import com.android.volley.toolbox.StringRequest;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.editor.EditorFragmentAbstract;
 import com.leanote.android.editor.LegacyEditorFragment;
+import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
+import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.LeaHtml;
@@ -244,7 +244,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         @Override
         protected Spanned doInBackground(Void... voids) {
             String content = fetchNoteContent(getNote().getNoteId());
-            AppLog.i("note content is null");
+
             if (org.apache.commons.lang.StringUtils.isEmpty(content)) {
                 return new SpannableString("");
             }
@@ -261,29 +261,22 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     private String fetchNoteContent(String noteId) {
         NoteDetail note = Leanote.leaDB.getLocalNoteByNoteId(noteId);
-        if (note != null && org.apache.commons.lang.StringUtils.isNotEmpty(note.getContent())) {
-            return note.getContent();
+        if (note != null && org.apache.commons.lang.StringUtils.isNotEmpty(note.getContent().getContent())) {
+            return note.getContent().getContent();
         }
 
         String noteApi = String.format("http://leanote.com/api/note/getNoteContent?noteId=%s&token=%s", noteId,
                 AccountHelper.getDefaultAccount().getmAccessToken());
 
-        RequestFuture<String> future = RequestFuture.newFuture();
-
-        StringRequest noteReq = new StringRequest(Request.Method.GET,
-                noteApi,
-                future,
-                future);
-
-        Leanote.requestQueue.add(noteReq);
 
         String response;
         String content = null;
         try {
-            response = future.get();
+            response = NetworkRequest.syncRequest(noteApi, Request.Method.GET);
             JSONObject json = new JSONObject(response);
             content = json.getString("Content");
-            Leanote.leaDB.saveNoteContent(noteId, content);
+            Leanote.leaDB.saveNoteContent(noteId, content, AccountHelper.getDefaultAccount().getmUserId());
+
         } catch (Exception e) {
             AppLog.e(AppLog.T.API, "fetch note content error", e);
             ToastUtils.showToast(this, R.string.fetch_note_content_fail);
@@ -304,15 +297,15 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         if (note != null) {
             if (!mHasSetNoteContent) {
                 mHasSetNoteContent = true;
-                if (!mIsNewNote && note.isLocalDraft()) {
+                if (!mIsNewNote && org.apache.commons.lang.StringUtils.isEmpty(note.getContent().getContent())) {
                     // Load local post content in the background, as it may take time to generate images
 //                    new LoadNoteContentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
 //                            note.getContent().replaceAll("\uFFFC", ""));
                     new LoadNoteContentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 }
-                else {
-                    mEditorFragment.setContent(note.getContent().replaceAll("\uFFFC", ""));
+                else if (!TextUtils.isEmpty(note.getContent().getContent())){
+                    mEditorFragment.setContent(note.getContent().getContent().replaceAll("\uFFFC", ""));
                 }
             }
             if (!TextUtils.isEmpty(note.getTitle())) {

@@ -13,14 +13,14 @@ import com.leanote.android.util.CoreEvents;
 
 import de.greenrobot.event.EventBus;
 
-public class CategoryFragment extends Fragment
+public class NotebookFragment extends Fragment
             implements LeaMainActivity.OnScrollToTopListener {
 
     private View mFabView;
     private int mFabTargetYTranslation;
 
-    public static CategoryFragment newInstance() {
-        return new CategoryFragment();
+    public static NotebookFragment newInstance() {
+        return new NotebookFragment();
     }
 
     @Override

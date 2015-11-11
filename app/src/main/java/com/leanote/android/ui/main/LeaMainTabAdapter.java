@@ -54,7 +54,7 @@ public class LeaMainTabAdapter extends FragmentStatePagerAdapter {
             case TAB_POST:
                 return PostFragment.newInstance();
             case TAB_CATEGORY:
-                return CategoryFragment.newInstance();
+                return NotebookFragment.newInstance();
             case TAB_ME:
                 return MeFragment.newInstance();
             default:

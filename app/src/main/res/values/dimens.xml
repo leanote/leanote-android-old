@@ -222,6 +222,8 @@
     <dimen name="link_dialog_margin_inner">4dp</dimen>
     <dimen name="link_dialog_margin_outer">16dp</dimen>
 
+    <dimen name="toolbar_content_offset">72dp</dimen>
+
 
     <dimen name="legacy_format_bar_height">40dp</dimen>
 

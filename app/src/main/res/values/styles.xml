@@ -24,11 +24,14 @@
         <item name="android:actionBarWidgetTheme">@style/Theme.Leanote.Widget</item>
 
         <item name="swipeToRefreshStyle">@style/SwipeToRefresh</item>
+
     </style>
 
     <style name="Leanote.DropDownListView.Light" parent="Leanote">
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
     </style>
+
+
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
     <style name="Theme.Leanote.Widget" parent="Theme.AppCompat">

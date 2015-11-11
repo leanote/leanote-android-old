@@ -3,7 +3,6 @@ package com.leanote.android.model;
 import com.leanote.android.util.StringUtils;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Created by binnchx on 10/18/15.
@@ -17,21 +16,19 @@ public class NoteDetail implements Serializable {
     private String userId;
     private String title;
     private String tags;
-    private String content;
+    private NoteContent content;
     private boolean isMarkDown;
     private boolean isTrash;
-    private NoteFile[] noteFiles;
-    private String createdTime;
+    private boolean isDeleted;
+    private boolean isDirty;
     private boolean isPublicBlog;
+    private String createdTime;
+
+    private String updatedTime;
+    private String publicTime;
+    private int usn;
 
 
-    public NoteFile[] getNoteFiles() {
-        return noteFiles;
-    }
-
-    public void setNoteFiles(NoteFile[] noteFiles) {
-        this.noteFiles = noteFiles;
-    }
 
     public String getCreatedTime() {
         return createdTime;
@@ -57,9 +54,6 @@ public class NoteDetail implements Serializable {
         this.publicTime = publicTime;
     }
 
-    private String updatedTime;
-    private String publicTime;
-    private int usn;
 
     public Long getId() {
         return id;
@@ -102,13 +96,6 @@ public class NoteDetail implements Serializable {
         this.tags = tags;
     }
 
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
 
     public boolean isMarkDown() {
         return isMarkDown;
@@ -140,10 +127,8 @@ public class NoteDetail implements Serializable {
                 ", userId='" + userId + '\'' +
                 ", title='" + title + '\'' +
                 ", tags=" + tags +
-                ", content='" + content + '\'' +
                 ", isMarkDown=" + isMarkDown +
                 ", isTrash=" + isTrash +
-                ", noteFiles=" + Arrays.toString(noteFiles) +
                 ", createdTime='" + createdTime + '\'' +
                 ", updatedTime='" + updatedTime + '\'' +
                 ", publicTime='" + publicTime + '\'' +
@@ -170,7 +155,7 @@ public class NoteDetail implements Serializable {
 
     public boolean hasChanges(NoteDetail otherNote) {
         return otherNote == null || !StringUtils.equals(title, otherNote.title)
-                || !StringUtils.equals(content, otherNote.content);
+            || !StringUtils.equals(updatedTime, otherNote.updatedTime);
     }
 
     public boolean isPublicBlog() {
@@ -179,6 +164,30 @@ public class NoteDetail implements Serializable {
 
     public void setIsPublicBlog(boolean isPublicBlog) {
         this.isPublicBlog = isPublicBlog;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public boolean isDirty() {
+        return isDirty;
+    }
+
+    public void setIsDirty(boolean isDirty) {
+        this.isDirty = isDirty;
+    }
+
+    public NoteContent getContent() {
+        return content;
+    }
+
+    public void setContent(NoteContent content) {
+        this.content = content;
     }
 
 }

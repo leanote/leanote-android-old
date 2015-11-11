@@ -1,5 +1,6 @@
 package com.leanote.android;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
@@ -8,6 +9,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gcm.GCMRegistrar;
+import com.leanote.android.model.AccountHelper;
+import com.leanote.android.networking.SelfSignedSSLCertsManager;
+import com.leanote.android.ui.AppPrefs;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.BitmapLruCache;
 import com.leanote.android.util.CoreEvents;
@@ -15,6 +20,8 @@ import com.leanote.android.util.PackageUtils;
 import com.leanote.android.util.VolleyUtils;
 import com.wordpress.rest.RestRequest;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Locale;
 
 import de.greenrobot.event.EventBus;
@@ -43,7 +50,14 @@ public class Leanote extends Application {
     }
 
 
+    private Activity mCurrentActivity = null;
 
+    public Activity getCurrentActivity(){
+        return mCurrentActivity;
+    }
+    public void setCurrentActivity(Activity mCurrentActivity){
+        this.mCurrentActivity = mCurrentActivity;
+    }
 
 
 
@@ -52,6 +66,15 @@ public class Leanote extends Application {
         super.onCreate();
 
         mContext = this;
+
+        EventBus.TAG = "Leanote-EVENT";
+        EventBus.builder()
+                .logNoSubscriberMessages(false)
+                .sendNoSubscriberEvent(false)
+                .throwSubscriberException(true)
+                .installDefaultEventBus();
+        EventBus.getDefault().register(this);
+
         setupVolleyQueue();
 
         leaDB = new LeanoteDB(this);
@@ -106,8 +129,76 @@ public class Leanote extends Application {
         return mUserAgent;
     }
 
+    public static void leanotecomSignOut(Context context) {
+        // Keep the analytics tracking at the beginning, before the account data is actual removed.
+
+        removeWpComUserRelatedData(context);
+
+        // broadcast an event: wpcom user signed out
+        EventBus.getDefault().post(new CoreEvents.UserSignedOutWordPressCom());
+
+        // broadcast an event only if the user is completely signed out
+        if (!AccountHelper.isSignedIn()) {
+            EventBus.getDefault().post(new CoreEvents.UserSignedOutCompletely());
+        }
+    }
+
+    public static void removeWpComUserRelatedData(Context context) {
+        // cancel all Volley requests - do this before unregistering push since that uses
+        // a Volley request
+        VolleyUtils.cancelAllRequests(requestQueue);
+
+        try {
+            GCMRegistrar.checkDevice(context);
+            GCMRegistrar.unregister(context);
+        } catch (Exception e) {
+            AppLog.v(AppLog.T.NOTIFS, "Could not unregister for GCM: " + e.getMessage());
+        }
+
+        // delete wpcom blogs
+
+        // reset default account
+        AccountHelper.getDefaultAccount().signout();
+
+        // reset all reader-related prefs & data
+        AppPrefs.reset();
+        //ReaderDatabase.reset();
+
+        // Reset Stats Data
+        //StatsDatabaseHelper.getDatabase(context).reset();
+        //StatsWidgetProvider.updateWidgetsOnLogout(context);
+
+        // Reset Simperium buckets (removes local data)
+        //SimperiumUtils.resetBucketsAndDeauthorize();
+    }
+
+    @SuppressWarnings("unused")
+    public void onEventMainThread(CoreEvents.UserSignedOutCompletely event) {
+        try {
+            SelfSignedSSLCertsManager.getInstance(getContext()).emptyLocalKeyStoreFile();
+        } catch (GeneralSecurityException e) {
+            AppLog.e(AppLog.T.UTILS, "Error while cleaning the Local KeyStore File", e);
+        } catch (IOException e) {
+            AppLog.e(AppLog.T.UTILS, "Error while cleaning the Local KeyStore File", e);
+        }
 
 
+        // dangerously delete all content!
+        leaDB.dangerouslyDeleteAllContent();
+    }
+
+    public static void LeanoteComSignOut(Context context) {
+
+        removeWpComUserRelatedData(context);
+
+        // broadcast an event: wpcom user signed out
+        EventBus.getDefault().post(new CoreEvents.UserSignedOutWordPressCom());
+
+        // broadcast an event only if the user is completely signed out
+        if (!AccountHelper.isSignedIn()) {
+            EventBus.getDefault().post(new CoreEvents.UserSignedOutCompletely());
+        }
+    }
 
 
 }

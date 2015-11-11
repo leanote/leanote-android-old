@@ -28,7 +28,9 @@ public class AccountTable {
                 + "email                   TEXT,"
                 + "verified                INTEGER,"
                 + "logo                    TEXT,"
-                + "access_token            TEXT)");
+                + "access_token            TEXT,"
+                + "isMarkDown              INTEGER default 0,"
+                + "usn                     INTEGER)");
     }
 
     private static void dropTables(SQLiteDatabase db) {
@@ -70,6 +72,7 @@ public class AccountTable {
                 account.setmAvatar(c.getString(c.getColumnIndex("logo")));
                 account.setVerified(c.getInt(c.getColumnIndex("verified")) == 0 ? true : false);
                 account.setmAccessToken(c.getString(c.getColumnIndex("access_token")));
+                account.setLastSyncUsn(c.getInt(c.getColumnIndex("usn")));
             }
             return account;
         } finally {

@@ -27,8 +27,5 @@ public class AccountHelper {
         return StringUtils.isNotEmpty(getDefaultAccount().getmAccessToken());
     }
 
-    public static boolean isSignedInWordPressDotCom() {
-        return StringUtils.isNotEmpty(getDefaultAccount().getmAccessToken());
-    }
 
 }

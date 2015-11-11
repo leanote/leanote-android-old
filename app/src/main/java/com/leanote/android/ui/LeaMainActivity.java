@@ -12,6 +12,7 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.TextView;
 
+import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.networking.NetworkUtils;
@@ -32,6 +33,7 @@ public class LeaMainActivity extends Activity {
     private LeaMainTabLayout mTabLayout;
     private LeaMainTabAdapter mTabAdapter;
     private TextView mConnectionBar;
+
 
     public static final String ARG_OPENED_FROM_PUSH = "opened_from_push";
 
@@ -57,6 +59,7 @@ public class LeaMainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main_activity);
+
 
         mViewPager = (LeaViewPager) findViewById(R.id.viewpager_main);
         mTabAdapter = new LeaMainTabAdapter(getFragmentManager());
@@ -165,11 +168,32 @@ public class LeaMainActivity extends Activity {
     }
 
     @Override
+    protected void onDestroy() {
+        clearReferences();
+        super.onDestroy();
+    }
+
+    private void clearReferences() {
+        Leanote lea = (Leanote) this.getApplicationContext();
+        Activity currActivity = lea.getCurrentActivity();
+        if (this.equals(currActivity))
+            lea.setCurrentActivity(null);
+
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RequestCodes.ADD_ACCOUNT && resultCode == RESULT_OK) {
             resetFragments();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Leanote app = (Leanote)this.getApplicationContext();
+        app.setCurrentActivity(this);
     }
 
     private void resetFragments() {
@@ -218,5 +242,30 @@ public class LeaMainActivity extends Activity {
             AniUtils.animateBottomBar(mConnectionBar, true);
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+
+    @SuppressWarnings("unused")
+    public void onEventMainThread(CoreEvents.UserSignedOutCompletely event) {
+        ActivityLauncher.showSignInForResult(this);
+    }
+
+    @SuppressWarnings("unused")
+    public void onEventMainThread(CoreEvents.UserSignedOutWordPressCom event) {
+        resetFragments();
+    }
+
+
 
 }

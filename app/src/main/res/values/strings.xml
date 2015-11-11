@@ -88,6 +88,8 @@
     <string name="tabbar_accessibility_label_me">Me</string>
     <string name="tabbar_note">Note</string>
     <string name="tabbar_post">Post</string>
+    <string name="tabbar_me">Me</string>
+    <string name="tabbar_notebook">Notebook</string>
     <string name="tabbar_category">Category</string>
     <string name="connectionbar_no_connection">No connection</string>
     <string name="title_activity_note_detail">NoteDetailActivity</string>
@@ -112,6 +114,7 @@
     <string name="button_revert">Revert</string>
     <string name="title_activity_edit_note">EditNoteActivity</string>
     <string name="untitled">Untitled</string>
+    <string name="new_note">new note</string>
 
 
     <!-- editor-->
@@ -191,6 +194,17 @@
     <string name="fetch_note_content_fail">fetch note content fail</string>
 
     <string name="tags_separate_with_commas">tags separate with commas</string>
+    <string name="me_disconnect_from_leanote_com">Disconnect from leanote.com</string>
+    <string name="me_connect_to_leanote_com">Connect to leanote.com</string>
+    <string name="sign_out_leacom_confirm">Disconnecting your account will remove all of @%s’s leanote.com data from this device, including local drafts and local changes.</string>
+    <string name="signout">Disconnect</string>
+    <string name="signing_out">Signing out…</string>
+
+    <string name="search_note_hint">search note</string>
+    <string name="action_search">search note</string>
+    <string name="default_editor">default editor</string>
+    <string name="me_btn_login_logout">log out</string>
+    <string name="markdown_editor">markdown editor</string>
     <string-array name="alignment_array">
         <item>None</item>
         <item>Left</item>

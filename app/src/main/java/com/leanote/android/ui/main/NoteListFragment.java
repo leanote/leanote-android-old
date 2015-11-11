@@ -1,5 +1,6 @@
 package com.leanote.android.ui.main;
 
+
 import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -50,6 +51,7 @@ public class NoteListFragment extends Fragment
     private View mFabView;
 
     private RecyclerView mRecyclerView;
+
     private View mEmptyView;
     private ProgressBar mProgressLoadMore;
     private TextView mEmptyViewTitle;
@@ -77,13 +79,16 @@ public class NoteListFragment extends Fragment
         return new NoteListFragment();
     }
 
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.note_list, container, false);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+
         mProgressLoadMore = (ProgressBar) view.findViewById(R.id.progress);
         mFabView = view.findViewById(R.id.fab_button);
+
 
         mEmptyView = view.findViewById(R.id.empty_view);
         mEmptyViewTitle = (TextView) mEmptyView.findViewById(R.id.title_empty);
@@ -106,6 +111,7 @@ public class NoteListFragment extends Fragment
         return view;
     }
 
+
     private void initSwipeToRefreshHelper() {
         mSwipeToRefreshHelper = new SwipeToRefreshHelper(
                 getActivity(),
@@ -121,7 +127,7 @@ public class NoteListFragment extends Fragment
                             updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
                             return;
                         }
-                        //该方法拉取笔记后存在本地的db中，然后通过AsyncTask加载到页面中
+                        //该方法拉取笔记后存在本地的db中，然后通过EventBus通知AsyncTask加载到页面中
                         requestPosts();
                     }
                 });
@@ -310,6 +316,7 @@ public class NoteListFragment extends Fragment
             }
         } else if (postCount > 0) {
             mEmptyView.setVisibility(View.GONE);
+
         }
     }
 
@@ -403,7 +410,7 @@ public class NoteListFragment extends Fragment
                 }
 
                 //delete note in local
-                Leanote.leaDB.deleteNote(note);
+                Leanote.leaDB.deleteNote(note.getNoteId());
                 //delete note in server
                 new deleteNoteTask().execute(note.getNoteId());
             }

@@ -9,21 +9,67 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="1">
 
-        <com.leanote.android.widget.LeaTextView
-            android:id="@+id/statusLabel"
-            style="@style/LeanoteSubHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/status" />
-
-        <Spinner
-            android:id="@+id/status"
-            android:paddingTop="@dimen/margin_small"
-            android:paddingBottom="@dimen/margin_small"
+        <LinearLayout
+            android:id="@+id/note_public_settings"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical" >
+
+            <com.leanote.android.widget.LeaTextView
+                android:id="@+id/isPublicLabel"
+                style="@style/LeanoteSubHeader"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:singleLine="true"
+                android:text="@string/publish_note" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="10dp" >
+
+                <ToggleButton
+                    android:id="@+id/toggle_public_blog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:gravity="left|center_vertical"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:textColor="#ffffff"
+                    android:textOff="OFF"
+                    android:textOn="ON"
+                    android:layout_alignParentTop="true" />
+
+                <ImageButton
+                    android:id="@+id/toggleButton_public_blog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignRight="@+id/toggle_public_blog"
+                    android:background="#00000000"
+                    android:src="@drawable/progress_thumb_selector" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <View style="@style/MeListSectionDividerView" />
+    <!--<com.leanote.android.widget.LeaTextView-->
+            <!--android:id="@+id/statusLabel"-->
+            <!--style="@style/LeanoteSubHeader"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/status" />-->
+
+        <!--<Spinner-->
+            <!--android:id="@+id/status"-->
+            <!--android:paddingTop="@dimen/margin_small"-->
+            <!--android:paddingBottom="@dimen/margin_small"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content" />-->
 
 
         <com.leanote.android.widget.LeaTextView
@@ -38,7 +84,8 @@
             android:paddingTop="@dimen/margin_small"
             android:paddingBottom="@dimen/margin_small"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="0.05" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/tagsLabel"
