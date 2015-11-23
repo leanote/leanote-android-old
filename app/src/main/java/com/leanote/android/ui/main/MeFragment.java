@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
-import com.leanote.android.R;
+
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
@@ -31,6 +31,7 @@ import com.leanote.android.util.GravatarUtils;
 import com.leanote.android.widget.LeaNetworkImageView;
 
 import java.lang.ref.WeakReference;
+import com.leanote.android.R;
 
 public class MeFragment extends Fragment {
 
@@ -88,7 +89,7 @@ public class MeFragment extends Fragment {
 
         return rootView;
     }
-
+/*
     private void initSettingsFields() {
         boolean isMarkdown = AccountHelper.getDefaultAccount().isUseMarkdown();
         togglePublicBlog.setChecked(isPublic);
@@ -113,7 +114,7 @@ public class MeFragment extends Fragment {
             togglePublicBlog.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
     }
-
+*/
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (mDisconnectProgressDialog != null) {

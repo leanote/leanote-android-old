@@ -115,6 +115,7 @@
                     android:layout_alignRight="@+id/toggle_public_blog"
                     android:background="#00000000"
                     android:src="@drawable/progress_thumb_selector" />
+
             </RelativeLayout>
         </LinearLayout>
 
