@@ -7,7 +7,6 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,9 +17,7 @@ import android.widget.TextView;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
-import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
-import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
@@ -32,24 +29,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by binnchx on 10/18/15.
+ * Created by binnchx on 11/11/15.
  */
-public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
-    public interface OnPostButtonClickListener {
-        void onPostButtonClicked(int buttonId, NoteDetail note);
+    public interface OnNotebookButtonClickListener {
+        void onNotebookButtonClicked(int buttonId, NotebookInfo notebook);
     }
 
-    private OnPostsLoadedListener mOnPostsLoadedListener;
-    private OnPostSelectedListener mOnPostSelectedListener;
-    private OnPostButtonClickListener mOnPostButtonClickListener;
+    private OnNotebooksLoadedListener mOnNotebooksLoadedListener;
+    private OnNotebookSelectedListener mOnNotebookSelectedListener;
+    private OnNotebookButtonClickListener mOnNotebookButtonClickListener;
 
     private final int mEndlistIndicatorHeight;
 
-    private boolean mIsLoadingNotes;
+    private boolean mIsLoadingNotebooks;
 
-    private NoteDetailList mNotes = new NoteDetailList();
-    private final List<NoteDetail> mHiddenNotes = new ArrayList<>();
+    private List<NotebookInfo> mNotebooks = new ArrayList<>();
+    private final List<NotebookInfo> mHiddenNotebooks = new ArrayList<>();
 
     private final LayoutInflater mLayoutInflater;
 
@@ -57,58 +54,57 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private static final long ROW_ANIM_DURATION = 150;
 
-    private static final int VIEW_TYPE_POST_OR_PAGE = 0;
+    private static final int VIEW_TYPE_NOTEBOOK = 0;
     private static final int VIEW_TYPE_ENDLIST_INDICATOR = 1;
-    private static final int VIEW_TYPE_SEARCH = 2;
+    private static final int VIEW_TYPE_MENU = 2;
 
-    public NoteListAdapter(Context context) {
+    public NotebookListAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
 
         mEndlistIndicatorHeight = DisplayUtils.dpToPx(context, 74);
 
     }
 
-
-    public void setOnPostsLoadedListener(OnPostsLoadedListener listener) {
-        mOnPostsLoadedListener = listener;
+    public void setmOnNotebooksLoadedListener(OnNotebooksLoadedListener mOnNotebooksLoadedListener) {
+        this.mOnNotebooksLoadedListener = mOnNotebooksLoadedListener;
     }
 
-    public void setOnPostSelectedListener(OnPostSelectedListener listener) {
-        mOnPostSelectedListener = listener;
+    public void setmOnNotebookSelectedListener(OnNotebookSelectedListener mOnNotebookSelectedListener) {
+        this.mOnNotebookSelectedListener = mOnNotebookSelectedListener;
     }
 
-    public void setOnPostButtonClickListener(OnPostButtonClickListener listener) {
-        mOnPostButtonClickListener = listener;
+    public void setmOnNotebookButtonClickListener(OnNotebookButtonClickListener mOnNotebookButtonClickListener) {
+        this.mOnNotebookButtonClickListener = mOnNotebookButtonClickListener;
     }
 
-    private NoteDetail getItem(int position) {
+    private NotebookInfo getItem(int position) {
         if (isValidPostPosition(position)) {
-            return mNotes.get(position);
+            return mNotebooks.get(position);
         }
         return null;
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position <= mNotes.size());
+        return (position >= 0 && position <= mNotebooks.size());
     }
 
     @Override
     public int getItemViewType(int position) {
 
-        if (position == (mNotes.size() + 1)) {
+        if (position == (mNotebooks.size() + 1)) {
             return VIEW_TYPE_ENDLIST_INDICATOR;
         } else if (position == 0) {
-            return VIEW_TYPE_SEARCH;
+            return VIEW_TYPE_MENU;
         }
-        return VIEW_TYPE_POST_OR_PAGE;
+        return VIEW_TYPE_NOTEBOOK;
     }
 
     @Override
     public int getItemCount() {
-        if (mNotes.size() == 0) {
+        if (mNotebooks.size() == 0) {
             return 0;
         } else {
-            return mNotes.size() + 2; // +1 for the endlist indicator
+            return mNotebooks.size() + 2; // +1 for the endlist indicator
         }
     }
 
@@ -118,11 +114,11 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             View view = mLayoutInflater.inflate(R.layout.endlist_indicator, parent, false);
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
-        } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext()));
+        } else if (viewType == VIEW_TYPE_MENU) {
+            return new NotebookAddViewHolder(new SearchToolbar(parent.getContext()));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
-            return new NoteViewHolder(view);
+            return new NotebookViewHolder(view);
         }
     }
 
@@ -133,59 +129,47 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         int posType = getItemViewType(position);
         if (posType == VIEW_TYPE_ENDLIST_INDICATOR) {
             return;
-        } else if (posType == VIEW_TYPE_SEARCH) {
-            SearchViewHolder searchViewHolder = (SearchViewHolder) holder;
-            //searchViewHolder.mSearchToolbar.getmSearchView().setOnQueryTextListener(new SearchChangeListener());
+        } else if (posType == VIEW_TYPE_MENU) {
             return;
         }
 
-        final NoteDetail note = mNotes.get(position - 1);
-        Log.i("note", note.toString());
+        final NotebookInfo notebook = mNotebooks.get(position - 1);
+
         Context context = holder.itemView.getContext();
 
-        if (holder instanceof NoteViewHolder) {
-            NoteViewHolder postHolder = (NoteViewHolder) holder;
+        if (holder instanceof NotebookViewHolder) {
+            NotebookViewHolder postHolder = (NotebookViewHolder) holder;
 
-            if (StringUtils.isNotEmpty(note.getTitle())) {
-                postHolder.txtTitle.setText(note.getTitle());
+            if (StringUtils.isNotEmpty(notebook.getTitle())) {
+                postHolder.txtTitle.setText(notebook.getTitle());
             } else {
                 postHolder.txtTitle.setText("(" + context.getResources().getText(R.string.untitled) + ")");
             }
 
-
-
-            postHolder.txtDate.setText(note.getUpdatedTime());
+            postHolder.txtDate.setText(notebook.getUpdateTime());
             postHolder.txtDate.setVisibility(View.VISIBLE);
             postHolder.btnTrash.setButtonType(PostListButton.BUTTON_TRASH);
 
-            configurePostButtons(postHolder, note);
+            configureNotebookButtons(postHolder, notebook);
         }
 
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NoteDetail selectedNote = getItem(position - 1);
-                if (mOnPostSelectedListener != null && selectedNote != null) {
-                    mOnPostSelectedListener.onPostSelected(selectedNote);
+                NotebookInfo selectedNotebook = getItem(position - 1);
+                if (mOnNotebookSelectedListener != null && selectedNotebook != null) {
+                    mOnNotebookSelectedListener.onNotebookSelected(selectedNotebook);
                 }
             }
         });
     }
 
 
-
-
-
-    private void configurePostButtons(final NoteViewHolder holder,
-                                      final NoteDetail note) {
+    private void configureNotebookButtons(final NotebookViewHolder holder,
+                                          final NotebookInfo notebook) {
         // posts with local changes have preview rather than view button
         holder.btnView.setButtonType(PostListButton.BUTTON_VIEW);
-
-        //boolean canShowStatsButton = canShowStatsForPost(post);
-        //int numVisibleButtons = (canShowStatsButton ? 4 : 3);
-        int numVisibleButtons = 3;
-        // edit / view are always visible
 
         holder.btnEdit.setVisibility(View.VISIBLE);
         holder.btnView.setVisibility(View.VISIBLE);
@@ -195,23 +179,13 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         View.OnClickListener btnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // handle back/more here, pass other actions to activity/fragment
                 int buttonType = ((PostListButton) view).getButtonType();
-                switch (buttonType) {
-                    case PostListButton.BUTTON_MORE:
-                        animateButtonRows(holder, note, false);
-                        break;
-                    case PostListButton.BUTTON_BACK:
-                        animateButtonRows(holder, note, true);
-                        break;
-                    default:
-                        if (mOnPostButtonClickListener != null) {
-                            mOnPostButtonClickListener.onPostButtonClicked(buttonType, note);
-                        }
-                        break;
+                if (mOnNotebookButtonClickListener != null) {
+                    mOnNotebookButtonClickListener.onNotebookButtonClicked(buttonType, notebook);
                 }
             }
         };
+
         holder.btnEdit.setOnClickListener(btnClickListener);
         holder.btnView.setOnClickListener(btnClickListener);
         holder.btnTrash.setOnClickListener(btnClickListener);
@@ -222,8 +196,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      * buttons - these rows are toggled through the "more" and "back" buttons - this
      * routine is used to animate the new row in and the old row out
      */
-    private void animateButtonRows(final NoteViewHolder holder,
-                                   final NoteDetail note,
+    private void animateButtonRows(final NotebookViewHolder holder,
+                                   final NotebookInfo note,
                                    final boolean showRow1) {
         // first animate out the button row, then show/hide the appropriate buttons,
         // then animate the row layout back in
@@ -257,12 +231,12 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         animOut.start();
     }
 
-    public void loadNotes() {
-        if (mIsLoadingNotes) {
-            AppLog.d(AppLog.T.POSTS, "post adapter > already loading posts");
+    public void loadNotebooks() {
+        if (mIsLoadingNotebooks) {
+            AppLog.d(AppLog.T.POSTS, "notebook adapter > already loading posts");
         } else {
             //load note
-            new LoadNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new LoadNotebooksTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -270,14 +244,20 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      * hides the post - used when the post is trashed by the user but the network request
      * to delete the post hasn't completed yet
      */
-    public void hidePost(NoteDetail note) {
-        mHiddenNotes.add(note);
+    public void hideNotebook(NotebookInfo notebook) {
+        mHiddenNotebooks.add(notebook);
 
-        int position = mNotes.indexOfPost(note);
+        int position = -1;
+        for (int i = 0; i < mNotebooks.size(); i++) {
+            if (mNotebooks.get(i).getNotebookId().equals(notebook.getNotebookId())) {
+                position = i;
+                break;
+            }
+        }
 
         if (position > -1) {
-            mNotes.remove(position);
-            if (mNotes.size() > 0) {
+            mNotebooks.remove(position);
+            if (mNotebooks.size() > 0) {
                 notifyItemRemoved(position);
             } else {
                 notifyDataSetChanged();
@@ -286,25 +266,21 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    public void unhidePost(NoteDetail note) {
-        if (mHiddenNotes.remove(note)) {
-            loadNotes();
+    public void unhideNotebook(NotebookInfo notebook) {
+        if (mHiddenNotebooks.remove(notebook)) {
+            loadNotebooks();
         }
     }
 
-//    public interface OnLoadMoreListener {
-//        void onLoadMore();
-//    }
-
-    public interface OnPostSelectedListener {
-        void onPostSelected(NoteDetail note);
+    public interface OnNotebookSelectedListener {
+        void onNotebookSelected(NotebookInfo note);
     }
 
-    public interface OnPostsLoadedListener {
-        void onPostsLoaded(int postCount);
+    public interface OnNotebooksLoadedListener {
+        void onNotebooksLoaded(int notebookCount);
     }
 
-    class NoteViewHolder extends RecyclerView.ViewHolder {
+    class NotebookViewHolder extends RecyclerView.ViewHolder {
         private final TextView txtTitle;
         private final TextView txtDate;
 
@@ -315,7 +291,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         private final ViewGroup layoutButtons;
 
-        public NoteViewHolder(View view) {
+        public NotebookViewHolder(View view) {
             super(view);
 
             txtTitle = (TextView) view.findViewById(R.id.text_title);
@@ -337,9 +313,9 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    class SearchViewHolder extends RecyclerView.ViewHolder {
+    class NotebookAddViewHolder extends RecyclerView.ViewHolder {
         private final SearchToolbar mSearchToolbar;
-        public SearchViewHolder(View itemView) {
+        public NotebookAddViewHolder(View itemView) {
             super(itemView);
             mSearchToolbar = (SearchToolbar) itemView;
             mSearchToolbar.setOnTouchListener(new View.OnTouchListener() {
@@ -365,51 +341,54 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
 
-    private class LoadNotesTask extends AsyncTask<Void, Void, Boolean> {
-        private NoteDetailList tmpNotes;
+    private class LoadNotebooksTask extends AsyncTask<Void, Void, Boolean> {
+        private List<NotebookInfo> tmpNotebooks;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mIsLoadingNotes = true;
+            mIsLoadingNotebooks = true;
         }
 
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            mIsLoadingNotes = false;
+            mIsLoadingNotebooks = false;
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
 
-            tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
-            Log.i("load notes from local:", String.valueOf(tmpNotes.size()));
-            // make sure we don't return any hidden posts
-            Log.i("hidden note size:", String.valueOf(mHiddenNotes.size()));
-            for (NoteDetail hiddenNote : mHiddenNotes) {
-                int index = tmpNotes.indexOfPost(hiddenNote);
-                tmpNotes.remove(index);
+            tmpNotebooks = Leanote.leaDB.getNotebookList();
+            AppLog.i("loading notebooks:" + tmpNotebooks);
+            for (NotebookInfo hiddenNote : mHiddenNotebooks) {
+                int index = -1;
+                for (int i = 0; i < tmpNotebooks.size(); i++) {
+                    if (tmpNotebooks.get(i).getNotebookId().equals(hiddenNote.getNotebookId())) {
+                        index = i;
+                        break;
+                    }
+                }
+                tmpNotebooks.remove(index);
             }
 
-            Log.i("after remove, size:", String.valueOf(tmpNotes.size()));
             return true;
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
             if (result) {
-                mNotes.clear();
-                mNotes.addAll(tmpNotes);
+                mNotebooks.clear();
+                mNotebooks.addAll(tmpNotebooks);
                 notifyDataSetChanged();
-
             }
 
-            mIsLoadingNotes = false;
+            mIsLoadingNotebooks = false;
 
-            if (mOnPostsLoadedListener != null) {
-                mOnPostsLoadedListener.onPostsLoaded(mNotes.size());
+            if (mOnNotebooksLoadedListener != null) {
+                mOnNotebooksLoadedListener.onNotebooksLoaded(mNotebooks.size());
             }
         }
     }
+
 }

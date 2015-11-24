@@ -26,7 +26,7 @@ public class SearchNoteAdapter extends RecyclerView.Adapter<SearchNoteViewHolder
 
     @Override
     public SearchNoteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View itemView = mInflater.inflate(R.layout.seach_note, parent, false);
+        final View itemView = mInflater.inflate(R.layout.search_note, parent, false);
         return new SearchNoteViewHolder(itemView);
     }
 

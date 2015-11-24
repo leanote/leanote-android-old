@@ -3,14 +3,19 @@ package com.leanote.android.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.SSLCertsViewActivity;
 import com.leanote.android.networking.SelfSignedSSLCertsManager;
 import com.leanote.android.ui.accounts.NewAccountActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
+import com.leanote.android.ui.note.EditNotebookActivity;
+import com.leanote.android.ui.note.NotePreviewActivity;
 import com.leanote.android.util.AppLog;
 
 import java.io.IOException;
@@ -69,20 +74,20 @@ public class ActivityLauncher {
         activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 
-    /*
-     * Load the post preview as an authenticated URL so stats aren't bumped
-     */
-    public static void browseNote(Context context, NoteDetail note) {
-        if (note == null) return;
-
-//        String url = post.getPermaLink();
-//        if (-1 == url.indexOf('?')) {
-//            url = url.concat("?preview=true");
-//        } else {
-//            url = url.concat("&preview=true");
-//        }
-//        WPWebViewActivity.openUrlByUsingBlogCredentials(context, blog, url);
+    public static void editNotebookForResult(Activity activity, long localNotebookId) {
+        Intent intent = new Intent(activity.getApplicationContext(), EditNotebookActivity.class);
+        intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, localNotebookId);
+        intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, false);
+        activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
+
+    public static void viewNotebookForResult(Activity activity, long localNotebookId) {
+        Intent intent = new Intent(activity.getApplicationContext(), EditNotebookActivity.class);
+        intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, localNotebookId);
+        intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, false);
+        activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
+    }
+
 
     public static void slideOutToRight(Activity activity) {
         if (activity != null
@@ -93,6 +98,32 @@ public class ActivityLauncher {
     }
 
 
+    public static void addNewNotebookForResult(Activity context) {
+        NotebookInfo newNotebook = new NotebookInfo();
+        //WordPress.wpDB.savePost(newPost);
+        Leanote.leaDB.addNotebook(newNotebook);
+        Intent intent = new Intent(context, EditNotebookActivity.class);
+        intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, newNotebook.getId());
+        intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, true);
+        context.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
+    }
 
+    public static void previewNoteForResult(Activity activity, Long id) {
+        NoteDetail note = Leanote.leaDB.getLocalNoteById(id);
+        if (note == null) return;
 
+        Intent intent = new Intent(activity, NotePreviewActivity.class);
+        intent.putExtra(NotePreviewActivity.ARG_LOCAL_NOTE_ID, id);
+        slideInFromRightForResult(activity, intent, RequestCodes.PREVIEW_NOTE);
+
+    }
+
+    public static void slideInFromRightForResult(Activity activity, Intent intent, int requestCode) {
+        intent.putExtra(ARG_DID_SLIDE_IN_FROM_RIGHT, true);
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeCustomAnimation(
+                activity,
+                R.anim.activity_slide_in_from_right,
+                R.anim.do_nothing);
+        ActivityCompat.startActivityForResult(activity, intent, requestCode, options.toBundle());
+    }
 }

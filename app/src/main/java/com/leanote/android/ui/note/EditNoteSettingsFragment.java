@@ -8,6 +8,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -20,6 +21,8 @@ import android.widget.ToggleButton;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.EditTextUtils;
 import com.leanote.android.util.ToggleListener;
 
@@ -46,6 +49,7 @@ public class EditNoteSettingsFragment extends Fragment
     private ViewGroup mRootView;
 
     private List<String> mNotebooks;
+    private List<NotebookInfo> mNotebookInfos;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,8 +66,24 @@ public class EditNoteSettingsFragment extends Fragment
         toggleButtonPublicBlog = (ImageButton) mRootView.findViewById(R.id.toggleButton_public_blog);
 
         mNotebooks = Leanote.leaDB.getNotebookTitles();
-        mNotebookSpinner = (Spinner) mRootView.findViewById(R.id.notebook);
+        mNotebookInfos = Leanote.leaDB.getNotebookList();
 
+        Leanote.leaDB.getNotebookList();
+        mNotebookSpinner = (Spinner) mRootView.findViewById(R.id.notebook);
+        mNotebookSpinner.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        saveSettingsAndSaveButton();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                }
+        );
         mTagsEditText = (EditText) mRootView.findViewById(R.id.tags);
 
 
@@ -71,6 +91,14 @@ public class EditNoteSettingsFragment extends Fragment
         setListeners();
 
         return mRootView;
+    }
+
+    private void saveSettingsAndSaveButton() {
+        AppLog.i("begin to save setting:" + isAdded());
+        if (isAdded()) {
+            updateNoteSettings();
+            getActivity().invalidateOptionsMenu();
+        }
     }
 
     private void setListeners() {
@@ -108,7 +136,7 @@ public class EditNoteSettingsFragment extends Fragment
                     .setImageResource(R.drawable.progress_thumb_selector);
             togglePublicBlog.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         } else {
-            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.note_public_settings);
+            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.toggle_public_blog);
             params.addRule(RelativeLayout.ALIGN_LEFT, -1);
             toggleButtonPublicBlog.setLayoutParams(params);
             toggleButtonPublicBlog
@@ -119,6 +147,7 @@ public class EditNoteSettingsFragment extends Fragment
 
         ArrayAdapter<String> notebookAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, mNotebooks);
         notebookAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mNotebookSpinner.setAdapter(notebookAdapter);
 
         String tags = mNote.getTags();
 
@@ -162,41 +191,30 @@ public class EditNoteSettingsFragment extends Fragment
     }
 
 
-
-
-
-    /**
-     * Updates post object with content of this fragment
-     */
-    public void updatePostSettings() {
-        if (!isAdded() || mNote == null) {
-            return;
-        }
-
-        String tags = EditTextUtils.getText(mTagsEditText);
-
-
-        //mNote.setIsPublicBlog(StringUtils.equals(status, getString(R.string.private_note)) ? false : true);
-        mNote.setTags(tags);
-        Leanote.leaDB.addNote(mNote);
-    }
-
-    /*
-     * Saves settings to post object and updates save button text in the ActionBar
-     */
-    private void updatePostSettingsAndSaveButton() {
-        if (isAdded()) {
-            updatePostSettings();
-            getActivity().invalidateOptionsMenu();
-        }
-    }
-
     @Override
     public void onClick(View view) {
 
     }
 
     public void updateNoteSettings() {
+        if (!isAdded() || mNote == null) {
+            return;
+        }
 
+
+        String tags = EditTextUtils.getText(mTagsEditText);
+
+
+        mNote.setIsPublicBlog(togglePublicBlog.isChecked());
+        mNote.setTags(tags);
+
+        //保存notebookid和notebook name 关联
+        NotebookInfo notebook = mNotebookInfos.get(mNotebookSpinner.getSelectedItemPosition());
+        mNote.setNoteBookId(notebook.getNotebookId());
+
+        Leanote.leaDB.saveNoteSettings(mNote);
+        ((EditNoteActivity)getActivity()).reloadNote();
     }
+
+
 }

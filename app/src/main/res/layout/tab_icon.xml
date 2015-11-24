@@ -18,15 +18,22 @@
         android:layout_gravity="center"
         tools:src="@drawable/main_tab_me" />
 
-    <View
-        android:id="@+id/tab_badge"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_gravity="center"
-        android:layout_marginLeft="-8dp"
-        android:layout_marginTop="-8dp"
-        android:background="@drawable/main_tab_me"
-        android:visibility="gone"
-        tools:visibility="visible" />
+
+    <!--<View-->
+        <!--android:id="@+id/tab_badge"-->
+        <!--android:layout_width="16dp"-->
+        <!--android:layout_height="16dp"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_marginLeft="-8dp"-->
+        <!--android:layout_marginTop="-8dp"-->
+        <!--android:background="@drawable/main_tab_me"-->
+        <!--android:visibility="gone"-->
+        <!--tools:visibility="visible" />-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/text_tab"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="@string/tabbar_post" />-->
 
 </FrameLayout>

@@ -42,6 +42,8 @@ public class Leanote extends Application {
 
     private static String mUserAgent;
 
+    private static String mHostUrl;
+
 
     private static final String USER_AGENT_APPNAME = "leanote-android";
 
@@ -200,5 +202,11 @@ public class Leanote extends Application {
         }
     }
 
+    public static String getmHostUrl() {
+        return mHostUrl;
+    }
 
+    public static void setmHostUrl(String mHostUrl) {
+        Leanote.mHostUrl = mHostUrl;
+    }
 }

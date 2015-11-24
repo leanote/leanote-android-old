@@ -22,12 +22,10 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.editor.EditorFragmentAbstract;
 import com.leanote.android.editor.LegacyEditorFragment;
-import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.networking.NetworkRequest;
@@ -55,11 +53,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     public static final String EXTRA_NOTEID = "noteId";
     public static final String EXTRA_IS_NEW_NOTE = "isNewNote";
 
-    public static final String EXTRA_POSTID = "postId";
-    public static final String EXTRA_IS_PAGE = "isPage";
-    public static final String EXTRA_IS_NEW_POST = "isNewPost";
     public static final String EXTRA_IS_QUICKPRESS = "isQuickPress";
-    public static final String EXTRA_QUICKPRESS_BLOG_ID = "quickPressBlogId";
     public static final String EXTRA_SAVED_AS_LOCAL_DRAFT = "savedAsLocalDraft";
     public static final String STATE_KEY_CURRENT_NOTE = "stateKeyCurrentPost";
     public static final String STATE_KEY_ORIGINAL_NOTE = "stateKeyOriginalPost";
@@ -228,18 +222,12 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         return mMaxThumbWidth;
     }
 
+    public void reloadNote() {
+        mNote = Leanote.leaDB.getLocalNoteByNoteId(mNote.getNoteId());
+    }
+
 
     private class LoadNoteContentTask extends AsyncTask<Void, Spanned, Spanned> {
-//        @Override
-//        protected Spanned doInBackground() {
-////            if (params.length < 1 || getNote() == null) {
-////                return null;
-////            }
-//            //从api获取笔记内容更新数据库
-//            String content = fetchNoteContent(getNote().getNoteId());
-//            //String content = StringUtils.notNullStr(params[0]);
-//            return LeaHtml.fromHtml(content, EditNoteActivity.this, getNote(), getMaximumThumbnailWidthForEditor());
-//        }
 
         @Override
         protected Spanned doInBackground(Void... voids) {
@@ -261,21 +249,22 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     private String fetchNoteContent(String noteId) {
         NoteDetail note = Leanote.leaDB.getLocalNoteByNoteId(noteId);
-        if (note != null && org.apache.commons.lang.StringUtils.isNotEmpty(note.getContent().getContent())) {
-            return note.getContent().getContent();
+        if (note != null && org.apache.commons.lang.StringUtils.isNotEmpty(note.getContent())) {
+            return note.getContent();
         }
 
-        String noteApi = String.format("http://leanote.com/api/note/getNoteContent?noteId=%s&token=%s", noteId,
+        String noteApi = String.format("%sapi/note/getNoteContent?noteId=%s&token=%s",
+                AccountHelper.getDefaultAccount().getHost(), noteId,
                 AccountHelper.getDefaultAccount().getmAccessToken());
 
 
         String response;
         String content = null;
         try {
-            response = NetworkRequest.syncRequest(noteApi, Request.Method.GET);
+            response = NetworkRequest.syncGetRequest(noteApi);
             JSONObject json = new JSONObject(response);
             content = json.getString("Content");
-            Leanote.leaDB.saveNoteContent(noteId, content, AccountHelper.getDefaultAccount().getmUserId());
+            Leanote.leaDB.saveNoteContent(noteId, content);
 
         } catch (Exception e) {
             AppLog.e(AppLog.T.API, "fetch note content error", e);
@@ -297,15 +286,15 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         if (note != null) {
             if (!mHasSetNoteContent) {
                 mHasSetNoteContent = true;
-                if (!mIsNewNote && org.apache.commons.lang.StringUtils.isEmpty(note.getContent().getContent())) {
+                if (!mIsNewNote && org.apache.commons.lang.StringUtils.isEmpty(note.getContent())) {
                     // Load local post content in the background, as it may take time to generate images
 //                    new LoadNoteContentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
 //                            note.getContent().replaceAll("\uFFFC", ""));
                     new LoadNoteContentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 }
-                else if (!TextUtils.isEmpty(note.getContent().getContent())){
-                    mEditorFragment.setContent(note.getContent().getContent().replaceAll("\uFFFC", ""));
+                else if (!TextUtils.isEmpty(note.getContent())){
+                    mEditorFragment.setContent(note.getContent().replaceAll("\uFFFC", ""));
                 }
             }
             if (!TextUtils.isEmpty(note.getTitle())) {
@@ -315,26 +304,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             //mEditorFragment.setLocalDraft(note.isLocalDraft());
         }
 
-        // Special actions
-//        String action = getIntent().getAction();
-//        int quickMediaType = getIntent().getIntExtra("quick-media", -1);
-//        if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
-//            setPostContentFromShareAction();
-//        } else if (NEW_MEDIA_GALLERY.equals(action)) {
-//            prepareMediaGallery();
-//        } else if (NEW_MEDIA_POST.equals(action)) {
-//            prepareMediaPost();
-//        } else if (quickMediaType >= 0) {
-//            // User selected 'Quick Photo' in the menu drawer
-//            if (quickMediaType == Constants.QUICK_POST_PHOTO_CAMERA) {
-//                launchCamera();
-//            } else if (quickMediaType == Constants.QUICK_POST_PHOTO_LIBRARY) {
-//                WordPressMediaUtils.launchPictureLibrary(this);
-//            }
-//            if (note != null) {
-//                note.setQuickPostType(Post.QUICK_MEDIA_TYPE_PHOTO);
-//            }
-//        }
+
     }
 
 
@@ -419,18 +389,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.edit_note, menu);
 
-//        mTags = (SuggestionAutoCompleteText) findViewById(R.id.tags);
-//        if (mTags != null) {
-//            mTags.setTokenizer(new SuggestionAutoCompleteText.CommaTokenizer());
-//
-//            remoteBlogId = WordPress.getCurrentRemoteBlogId();
-//            mSuggestionServiceConnectionManager = new SuggestionServiceConnectionManager(this, remoteBlogId);
-//            mTagSuggestionAdapter = SuggestionUtils.setupTagSuggestions(remoteBlogId, this, mSuggestionServiceConnectionManager);
-//            if (mTagSuggestionAdapter != null) {
-//                mTags.setAdapter(mTagSuggestionAdapter);
-//            }
-//        }
-
         return true;
     }
 
@@ -447,7 +405,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         }
     }
 
-    private void updatePostObject(boolean isAutosave) {
+    private void updateNoteObject(boolean isAutosave) {
         if (mNote == null) {
             AppLog.e(AppLog.T.POSTS, "Attempted to save an invalid Post.");
             return;
@@ -455,7 +413,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
         // Update post object from fragment fields
         if (mEditorFragment != null) {
-            updatePostContent(isAutosave);
+            updateNoteContent(isAutosave);
         }
         if (mEditNoteSettingsFragment != null) {
             mEditNoteSettingsFragment.updateNoteSettings();
@@ -463,7 +421,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     }
 
 
-    private void updatePostContent(boolean isAutoSave) {
+    private void updateNoteContent(boolean isAutoSave) {
         NoteDetail note = getNote();
 
         if (note == null) {
@@ -549,17 +507,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
         note.setTitle(title);
         // split up the post content if there's a more tag
-//        if (note.isLocalDraft() && content.contains(moreTag)) {
-//            note.setDescription(content.substring(0, content.indexOf(moreTag)));
-//            note.setMoreText(content.substring(content.indexOf(moreTag) + moreTag.length(), content.length()));
-//        } else {
-//            note.setDescription(content);
-//            note.setMoreText("");
-//        }
-//
-//        if (!note.isLocalDraft()) {
-//            note.setLocalChange(true);
-//        }
+
     }
 
     private void updateMediaFileOnServer(LeaImageSpan wpIS) {
@@ -604,7 +552,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     private void saveNote(boolean isAutosave, boolean updatePost) {
         if (updatePost) {
-            updatePostObject(isAutosave);
+            updateNoteObject(isAutosave);
         }
 
         //Leanote.leaDB.updateNote(mNote);
@@ -617,7 +565,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
         if (itemId == R.id.menu_save_post) {
             // If the post is new and there are no changes, don't publish
-            updatePostObject(false);
+            updateNoteObject(false);
 //            if (!mPost.isPublishable()) {
 //                ToastUtils.showToast(this, R.string.error_publish_empty_post, Duration.SHORT);
 //                return false;

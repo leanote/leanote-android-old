@@ -25,6 +25,7 @@
 
         <item name="swipeToRefreshStyle">@style/SwipeToRefresh</item>
 
+
     </style>
 
     <style name="Leanote.DropDownListView.Light" parent="Leanote">
@@ -32,6 +33,10 @@
     </style>
 
 
+    <style name="AppTheme4Preview" parent="Leanote">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
     <style name="Theme.Leanote.Widget" parent="Theme.AppCompat">

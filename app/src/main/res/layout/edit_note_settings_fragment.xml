@@ -83,9 +83,13 @@
             android:id="@+id/notebook"
             android:paddingTop="@dimen/margin_small"
             android:paddingBottom="@dimen/margin_small"
+            android:spinnerMode="dialog"
+            android:prompt="@string/choose_notebook"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.05" />
+
+        <View style="@style/MeListSectionDividerView" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/tagsLabel"

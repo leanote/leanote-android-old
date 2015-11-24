@@ -189,6 +189,8 @@
     <string name="private_note">private note</string>
     <string name="save_note">save note</string>
     <string name="tags">tags</string>
+    <string name="choose_notebook">choose notebook</string>
+
 
     <string name="pwd_size_alert">password too short</string>
     <string name="fetch_note_content_fail">fetch note content fail</string>
@@ -205,11 +207,24 @@
     <string name="default_editor">default editor</string>
     <string name="me_btn_login_logout">log out</string>
     <string name="markdown_editor">markdown editor</string>
+    <string name="notebook_not_found">notebook not found</string>
+    <string name="new_notebook_hint">input notebook name</string>
+    <string name="save_notebook">save</string>
+    <string name="save_notebook_fail">save notebook fail</string>
+    <string name="title_activity_edit_notebook">EditNotebookActivity</string>
+    <string name="empty_notebook_title">notebook title is empty</string>
+    <string name="save_notebook_succ">sync note succful</string>
+    <string name="add_new_notebook">add new notebook</string>
+    <string name="edit_notebook_title">edit notebook title</string>
     <string-array name="alignment_array">
         <item>None</item>
         <item>Left</item>
         <item>Center</item>
         <item>Right</item>
     </string-array>
+    <string name="title_activity_note_list">NoteListActivity</string>
+    <string name="title_activity_note_preview">NotePreviewActivity</string>
+    <string name="fragment_tag_note_preview">fragment_note_preview</string>
+    <string name="local_changes_explainer">This note has local changes which haven\\\'t been published to server</string>
 
 </resources>

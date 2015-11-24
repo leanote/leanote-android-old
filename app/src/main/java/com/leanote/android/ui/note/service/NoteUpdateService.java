@@ -43,6 +43,7 @@ public class NoteUpdateService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         if (intent == null) return START_NOT_STICKY;
 
+
         new Thread() {
             @Override
             public void run() {
@@ -54,8 +55,10 @@ public class NoteUpdateService extends Service {
     }
 
     private void fetchNotes() {
+
         NoteEvents.RequestNotes event = new NoteEvents.RequestNotes();
         NoteSyncService.syncNote();
+
 
         EventBus.getDefault().post(event);
     }

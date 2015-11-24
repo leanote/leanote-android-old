@@ -15,15 +15,17 @@ public class NoteDetail implements Serializable {
     private String noteBookId;
     private String userId;
     private String title;
+    private String desc;
     private String tags;
-    private NoteContent content;
+    private String noteAbstract;
+    private String content;
+    private String fileIds;
     private boolean isMarkDown;
     private boolean isTrash;
     private boolean isDeleted;
     private boolean isDirty;
     private boolean isPublicBlog;
     private String createdTime;
-
     private String updatedTime;
     private String publicTime;
     private int usn;
@@ -182,12 +184,36 @@ public class NoteDetail implements Serializable {
         this.isDirty = isDirty;
     }
 
-    public NoteContent getContent() {
+    public String getNoteAbstract() {
+        return noteAbstract;
+    }
+
+    public void setNoteAbstract(String noteAbstract) {
+        this.noteAbstract = noteAbstract;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+
+    public String getContent() {
         return content;
     }
 
-    public void setContent(NoteContent content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
+    public String getFileIds() {
+        return fileIds;
+    }
+
+    public void setFileIds(String fileIds) {
+        this.fileIds = fileIds;
+    }
 }
