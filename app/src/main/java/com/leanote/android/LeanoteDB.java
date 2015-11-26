@@ -492,4 +492,21 @@ public class LeanoteDB extends SQLiteOpenHelper {
         db.execSQL(sql);
 
     }
+
+    public List<String> getNoteisBlogIds() {
+        String[] st = {"title"};
+//        Cursor c = db.query(NOTES_TABLE, null, null , null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, st , "isBlog=1", null, null, null, "");
+        List<String> notebookIds = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+
+                notebookIds.add(c.getString(0));
+            }
+            return notebookIds;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
 }

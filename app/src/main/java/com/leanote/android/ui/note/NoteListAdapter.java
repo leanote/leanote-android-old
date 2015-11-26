@@ -219,6 +219,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.i("notewe", position+"");
                 NoteDetail selectedNote = getItem(position);
                 if (mOnPostSelectedListener != null && selectedNote != null) {
                     mOnPostSelectedListener.onPostSelected(selectedNote);

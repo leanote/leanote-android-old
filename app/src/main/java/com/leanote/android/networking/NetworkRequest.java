@@ -1,5 +1,7 @@
 package com.leanote.android.networking;
 
+import android.util.Log;
+
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.leanote.android.Leanote;
@@ -13,7 +15,7 @@ public class NetworkRequest {
 
     public static String syncRequest(String api, int method) throws ExecutionException, InterruptedException {
         RequestFuture<String> future = RequestFuture.newFuture();
-
+        Log.v("url", api);
         StringRequest request = new StringRequest(method, api, future, future);
 
         Leanote.requestQueue.add(request);
