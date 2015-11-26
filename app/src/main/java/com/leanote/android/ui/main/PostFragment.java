@@ -19,6 +19,7 @@ import com.leanote.android.R;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.LeaMainActivity;
+import com.leanote.android.ui.post.PostAdapter;
 import com.leanote.android.util.CoreEvents;
 import com.leanote.android.util.SwipeToRefreshHelper;
 import com.leanote.android.widget.CustomSwipeRefreshLayout;
@@ -41,7 +42,7 @@ public class PostFragment extends Fragment
     private ProgressBar mProgressLoadMore;
     private TextView mEmptyViewTitle;
     private SwipeToRefreshHelper mSwipeToRefreshHelper;
-
+    private PostAdapter mNoteListAdapter;
 
 
     private ImageView mEmptyViewImage;public static PostFragment newInstance() {
@@ -59,11 +60,24 @@ public class PostFragment extends Fragment
         super.onPause();
 
     }
+    public PostAdapter getNoteListAdapter() {
+        if (mNoteListAdapter == null) {
+            mNoteListAdapter = new PostAdapter(getActivity());
+        }
+        return mNoteListAdapter;
+    }
+
+    private void loadNotes() {
+        getNoteListAdapter().loadNotes();
+    }
 
     @Override
     public void onResume() {
         super.onResume();
-
+        if (mRecyclerView.getAdapter() == null) {
+            mRecyclerView.setAdapter(getNoteListAdapter());
+        }
+        loadNotes();
     }
 
     @Override
@@ -91,8 +105,8 @@ public class PostFragment extends Fragment
         int spacingHorizontal = context.getResources().getDimensionPixelSize(R.dimen.content_margin);
         mRecyclerView.addItemDecoration(new RecyclerItemDecoration(spacingHorizontal, spacingVertical));
 
-        mEmptyViewImage.setVisibility(View.VISIBLE);
-        mEmptyView.setVisibility(View.VISIBLE);
+        //mEmptyViewImage.setVisibility(View.VISIBLE);
+        //mEmptyView.setVisibility(View.VISIBLE);
 
 
 
@@ -110,8 +124,7 @@ public class PostFragment extends Fragment
                 new SwipeToRefreshHelper.RefreshListener() {
                     @Override
                     public void onRefreshStarted() {
-                        List<String> localNotebookIds = Leanote.leaDB.getNoteisBlogIds();
-                        Log.v("postIds", localNotebookIds.toString());
+
                     }
                 });
     }
@@ -121,8 +134,8 @@ public class PostFragment extends Fragment
         super.onActivityCreated(bundle);
 
         initSwipeToRefreshHelper();
-        List<String> localNotebookIds = Leanote.leaDB.getNoteisBlogIds();
-        Log.v("postIds", localNotebookIds.toString());
+//        List<String> localNotebookIds = Leanote.leaDB.getNoteisBlogIds();
+//        Log.v("postIds", localNotebookIds.toString());
         
 
     }

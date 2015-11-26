@@ -509,4 +509,30 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
+    public NoteDetailList getNoteisBlogList(String userId) {
+        NoteDetailList listPosts = new NoteDetailList();
+
+        String[] st = {"title"};
+        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null , "isBlog=1", null, null, null, "");
+        try {
+            while (c.moveToNext()) {
+                String title = c.getString(4);
+                String updateTime = c.getString(12);
+                NoteDetail detail = new NoteDetail();
+
+                detail.setId(c.getLong(0));
+                detail.setNoteId(c.getString(1));
+                detail.setTitle(title);
+                detail.setContent(getNoteContentByNoteId(c.getString(1)));
+                detail.setUpdatedTime(updateTime);
+
+                listPosts.add(detail);
+            }
+            return listPosts;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
 }
