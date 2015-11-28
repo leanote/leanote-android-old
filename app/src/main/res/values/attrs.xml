@@ -46,6 +46,7 @@
             <enum name="publish" value="7" />
             <enum name="more" value="8" />
             <enum name="back" value="9" />
+            <enum name="visitblog" value="10" />
         </attr>
     </declare-styleable>
 
@@ -72,6 +73,7 @@
             <enum name="publish" value="7" />
             <enum name="more" value="8" />
             <enum name="back" value="9" />
+            <enum name="visitblog" value="10" />
         </attr>
     </declare-styleable>
 

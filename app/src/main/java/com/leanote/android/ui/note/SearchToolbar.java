@@ -14,16 +14,16 @@ public class SearchToolbar extends LinearLayout {
 
     private SearchView mSearchView;
 
-    public SearchToolbar(Context context) {
+    public SearchToolbar(Context context, String hintext) {
         super(context);
-        initView(context);
+        initView(context,hintext);
     }
 
     public SearchView getmSearchView() {
         return mSearchView;
     }
 
-    private void initView(Context context) {
+    private void initView(Context context,String hintext) {
         View view = inflate(context, R.layout.search_note, this);
 
         mSearchView = (SearchView) view.findViewById(R.id.search_note);
@@ -33,7 +33,7 @@ public class SearchToolbar extends LinearLayout {
         mSearchView.clearFocus();
         mSearchView.setSubmitButtonEnabled(true);
 
-        mSearchView.setQueryHint("search note");
+        mSearchView.setQueryHint(hintext);
 		//mSearchView.setIconifiedByDefault(true);
 
 

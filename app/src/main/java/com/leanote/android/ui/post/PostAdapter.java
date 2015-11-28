@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -14,6 +15,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.note.NoteListAdapter;
 import com.leanote.android.ui.note.SearchToolbar;
 import com.leanote.android.util.AppLog;
@@ -41,6 +43,13 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private NoteDetailList mNotes = new NoteDetailList();
     private final List<NoteDetail> mHiddenNotes = new ArrayList<>();
 
+    private static final long ROW_ANIM_DURATION = 150;
+
+    private static final int VIEW_TYPE_POST_OR_PAGE = 0;
+    private static final int VIEW_TYPE_ENDLIST_INDICATOR = 1;
+    private static final int VIEW_TYPE_SEARCH = 2;
+    private static final int VIEW_TYPE_HOME_PAGE = 3;
+
     private NoteListAdapter.OnPostsLoadedListener mOnPostsLoadedListener;
 
     public PostAdapter(Context context) {
@@ -58,13 +67,73 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
-        return new NoteViewHolder(view);
+        if (viewType == VIEW_TYPE_ENDLIST_INDICATOR) {
+            View view = mLayoutInflater.inflate(R.layout.endlist_indicator, parent, false);
+            view.getLayoutParams().height = mEndlistIndicatorHeight;
+            return new EndListViewHolder(view);
+        } else if (viewType == VIEW_TYPE_SEARCH) {
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(),"search post"));
+        } else if (viewType == VIEW_TYPE_HOME_PAGE) {
+            View view = mLayoutInflater.inflate(R.layout.blog_home_page, parent, false);
+            //view.getLayoutParams().height = mEndlistIndicatorHeight;
+            return new ViewBlogHolder(view);
+        } else{
+            View view = mLayoutInflater.inflate(R.layout.post_cardview_link, parent, false);
+            return new NoteViewHolder(view);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == (mNotes.size() + 2)) {
+            return VIEW_TYPE_ENDLIST_INDICATOR;
+        } else if (position == 0) {
+            return VIEW_TYPE_SEARCH;
+        }
+          else if (position == 1) {
+            return VIEW_TYPE_HOME_PAGE;
+        }
+        return VIEW_TYPE_POST_OR_PAGE;
+    }
+
+
+    private boolean isValidPostPosition(int position) {
+        return (position >= 1 && position <= mNotes.size()); //i do not know...
+    }
+
+    private NoteDetail getItem(int position) {
+        if (isValidPostPosition(position)) {
+            return mNotes.get(position-2);
+        }
+        return null;
+    }
+
+    @Override
+    public int getItemCount() {
+        if (mNotes.size() == 0) {
+            return 0;
+        } else {
+            return mNotes.size()+3 ; // +1 for the endlist indicator
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        final NoteDetail note = mNotes.get(position);  //not clear
+
+        int posType = getItemViewType(position);
+        if (posType == VIEW_TYPE_ENDLIST_INDICATOR) {
+            return;
+        }
+        else if (posType == VIEW_TYPE_HOME_PAGE) {
+            ViewBlogHolder viewBlogHolder = (ViewBlogHolder) holder;
+            return;
+        } else if (posType == VIEW_TYPE_SEARCH) {
+            SearchViewHolder searchViewHolder = (SearchViewHolder) holder;
+            //searchViewHolder.mSearchToolbar.getmSearchView().setOnQueryTextListener(new SearchChangeListener());
+            return;
+        }
+
+        final NoteDetail note = mNotes.get(position-2);  //not clear
         Log.i("note", note.toString());
         Context context = holder.itemView.getContext();
 
@@ -80,7 +149,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             postHolder.txtDate.setText(note.getUpdatedTime());
             postHolder.txtDate.setVisibility(View.VISIBLE);
-            postHolder.btnTrash.setButtonType(PostListButton.BUTTON_TRASH);
+
 
             //configurePostButtons(postHolder, note);
         }
@@ -96,40 +165,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
     }
 
-    @Override
-    public int getItemCount() {
-        if (mNotes.size() == 0) {
-            return 0;
-        } else {
-            return mNotes.size() ; // +1 for the endlist indicator
-        }
-    }
 
-
-    class NoteViewHolder extends RecyclerView.ViewHolder {
-        private final TextView txtTitle;
-        private final TextView txtDate;
-
-        private final PostListButton btnEdit;
-        private final PostListButton btnView;
-
-        private final PostListButton btnTrash;
-
-        private final ViewGroup layoutButtons;
-
-        public NoteViewHolder(View view) {
-            super(view);
-
-            txtTitle = (TextView) view.findViewById(R.id.text_title);
-            txtDate = (TextView) view.findViewById(R.id.text_date);
-
-            btnEdit = (PostListButton) view.findViewById(R.id.btn_edit);
-            btnView = (PostListButton) view.findViewById(R.id.btn_view);
-
-            btnTrash = (PostListButton) view.findViewById(R.id.btn_trash);
-            layoutButtons = (ViewGroup) view.findViewById(R.id.layout_buttons);
-        }
-    }
 
 
     public void loadNotes() {
@@ -184,6 +220,70 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (mOnPostsLoadedListener != null) {
                 mOnPostsLoadedListener.onPostsLoaded(mNotes.size());
             }
+        }
+    }
+
+
+
+    class EndListViewHolder extends RecyclerView.ViewHolder {
+        public EndListViewHolder(View view) {
+            super(view);
+        }
+    }
+
+    class SearchViewHolder extends RecyclerView.ViewHolder {
+        private final SearchToolbar mSearchToolbar;
+        public SearchViewHolder(View itemView) {
+            super(itemView);
+            mSearchToolbar = (SearchToolbar) itemView;
+            mSearchToolbar.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    ActivityLauncher.addNewNoteForResult(
+                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
+
+                    return true;
+                }
+
+            });
+            mSearchToolbar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    ActivityLauncher.addNewNoteForResult(
+                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
+
+                }
+            });
+        }
+    }
+
+
+    class NoteViewHolder extends RecyclerView.ViewHolder {
+        private final TextView txtTitle;
+        private final TextView txtDate;
+        public NoteViewHolder(View view) {
+            super(view);
+            txtTitle = (TextView) view.findViewById(R.id.text_title);
+            txtDate = (TextView) view.findViewById(R.id.text_date);
+
+        }
+    }
+
+    class ViewBlogHolder extends RecyclerView.ViewHolder {
+        private final PostListButton btnView;
+        public ViewBlogHolder(View view) {
+            super(view);
+            btnView = (PostListButton) view.findViewById(R.id.btn_visit_blog);
+            btnView.setVisibility(View.VISIBLE);
+            View.OnClickListener btnClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // handle back/more here, pass other actions to activity/fragment
+
+                }
+            };
+            btnView.setOnClickListener(btnClickListener);
+
         }
     }
 }

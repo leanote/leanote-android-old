@@ -108,7 +108,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position <= mNotes.size());
+        return (position >= 0 && position <= mNotes.size()-1);  //modify
     }
 
     @Override
@@ -138,7 +138,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext()));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(),"search note"));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NoteViewHolder(view);
