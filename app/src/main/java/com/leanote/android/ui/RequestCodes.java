@@ -7,4 +7,5 @@ public class RequestCodes {
     public static final int ADD_ACCOUNT            = 100;
     public static final int EDIT_NOTE              = 800;
 
+    public static final int PREVIEW_NOTE           = 810;
 }

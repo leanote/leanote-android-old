@@ -63,7 +63,6 @@
         </activity>
         <activity android:name=".ui.LeaMainActivity2" >
         </activity>
-
         <activity
             android:name=".ui.SignInActivity"
             android:label="@string/title_activity_sign_in"
@@ -81,6 +80,10 @@
             android:name=".ui.note.EditNoteActivity"
             android:label="@string/title_activity_edit_note" >
         </activity>
+        <activity
+            android:name=".ui.note.EditNotebookActivity"
+            android:label="@string/title_activity_edit_notebook" >
+        </activity>
 
         <service
             android:name=".ui.note.service.NoteUpdateService"
@@ -89,6 +92,21 @@
             android:label="Note Update Service" >
         </service>
 
+        <activity
+            android:name=".ui.note.NoteListActivity"
+            android:label="@string/title_activity_note_list" >
+        </activity>
+        <activity
+            android:name=".ui.note.NotePreviewActivity"
+            android:label="@string/title_activity_note_preview"
+            android:theme="@style/AppTheme4Preview">
+        </activity>
+
+        <service
+            android:name=".ui.note.service.NoteUploadService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

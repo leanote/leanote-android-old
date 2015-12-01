@@ -26,11 +26,12 @@ public class AccountTable {
                 + "user_name               TEXT,"
                 + "user_id                 TEXT,"
                 + "email                   TEXT,"
-                + "verified                INTEGER,"
+                + "verified                INTEGER default 0,"
                 + "logo                    TEXT,"
                 + "access_token            TEXT,"
                 + "isMarkDown              INTEGER default 0,"
-                + "usn                     INTEGER)");
+                + "usn                     INTEGER,"
+                + "host                    TEXT default 'https://leanote.com')");
     }
 
     private static void dropTables(SQLiteDatabase db) {
@@ -51,6 +52,8 @@ public class AccountTable {
         values.put("verified", account.isVerified() ? 0 : 1);
         values.put("logo", account.getmAvatar());
         values.put("access_token", account.getmAccessToken());
+        values.put("host", account.getHost());
+
         database.insertWithOnConflict(ACCOUNT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
@@ -70,9 +73,11 @@ public class AccountTable {
                 account.setmUserId(c.getString(c.getColumnIndex("user_id")));
                 account.setmEmail(c.getString(c.getColumnIndex("email")));
                 account.setmAvatar(c.getString(c.getColumnIndex("logo")));
-                account.setVerified(c.getInt(c.getColumnIndex("verified")) == 0 ? true : false);
+                account.setVerified(c.getInt(c.getColumnIndex("verified")) == 0 ? false : true);
                 account.setmAccessToken(c.getString(c.getColumnIndex("access_token")));
+                account.setUseMarkdown(c.getInt(c.getColumnIndex("isMarkDown")) == 0 ? false : true);
                 account.setLastSyncUsn(c.getInt(c.getColumnIndex("usn")));
+                account.setHost(c.getString(c.getColumnIndex("host")));
             }
             return account;
         } finally {

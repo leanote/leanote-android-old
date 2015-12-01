@@ -5,7 +5,7 @@ package com.leanote.android.model;
  */
 public class NotebookInfo {
 
-    private int id;
+    private long id;
     private String notebookId;
     private String parentNotebookId;
 
@@ -30,11 +30,11 @@ public class NotebookInfo {
         CreateTime = createTime;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

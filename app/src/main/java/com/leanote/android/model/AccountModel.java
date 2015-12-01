@@ -13,6 +13,7 @@ public class AccountModel {
     private String mAccessToken;
     private boolean useMarkdown;
     private int lastSyncUsn;
+    private String host;
 
     public AccountModel() {
         localUserId = 0L;
@@ -100,5 +101,11 @@ public class AccountModel {
         this.useMarkdown = useMarkdown;
     }
 
+    public String getHost() {
+        return host;
+    }
 
+    public void setHost(String host) {
+        this.host = host;
+    }
 }

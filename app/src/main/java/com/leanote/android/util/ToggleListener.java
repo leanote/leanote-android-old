@@ -36,6 +36,9 @@ public class ToggleListener implements OnCheckedChangeListener {
         //更新toggle button 值
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) toggle_Button
                 .getLayoutParams();
+        AppLog.i("ischecked:" + isChecked);
+        AppLog.i("setting name:" + settingName);
+        AppLog.i("noteId:" + param);
         if (isChecked) {
 
             params.addRule(RelativeLayout.ALIGN_RIGHT, -1);

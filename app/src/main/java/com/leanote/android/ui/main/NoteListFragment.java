@@ -57,7 +57,6 @@ public class NoteListFragment extends Fragment
     private TextView mEmptyViewTitle;
     private ImageView mEmptyViewImage;
 
-    //private boolean mCanLoadMorePosts = true;
     private boolean mIsFetchingPosts;
 
     private final NoteDetailList mTrashedNotes = new NoteDetailList();
@@ -66,13 +65,6 @@ public class NoteListFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
-//        if (isAdded()) {
-//            Bundle extras = getActivity().getIntent().getExtras();
-//            if (extras != null) {
-//                mIsPage = extras.getBoolean(PostsListActivity.EXTRA_VIEW_PAGES);
-//            }
-//        }
     }
 
     public static NoteListFragment newInstance() {
@@ -214,20 +206,11 @@ public class NoteListFragment extends Fragment
         }
 
         mIsFetchingPosts = true;
-//        if (loadMore) {
-//            showLoadMoreProgress();
-//        }
-        //load notes
 
         NoteUpdateService.startServiceForNote(getActivity());
-        //PostUpdateService.startServiceForBlog(getActivity(), WordPress.getCurrentLocalTableBlogId(), mIsPage, loadMore);
+
     }
 
-    private void showLoadMoreProgress() {
-        if (mProgressLoadMore != null) {
-            mProgressLoadMore.setVisibility(View.VISIBLE);
-        }
-    }
 
     private void hideLoadMoreProgress() {
         if (mProgressLoadMore != null) {
@@ -320,15 +303,6 @@ public class NoteListFragment extends Fragment
         }
     }
 
-    /*
-     * called by the adapter to load more posts when the user scrolls towards the last post
-     */
-//    @Override
-//    public void onLoadMore() {
-//        if (mCanLoadMorePosts && !mIsFetchingPosts) {
-//            requestPosts(true);
-//        }
-//    }
 
     /*
      * called by the adapter when the user clicks a post
@@ -347,6 +321,7 @@ public class NoteListFragment extends Fragment
 
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());
         //load note detail
+        AppLog.i("click note id:" + note.getId());
         NoteDetail fullNote = Leanote.leaDB.getLocalNoteByNoteId(note.getNoteId());
         if (fullNote == null) {
             ToastUtils.showToast(getActivity(), R.string.note_not_found);
@@ -357,8 +332,9 @@ public class NoteListFragment extends Fragment
             case PostListButton.BUTTON_EDIT:
                 ActivityLauncher.editNoteForResult(getActivity(), fullNote.getId());
                 break;
+            case PostListButton.BUTTON_PREVIEW:
             case PostListButton.BUTTON_VIEW:
-                //ActivityLauncher.browseNote(getActivity(), WordPress.getCurrentBlog(), fullPost);
+                ActivityLauncher.previewNoteForResult(getActivity(), fullNote.getId());
                 break;
             case PostListButton.BUTTON_TRASH:
             case PostListButton.BUTTON_DELETE:

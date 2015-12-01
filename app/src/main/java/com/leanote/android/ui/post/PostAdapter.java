@@ -72,7 +72,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext(),"search post"));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext()));
         } else if (viewType == VIEW_TYPE_HOME_PAGE) {
             View view = mLayoutInflater.inflate(R.layout.blog_home_page, parent, false);
             //view.getLayoutParams().height = mEndlistIndicatorHeight;

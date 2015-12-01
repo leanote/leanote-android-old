@@ -5,6 +5,7 @@ import android.util.Base64;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.Request.Method;
 import com.android.volley.toolbox.HttpStack;
 import com.leanote.android.Leanote;
 import com.leanote.android.model.AccountHelper;
@@ -13,7 +14,7 @@ import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
 import com.leanote.android.util.StringUtils;
 
-import com.android.volley.Request.Method;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -22,7 +23,6 @@ import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
-import org.apache.http.Header;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

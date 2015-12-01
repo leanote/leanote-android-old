@@ -27,7 +27,9 @@ import com.leanote.android.Leanote;
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.GravatarUtils;
+import com.leanote.android.util.ToggleListener;
 import com.leanote.android.widget.LeaNetworkImageView;
 
 import java.lang.ref.WeakReference;
@@ -64,13 +66,15 @@ public class MeFragment extends Fragment {
         mUsernameTextView = (TextView) rootView.findViewById(R.id.me_username);
         mLoginLogoutTextView = (TextView) rootView.findViewById(R.id.me_login_logout_text_view);
 
-        markdown_editor_setting = (LinearLayout) rootView.findViewById(R.id.note_public_settings);
-        switch_markdown = (ToggleButton) rootView.findViewById(R.id.toggle_public_blog);
-        switch_markdown_button = (ImageButton) rootView.findViewById(R.id.toggleButton_public_blog);
+        markdown_editor_setting = (LinearLayout) rootView.findViewById(R.id.markdown_editor_setting);
+        switch_markdown = (ToggleButton) rootView.findViewById(R.id.switch_markdown);
+        switch_markdown_button = (ImageButton) rootView.findViewById(R.id.switch_markdown_button);
 
         addDropShadowToAvatar();
         refreshAccountDetails();
 
+        initSettingsFields();
+        setListeners();
 
         rootView.findViewById(R.id.row_logout).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,32 +93,55 @@ public class MeFragment extends Fragment {
 
         return rootView;
     }
-/*
+
+
+
+    private void setListeners() {
+
+        switch_markdown.setOnCheckedChangeListener(new ToggleListener(getActivity(),
+                "use_markdown", switch_markdown, switch_markdown_button, null));
+
+
+        View.OnClickListener clickToToggleListener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                switch_markdown.toggle();
+            }
+        };
+
+        switch_markdown_button.setOnClickListener(clickToToggleListener);
+        markdown_editor_setting.setOnClickListener(clickToToggleListener);
+
+    }
+
+
     private void initSettingsFields() {
         boolean isMarkdown = AccountHelper.getDefaultAccount().isUseMarkdown();
-        togglePublicBlog.setChecked(isPublic);
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) toggleButtonPublicBlog
+        AppLog.i("ismarkdown:" + isMarkdown);
+        switch_markdown.setChecked(isMarkdown);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) switch_markdown_button
                 .getLayoutParams();
 
 
-        if (isPublic) {
+        if (isMarkdown) {
             params.addRule(RelativeLayout.ALIGN_RIGHT, -1);
             params.addRule(RelativeLayout.ALIGN_LEFT,
                     R.id.toggleButton_public_blog);
-            toggleButtonPublicBlog.setLayoutParams(params);
-            toggleButtonPublicBlog
+            switch_markdown_button.setLayoutParams(params);
+            switch_markdown_button
                     .setImageResource(R.drawable.progress_thumb_selector);
-            togglePublicBlog.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            switch_markdown.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         } else {
-            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.note_public_settings);
+            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.switch_markdown);
             params.addRule(RelativeLayout.ALIGN_LEFT, -1);
-            toggleButtonPublicBlog.setLayoutParams(params);
-            toggleButtonPublicBlog
+            switch_markdown_button.setLayoutParams(params);
+            switch_markdown_button
                     .setImageResource(R.drawable.progress_thumb_off_selector);
-            togglePublicBlog.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+            switch_markdown.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
     }
-*/
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (mDisconnectProgressDialog != null) {

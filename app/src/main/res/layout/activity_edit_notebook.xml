@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <EditText
+        android:id="@+id/edit_notebook_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:maxLength="40"
+        android:hint="@string/new_notebook_hint" />
+</LinearLayout>

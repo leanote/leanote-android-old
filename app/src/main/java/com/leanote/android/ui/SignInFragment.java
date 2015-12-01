@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.leanote.android.R;
 import com.leanote.android.accounts.helpers.LoginAbstract;
 import com.leanote.android.accounts.helpers.LoginLeanote;
+import com.leanote.android.accounts.helpers.LoginSelfHost;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.accounts.NewAccountActivity;
 import com.leanote.android.util.ABTestingUtils;
@@ -81,6 +82,8 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
     private int mErroneousLogInCount;
     private String mUsername;
     private String mPassword;
+    private String mHostUrl;
+
     private String mTwoStepCode;
     private String mHttpUsername;
     private String mHttpPassword;
@@ -99,11 +102,18 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         }
         mPasswordEditText.setError(null);
         mUsernameEditText.setError(null);
+        mUrlEditText.setError(null);
+
     }
 
     private boolean fieldsFilled() {
-        return EditTextUtils.getText(mUsernameEditText).trim().length() > 0
+        boolean usernamePass = EditTextUtils.getText(mUsernameEditText).trim().length() > 0
                 && EditTextUtils.getText(mPasswordEditText).trim().length() > 0;
+        if (!mSelfHosted) {
+            return usernamePass;
+        } else {
+            return usernamePass && EditTextUtils.getText(mUrlEditText).trim().length() > 0;
+        }
     }
 
 
@@ -134,11 +144,17 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         mUsernameEditText = (EditText) rootView.findViewById(R.id.nux_username);
         mUsernameEditText.addTextChangedListener(this);
         mUsernameEditText.setOnClickListener(mOnLoginFormClickListener);
+
         mPasswordEditText = (EditText) rootView.findViewById(R.id.nux_password);
         mPasswordEditText.addTextChangedListener(this);
         mPasswordEditText.setOnClickListener(mOnLoginFormClickListener);
         mJetpackAuthLabel = (LeaTextView) rootView.findViewById(R.id.nux_jetpack_auth_label);
+
         mUrlEditText = (EditText) rootView.findViewById(R.id.nux_url);
+        mUrlEditText.addTextChangedListener(this);
+        mUrlEditText.setOnClickListener(mOnLoginFormClickListener);
+
+
         mSignInButton = (LeaTextView) rootView.findViewById(R.id.nux_sign_in_button);
         mSignInButton.setOnClickListener(mSignInClickListener);
 
@@ -147,6 +163,7 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         mCreateAccountButton = (LeaTextView) rootView.findViewById(R.id.nux_create_account_button);
         mCreateAccountButton.setOnClickListener(mCreateAccountListener);
         mAddSelfHostedButton = (LeaTextView) rootView.findViewById(R.id.nux_add_selfhosted_button);
+
         mAddSelfHostedButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -312,26 +329,6 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
     }
 
 
-//    private void setTwoStepAuthVisibility(boolean isVisible) {
-//        mTwoStepLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-//        mTwoStepFooter.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-//        mSignInButton.setText(isVisible ? getString(R.string.verify) : getString(R.string.sign_in));
-//        mForgotPassword.setVisibility(isVisible ? View.GONE : View.VISIBLE);
-//        mBottomButtonsLayout.setVisibility(isVisible ? View.GONE : View.VISIBLE);
-//        mUsernameEditText.setFocusableInTouchMode(!isVisible);
-//        mUsernameLayout.setAlpha(isVisible ? 0.6f : 1.0f);
-//        mPasswordEditText.setFocusableInTouchMode(!isVisible);
-//        mPasswordLayout.setAlpha(isVisible ? 0.6f : 1.0f);
-//
-//        if (isVisible) {
-//            mTwoStepEditText.requestFocus();
-//            mTwoStepEditText.setText("");
-//        } else {
-//            mTwoStepEditText.setText("");
-//            mTwoStepEditText.clearFocus();
-//        }
-//    }
-
 
     private void signIn() {
         if (!isUserDataValid()) {
@@ -344,17 +341,26 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
 
         mUsername = EditTextUtils.getText(mUsernameEditText).trim();
         mPassword = EditTextUtils.getText(mPasswordEditText).trim();
-        //mTwoStepCode = EditTextUtils.getText(mTwoStepEditText).trim();
-
-        if (isLeaComLogin()) {
-            startProgress(getString(R.string.connecting_wpcom));
-            //signInAndFetchBlogListWPCom();
-            signInLeanote();
+        if (mSelfHosted) {
+            mHostUrl = EditTextUtils.getText(mUrlEditText).trim();
         }
+
+
+        startProgress(getString(R.string.connecting_wpcom));
+        signInServer();
+
     }
 
-    private void signInLeanote() {
-        LoginLeanote login = new LoginLeanote(mUsername, mPassword);
+    private void signInServer() {
+        LoginAbstract login;
+
+        AppLog.i("isself:" + mSelfHosted);
+        if (mSelfHosted) {
+            login = new LoginSelfHost(mUsername, mPassword, mHostUrl);
+        } else {
+            login = new LoginLeanote(mUsername, mPassword);
+        }
+
         login.execute(new LoginAbstract.Callback() {
             @Override
             public void onSuccess() {
@@ -528,6 +534,7 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
     protected boolean isUserDataValid() {
         final String username = EditTextUtils.getText(mUsernameEditText).trim();
         final String password = EditTextUtils.getText(mPasswordEditText).trim();
+
         boolean retValue = true;
 
         if (username.equals("")) {
@@ -546,6 +553,14 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
             mPasswordEditText.setError(getString(R.string.pwd_size_alert));
             mPasswordEditText.requestFocus();
             retValue = false;
+        }
+
+        if (mSelfHosted) {
+            final String host = EditTextUtils.getText(mUrlEditText).trim();
+            if (TextUtils.isEmpty(host)) {
+                mUrlEditText.requestFocus();
+                retValue = false;
+            }
         }
 
         return retValue;
