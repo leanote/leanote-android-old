@@ -14,18 +14,16 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.LeaMainActivity;
+import com.leanote.android.ui.note.service.NoteEvents;
+import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.ui.post.PostAdapter;
-import com.leanote.android.util.CoreEvents;
 import com.leanote.android.util.SwipeToRefreshHelper;
 import com.leanote.android.widget.CustomSwipeRefreshLayout;
 import com.leanote.android.widget.RecyclerItemDecoration;
-
-import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -44,8 +42,11 @@ public class PostFragment extends Fragment
     private SwipeToRefreshHelper mSwipeToRefreshHelper;
     private PostAdapter mNoteListAdapter;
 
+    private ImageView mEmptyViewImage;
 
-    private ImageView mEmptyViewImage;public static PostFragment newInstance() {
+    private boolean mIsFetchingPosts;
+
+    public static PostFragment newInstance() {
         return new PostFragment();
     }
 
@@ -60,6 +61,7 @@ public class PostFragment extends Fragment
         super.onPause();
 
     }
+
     public PostAdapter getNoteListAdapter() {
         if (mNoteListAdapter == null) {
             mNoteListAdapter = new PostAdapter(getActivity());
@@ -116,6 +118,9 @@ public class PostFragment extends Fragment
     private void showSitePicker() {
     }
 
+    private void setRefreshing(boolean refreshing) {
+        mSwipeToRefreshHelper.setRefreshing(refreshing);
+    }
 
     private void initSwipeToRefreshHelper() {
         mSwipeToRefreshHelper = new SwipeToRefreshHelper(
@@ -124,9 +129,35 @@ public class PostFragment extends Fragment
                 new SwipeToRefreshHelper.RefreshListener() {
                     @Override
                     public void onRefreshStarted() {
+                        if (!isAdded()) {
+                            return;
+                        }
+                        if (!NetworkUtils.checkConnection(getActivity())) {
+                            setRefreshing(false);
+                            updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
+                            return;
+                        }
+                        //该方法拉取笔记后存在本地的db中，然后通过EventBus通知AsyncTask加载到页面中
+                        requestPosts();
 
                     }
                 });
+    }
+
+    private void requestPosts() {
+        if (!isAdded() || mIsFetchingPosts) {
+            return;
+        }
+
+        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+            updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
+            return;
+        }
+
+        mIsFetchingPosts = true;
+
+        NoteUpdateService.startServiceForNote(getActivity());
+
     }
 
     @Override
@@ -171,12 +202,38 @@ public class PostFragment extends Fragment
     }
 
 
+    private void hideLoadMoreProgress() {
+        if (mProgressLoadMore != null) {
+            mProgressLoadMore.setVisibility(View.GONE);
+        }
+    }
 
 
-
-    //unused
-    public void onEventMainThread(CoreEvents.MainViewPagerScrolled event) {
-        mFabView.setTranslationY(mFabTargetYTranslation * event.mXOffset);
+    @SuppressWarnings("unused")
+    public void onEventMainThread(NoteEvents.RequestNotes event) {
+        Log.i("listen load note", ".....");
+        mIsFetchingPosts = false;
+        if (isAdded()) {
+            setRefreshing(false);
+            hideLoadMoreProgress();
+            Log.i("is fail:", String.valueOf(event.getFailed()));
+            if (!event.getFailed()) {
+                loadNotes();
+            } else {
+//                ApiHelper.ErrorType errorType = event.getErrorType();
+//                if (errorType != null && errorType != ErrorType.TASK_CANCELLED && errorType != ErrorType.NO_ERROR) {
+//                    switch (errorType) {
+//                        case UNAUTHORIZED:
+//                            updateEmptyView(EmptyViewMessageType.PERMISSION_ERROR);
+//                            break;
+//                        default:
+//                            updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
+//                            break;
+//                    }
+//                }
+                updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
+            }
+        }
     }
 
     private boolean isPostAdapterEmpty() {
