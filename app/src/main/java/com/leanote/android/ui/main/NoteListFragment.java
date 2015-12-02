@@ -131,6 +131,7 @@ public class NoteListFragment extends Fragment
             mNoteListAdapter.setOnPostsLoadedListener(this);
             mNoteListAdapter.setOnPostSelectedListener(this);
             mNoteListAdapter.setOnPostButtonClickListener(this);
+
         }
 
         return mNoteListAdapter;
