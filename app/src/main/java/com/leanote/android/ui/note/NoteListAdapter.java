@@ -89,7 +89,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position <= mNotes.size());
+        return (position >= 0 && position <= mNotes.size()-1);  //modify
     }
 
     @Override
@@ -165,7 +165,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NoteDetail selectedNote = getItem(position - 1);
+                Log.i("notewe", position+"");
+                NoteDetail selectedNote = getItem(position);    //or position -1
                 if (mOnPostSelectedListener != null && selectedNote != null) {
                     mOnPostSelectedListener.onPostSelected(selectedNote);
                 }

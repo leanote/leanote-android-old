@@ -534,6 +534,48 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
     }
 
+    public List<String> getNoteisBlogIds() {
+        String[] st = {"title"};
+//        Cursor c = db.query(NOTES_TABLE, null, null , null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, st , "isBlog=1", null, null, null, "");
+        List<String> notebookIds = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+
+                notebookIds.add(c.getString(0));
+            }
+            return notebookIds;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
+    public NoteDetailList getNoteisBlogList(String userId) {
+        NoteDetailList listPosts = new NoteDetailList();
+
+        String[] st = {"title"};
+        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, "isBlog=1", null, null, null, "");
+        try {
+            while (c.moveToNext()) {
+                String title = c.getString(4);
+                String updateTime = c.getString(12);
+                NoteDetail detail = new NoteDetail();
+
+                detail.setId(c.getLong(0));
+                detail.setNoteId(c.getString(1));
+                detail.setTitle(title);
+                detail.setContent(c.getString(6));
+                //detail.setContent(getNoteContentByNoteId(c.getString(1)));
+                detail.setUpdatedTime(updateTime);
+                listPosts.add(detail);
+            }
+            return listPosts;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
     public List<NotebookInfo> getNotebookList() {
         Cursor c = db.query(NOTEBOOKS_TABLE, null, null, null, null, null, "");
         List<NotebookInfo> notebooks = new ArrayList<>();

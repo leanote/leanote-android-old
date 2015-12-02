@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
-import com.leanote.android.R;
+
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
@@ -33,6 +33,7 @@ import com.leanote.android.util.ToggleListener;
 import com.leanote.android.widget.LeaNetworkImageView;
 
 import java.lang.ref.WeakReference;
+import com.leanote.android.R;
 
 public class MeFragment extends Fragment {
 
@@ -94,6 +95,7 @@ public class MeFragment extends Fragment {
     }
 
 
+
     private void setListeners() {
 
         switch_markdown.setOnCheckedChangeListener(new ToggleListener(getActivity(),
@@ -112,6 +114,7 @@ public class MeFragment extends Fragment {
         markdown_editor_setting.setOnClickListener(clickToToggleListener);
 
     }
+
 
     private void initSettingsFields() {
         boolean isMarkdown = AccountHelper.getDefaultAccount().isUseMarkdown();

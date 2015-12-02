@@ -115,6 +115,7 @@
     <string name="title_activity_edit_note">EditNoteActivity</string>
     <string name="untitled">Untitled</string>
     <string name="new_note">new note</string>
+    <string name="button_visit_blog">Visit Blog </string>
 
 
     <!-- editor-->
