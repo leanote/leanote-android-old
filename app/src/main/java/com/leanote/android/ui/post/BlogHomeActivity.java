@@ -2,17 +2,24 @@ package com.leanote.android.ui.post;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class BlogHomeActivity extends AppCompatActivity {
+import com.leanote.android.model.AccountHelper;
 
+public class BlogHomeActivity extends AppCompatActivity {
+    String userid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
-        //setContentView(R.layout.activity_blog_home);
+
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         WebView webview = new WebView(this);
 
         webview.setWebViewClient(new WebViewClient() {
@@ -26,7 +33,9 @@ public class BlogHomeActivity extends AppCompatActivity {
         });
 
         webview.getSettings().setJavaScriptEnabled(true);
-        webview.loadUrl("http://www.google.com");
+        userid = AccountHelper.getDefaultAccount().getmUserName();
+        Log.i("userid",userid);
+        webview.loadUrl("http://blog.leanote.com/"+userid);
         setContentView(webview);
     }
 }
