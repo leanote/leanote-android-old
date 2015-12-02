@@ -18,6 +18,7 @@ import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
 import com.leanote.android.ui.post.BlogHomeActivity;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.ui.WebViewActivity;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;

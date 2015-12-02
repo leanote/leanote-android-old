@@ -341,6 +341,23 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="LeanoteNoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="colorControlActivated">@color/color_control_activated</item>
+        <item name="colorControlHighlight">@color/color_control_highlight</item>
 
+        <item name="android:windowBackground">@color/grey_lighten_30</item>
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_leanote</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Leanote</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Leanote</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Leanote</item>
+        <item name="android:actionModeBackground">@color/color_primary_dark</item>
+        <item name="android:actionBarTabTextStyle">@style/TabTextStyle.Leanote</item>
+        <item name="android:actionBarTabBarStyle">@style/TabBarStyle.Leanote</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
 
 </resources>
