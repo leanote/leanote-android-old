@@ -17,8 +17,10 @@ import android.widget.TextView;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.networking.NetworkUtils;
+import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.LeaMainActivity;
+import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.ui.post.PostAdapter;
 import com.leanote.android.util.CoreEvents;
 import com.leanote.android.util.SwipeToRefreshHelper;
@@ -30,7 +32,8 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 public class PostFragment extends Fragment
-            implements LeaMainActivity.OnScrollToTopListener {
+            implements LeaMainActivity.OnScrollToTopListener,
+            PostAdapter.OnVisitBlogClickListener{
 
 
     private View mFabView;
@@ -43,6 +46,7 @@ public class PostFragment extends Fragment
     private TextView mEmptyViewTitle;
     private SwipeToRefreshHelper mSwipeToRefreshHelper;
     private PostAdapter mNoteListAdapter;
+    private boolean mIsFetchingPostList;
 
 
     private ImageView mEmptyViewImage;public static PostFragment newInstance() {
@@ -63,6 +67,7 @@ public class PostFragment extends Fragment
     public PostAdapter getNoteListAdapter() {
         if (mNoteListAdapter == null) {
             mNoteListAdapter = new PostAdapter(getActivity());
+            mNoteListAdapter.setOnVisitBlogClickListener((PostAdapter.OnVisitBlogClickListener) this);
         }
         return mNoteListAdapter;
     }
@@ -124,9 +129,38 @@ public class PostFragment extends Fragment
                 new SwipeToRefreshHelper.RefreshListener() {
                     @Override
                     public void onRefreshStarted() {
-
+                        if (!isAdded()) {
+                            return;
+                        }
+                        if (!NetworkUtils.checkConnection(getActivity())) {
+                            setRefreshing(false);
+                            updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
+                            return;
+                        }
+                        //该方法拉取笔记后存在本地的db中，然后通过EventBus通知AsyncTask加载到页面中
+                        requestNotes();
                     }
                 });
+    }
+
+    private void setRefreshing(boolean refreshing) {
+        mSwipeToRefreshHelper.setRefreshing(refreshing);
+    }
+
+    private void requestNotes() {
+        if (!isAdded() || mIsFetchingPostList) {
+            return;
+        }
+
+        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+            updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
+            return;
+        }
+
+        mIsFetchingPostList = true;
+
+        NoteUpdateService.startServiceForNote(getActivity());
+
     }
 
     @Override
@@ -205,4 +239,8 @@ public class PostFragment extends Fragment
         mEmptyView.setVisibility(isPostAdapterEmpty() ? View.VISIBLE : View.GONE);
     }
 
+    @Override
+    public void onVisitBlogButtonClicked() {
+        ActivityLauncher.visitBlog(getActivity());
+    }
 }
