@@ -16,9 +16,12 @@ import android.widget.TextView;
 
 import com.leanote.android.R;
 import com.leanote.android.networking.NetworkUtils;
+import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.LeaMainActivity;
+
 import com.leanote.android.ui.note.service.NoteEvents;
+
 import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.ui.post.PostAdapter;
 import com.leanote.android.util.SwipeToRefreshHelper;
@@ -28,7 +31,8 @@ import com.leanote.android.widget.RecyclerItemDecoration;
 import de.greenrobot.event.EventBus;
 
 public class PostFragment extends Fragment
-            implements LeaMainActivity.OnScrollToTopListener {
+            implements LeaMainActivity.OnScrollToTopListener,
+            PostAdapter.OnVisitBlogClickListener{
 
 
     private View mFabView;
@@ -41,6 +45,7 @@ public class PostFragment extends Fragment
     private TextView mEmptyViewTitle;
     private SwipeToRefreshHelper mSwipeToRefreshHelper;
     private PostAdapter mNoteListAdapter;
+    private boolean mIsFetchingPostList;
 
     private ImageView mEmptyViewImage;
 
@@ -65,6 +70,7 @@ public class PostFragment extends Fragment
     public PostAdapter getNoteListAdapter() {
         if (mNoteListAdapter == null) {
             mNoteListAdapter = new PostAdapter(getActivity());
+            mNoteListAdapter.setOnVisitBlogClickListener((PostAdapter.OnVisitBlogClickListener) this);
         }
         return mNoteListAdapter;
     }
@@ -138,14 +144,18 @@ public class PostFragment extends Fragment
                             return;
                         }
                         //该方法拉取笔记后存在本地的db中，然后通过EventBus通知AsyncTask加载到页面中
+
                         requestPosts();
+
 
                     }
                 });
     }
 
+
     private void requestPosts() {
         if (!isAdded() || mIsFetchingPosts) {
+
             return;
         }
 
@@ -154,7 +164,9 @@ public class PostFragment extends Fragment
             return;
         }
 
+
         mIsFetchingPosts = true;
+
 
         NoteUpdateService.startServiceForNote(getActivity());
 
@@ -262,4 +274,8 @@ public class PostFragment extends Fragment
         mEmptyView.setVisibility(isPostAdapterEmpty() ? View.VISIBLE : View.GONE);
     }
 
+    @Override
+    public void onVisitBlogButtonClicked() {
+        ActivityLauncher.visitBlog(getActivity());
+    }
 }

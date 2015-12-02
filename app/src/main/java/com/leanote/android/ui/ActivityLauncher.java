@@ -16,6 +16,7 @@ import com.leanote.android.ui.accounts.NewAccountActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
+import com.leanote.android.ui.post.BlogHomeActivity;
 import com.leanote.android.util.AppLog;
 
 import java.io.IOException;
@@ -125,5 +126,10 @@ public class ActivityLauncher {
                 R.anim.activity_slide_in_from_right,
                 R.anim.do_nothing);
         ActivityCompat.startActivityForResult(activity, intent, requestCode, options.toBundle());
+    }
+
+    public static void visitBlog(Activity activity){
+        Intent intent = new Intent(activity,BlogHomeActivity.class);
+        activity.startActivity(intent);
     }
 }

@@ -1,6 +1,9 @@
 package com.leanote.android.ui.post;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -8,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.leanote.android.Leanote;
@@ -31,6 +35,12 @@ import java.util.List;
  * Created by yun on 11/23/15.
  */
 public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    public interface OnVisitBlogClickListener {
+        void onVisitBlogButtonClicked();
+    }
+
+    private OnVisitBlogClickListener mOnVisitBlogClickListener;
 
     private final LayoutInflater mLayoutInflater;
     private final int mPhotonWidth;
@@ -63,6 +73,10 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mEndlistIndicatorHeight = DisplayUtils.dpToPx(context, 74);
         // on larger displays we can always show all buttons
         mAlwaysShowAllButtons = (displayWidth >= 1080);
+    }
+
+    public void setOnVisitBlogClickListener(OnVisitBlogClickListener listener) {
+        mOnVisitBlogClickListener = listener;
     }
 
     @Override
@@ -133,7 +147,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return;
         }
 
-        final NoteDetail note = mNotes.get(position-2);  //not clear
+        final NoteDetail note = mNotes.get(position - 2);  //not clear
         Log.i("note", note.toString());
         Context context = holder.itemView.getContext();
 
@@ -275,15 +289,22 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             super(view);
             btnView = (PostListButton) view.findViewById(R.id.btn_visit_blog);
             btnView.setVisibility(View.VISIBLE);
-            View.OnClickListener btnClickListener = new View.OnClickListener() {
+            View.OnClickListener viewBlogClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     // handle back/more here, pass other actions to activity/fragment
+//                    context =
+//                    Intent intent = new Intent();
+//                    intent.setClass(context,BlogHomeActivity.class);
+//                    context.startActivity(intent);
 
+                    mOnVisitBlogClickListener.onVisitBlogButtonClicked();
                 }
             };
-            btnView.setOnClickListener(btnClickListener);
+            btnView.setOnClickListener(viewBlogClickListener);
 
         }
     }
+
+
 }

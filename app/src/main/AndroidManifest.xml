@@ -99,7 +99,7 @@
         <activity
             android:name=".ui.note.NotePreviewActivity"
             android:label="@string/title_activity_note_preview"
-            android:theme="@style/AppTheme4Preview">
+            android:theme="@style/AppTheme4Preview" >
         </activity>
 
         <service
@@ -107,6 +107,9 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
+        <activity android:name=".ui.post.BlogHomeActivity" >
+        </activity>
     </application>
 
 </manifest>
