@@ -109,7 +109,9 @@
             android:exported="true" >
         </service>
 
-        <activity android:name=".ui.post.BlogHomeActivity" >
+        <activity
+            android:name=".ui.post.BlogHomeActivity"
+            android:theme="@style/LeanoteNoActionBarTheme">
         </activity>
     </application>
 
