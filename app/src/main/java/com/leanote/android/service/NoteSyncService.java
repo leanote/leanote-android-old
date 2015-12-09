@@ -25,16 +25,19 @@ import java.util.concurrent.ExecutionException;
  */
 public class NoteSyncService {
 
-    private static final int MAX_SYNC_SIZE = 10;
+    private static final int MAX_SYNC_SIZE = 20;
 
     private static OnNotebooksSyncListener notebooksSyncListener;
 
-    public static void syncNote() {
+
+    public static void syncPullNote() {
         int lastSyncUsn = AccountHelper.getDefaultAccount().getLastSyncUsn();
 
         int serverUsn = getServerSyncState();
 
         boolean ifNeedSync = lastSyncUsn < serverUsn;
+
+        AppLog.i("needsync:[localsync:" + lastSyncUsn + ", serverUsn:" + serverUsn + "]");
         if (ifNeedSync) {
             String host = AccountHelper.getDefaultAccount().getHost();
 
@@ -47,6 +50,12 @@ public class NoteSyncService {
                     host, AccountHelper.getDefaultAccount().getmAccessToken(), MAX_SYNC_SIZE);
 
             getSyncNotebook(notebookApi, lastSyncUsn);
+
+            if (Leanote.isFirstSync()) {
+                //第一次全量pull笔记时才更新user usn
+                Leanote.leaDB.updateAccountUsn(serverUsn);
+                Leanote.setIsFirstSync(false);
+            }
         }
 
     }
@@ -67,7 +76,7 @@ public class NoteSyncService {
 
                 String response = NetworkRequest.syncGetRequest(notebookApi);
                 JSONArray jsonArray = new JSONArray(response);
-                AppLog.i("notebook response:" + response);
+
                 updateNotebookToLocal(jsonArray, localNotebookIds);
 
                 if (jsonArray.length() == MAX_SYNC_SIZE) {
@@ -146,13 +155,61 @@ public class NoteSyncService {
             JSONObject json = new JSONObject(response);
             AppLog.i("sync state:" + json);
             int serverUsn = json.getInt("LastSyncUsn");
-            Leanote.leaDB.updateUsn(AccountHelper.getDefaultAccount().getmUserId(), serverUsn);
+
             return serverUsn;
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
         }
 
+    }
+
+
+    public static NoteDetail getServerNote(String noteId) {
+        String api = String.format("%s/api/note/getNoteAndContent?token=%s&noteId=%s",
+                AccountHelper.getDefaultAccount().getHost(),
+                AccountHelper.getDefaultAccount().getmAccessToken(),
+                noteId);
+
+        NoteDetail note = new NoteDetail();
+
+        try {
+            String response = NetworkRequest.syncGetRequest(api);
+            JSONObject json = new JSONObject(response);
+
+            note.setNoteId(json.getString("NoteId"));
+            note.setNoteBookId(json.getString("NotebookId"));
+            note.setUserId(json.getString("UserId"));
+            note.setTitle(json.getString("Title"));
+            note.setDesc(json.getString("Desc"));
+
+            String tags = json.getString("Tags").replaceAll("[\\[\\]]", "");
+            AppLog.i("server tags:" + tags);
+            note.setTags(tags);
+            note.setNoteAbstract(json.getString("Abstract"));
+            note.setContent(json.getString("Content"));
+            note.setIsMarkDown(json.getBoolean("IsMarkdown"));
+            note.setIsPublicBlog(json.getBoolean("IsBlog"));
+            note.setIsTrash(json.getBoolean("IsTrash"));
+            note.setIsDeleted(json.getBoolean("IsDeleted"));
+            note.setUsn(json.getInt("Usn"));
+            AppLog.i("conflict, usn:" + json.getInt("Usn"));
+
+            JSONArray fileArray = json.getJSONArray("Files");
+            List<String> fileIdList = new ArrayList<>();
+            for (int i = 0; i < fileArray.length(); i++) {
+                JSONObject item = fileArray.getJSONObject(i);
+                fileIdList.add(item.getString("LocalFileId"));
+            }
+            note.setFileIds(StringUtils.join(fileIdList, ","));
+            note.setCreatedTime(json.getString("CreatedTime"));
+            note.setUpdatedTime(json.getString("UpdatedTime"));
+            note.setPublicTime(json.getString("PublicTime"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return note;
     }
 
     public static void getSyncNote(String apiPrefix, int lastSyncUsn) {
@@ -189,61 +246,105 @@ public class NoteSyncService {
 
     }
 
+
+    public static boolean pushNoteChanges(NoteDetail note, boolean isNew) {
+        if (!note.isDirty()) {
+            return true;
+        }
+
+        String api;
+        if (isNew) {
+            api = String.format("%s/note/addNote");
+        }
+        return false;
+    }
+
     private static void updateNoteToLocal(JSONArray jsonArray, List<String> localNoteIds) throws Exception {
         NoteDetailList syncNotes = new NoteDetailList();
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject item = jsonArray.getJSONObject(i);
 
-            boolean isDeleted = item.getBoolean("IsDeleted");
-            String noteId = item.getString("NoteId");
-            if (isDeleted) {
-                Leanote.leaDB.deleteNote(noteId);
-                continue;
-            }
-
-            NoteDetail serverNote = new NoteDetail();
-
-            serverNote.setNoteId(noteId);
-            serverNote.setNoteBookId(item.getString("NotebookId"));
-            String userId = item.getString("UserId");
-            serverNote.setUserId(userId);
-            serverNote.setTitle(item.getString("Title"));
-
-            if (item.getString("Tags") != null) {
-                //serverNote.setTags(item.getJSONArray("Tags").toString().replaceAll("[\\[\\]]", ""));
-                serverNote.setTags(item.getString("Tags").replaceAll("[\\[\\]]", ""));
-            }
-
-            serverNote.setIsPublicBlog(item.getBoolean("IsBlog"));
-            serverNote.setUpdatedTime(item.getString("UpdatedTime"));
-            serverNote.setUserId(item.getString("UserId"));
-
-            String host = AccountHelper.getDefaultAccount().getHost();
-            String noteContentApi = String.format("%s/api/note/getNoteAndContent?token=%s&noteId=%s", host,
-                    AccountHelper.getDefaultAccount().getmAccessToken(), noteId);
-
-            String contentRes = NetworkRequest.syncGetRequest(noteContentApi);
-            JSONObject json = new JSONObject(contentRes);
-
-            serverNote.setContent(json.getString("Content"));
-            serverNote.setUsn(item.getInt("Usn"));
-
-            if (localNoteIds.contains(noteId)) {
-                if (Leanote.leaDB.getLocalNoteByNoteId(noteId).isDirty()) {
-                    //conflict
-                    AppLog.i("conflict :" + noteId);
-                } else {
-                    //更新本地笔记
-                    Leanote.leaDB.updateNote(serverNote);
-                }
-            } else {
-                //本地新增笔记
-                syncNotes.add(serverNote);
-
+            NoteDetail note = parseServerNote(item, localNoteIds);
+            if (note != null) {
+                syncNotes.add(note);
             }
 
         }
         Leanote.leaDB.saveNotes(syncNotes);
+    }
+
+    public static NoteDetail parseServerNote(JSONObject item, List<String> localNoteIds)
+            throws JSONException, ExecutionException, InterruptedException {
+
+        boolean isDeleted = item.getBoolean("IsDeleted");
+        boolean isTrash = item.getBoolean("IsTrash");
+        String noteId = item.getString("NoteId");
+        if (isDeleted) {
+            Leanote.leaDB.deleteNoteByNoteId(noteId);
+            return null;
+        } else if (isTrash) {
+            return null;
+        }
+
+        NoteDetail serverNote = new NoteDetail();
+
+        serverNote.setNoteId(noteId);
+        serverNote.setNoteBookId(item.getString("NotebookId"));
+        String userId = item.getString("UserId");
+        serverNote.setUserId(userId);
+        serverNote.setTitle(item.getString("Title"));
+        serverNote.setCreatedTime(item.getString("CreatedTime"));
+        serverNote.setIsMarkDown(item.getBoolean("IsMarkdown"));
+
+        if (!TextUtils.isEmpty(item.getString("Tags"))) {
+            AppLog.i("server tags:" + item.getString("Tags"));
+            serverNote.setTags(item.getString("Tags").toString().replaceAll("[\\[\\]]", ""));
+        } else {
+            serverNote.setTags("");
+        }
+
+        serverNote.setIsPublicBlog(item.getBoolean("IsBlog"));
+        serverNote.setUpdatedTime(item.getString("UpdatedTime"));
+        serverNote.setPublicTime(item.getString("PublicTime"));
+        serverNote.setUserId(item.getString("UserId"));
+        serverNote.setDesc(item.getString("Desc"));
+        serverNote.setNoteAbstract(item.getString("Abstract"));
+
+
+        String host = AccountHelper.getDefaultAccount().getHost();
+        String noteContentApi = String.format("%s/api/note/getNoteAndContent?token=%s&noteId=%s", host,
+                AccountHelper.getDefaultAccount().getmAccessToken(), noteId);
+
+        String contentRes = NetworkRequest.syncGetRequest(noteContentApi);
+        JSONObject json = new JSONObject(contentRes);
+
+        serverNote.setContent(json.getString("Content"));
+        serverNote.setUsn(item.getInt("Usn"));
+
+
+
+        if (localNoteIds.contains(noteId)) {
+            if (Leanote.leaDB.getLocalNoteByNoteId(noteId).isDirty()) {
+                //conflict
+                AppLog.i("conflict :" + noteId);
+                serverNote.setTitle(item.getString("Title") + "---push-conflict");
+                return serverNote;
+            } else {
+                //更新本地笔记
+                AppLog.i("update server note to local:");
+                serverNote.setIsDirty(false);
+
+                //Leanote.leaDB.updateNote(serverNote);
+                Leanote.leaDB.updateNoteByNoteId(serverNote);
+            }
+
+        } else {
+            //本地新增笔记
+            AppLog.i("add server note :" + noteId);
+            //syncNotes.add(serverNote);
+            return serverNote;
+        }
+        return null;
     }
 
 

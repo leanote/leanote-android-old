@@ -482,7 +482,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
     }
 
     private LeaEditImageSpan createLeaEditImageSpanRemote(Context context, MediaFile mediaFile) {
-        int drawable = mediaFile.isVideo() ? R.drawable.media_movieclip : R.drawable.legacy_dashicon_format_image_big_grey;
+        int drawable = R.drawable.legacy_dashicon_format_image_big_grey;
         Uri uri = Uri.parse(mediaFile.getFileURL());
         LeaEditImageSpan imageSpan = new LeaEditImageSpan(context, drawable, uri);
         imageSpan.setMediaFile(mediaFile);
@@ -697,113 +697,113 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
                     MediaFile mediaFile = imageSpan.getMediaFile();
                     if (mediaFile == null)
                         return false;
-                    if (!mediaFile.isVideo()) {
-                        LayoutInflater factory = LayoutInflater.from(getActivity());
-                        final View alertView = factory.inflate(R.layout.alert_image_options, null);
-                        if (alertView == null)
-                            return false;
-                        final EditText imageWidthText = (EditText) alertView.findViewById(R.id.imageWidthText);
-                        final EditText titleText = (EditText) alertView.findViewById(R.id.title);
-                        final EditText caption = (EditText) alertView.findViewById(R.id.caption);
-                        final CheckBox featuredCheckBox = (CheckBox) alertView.findViewById(R.id.featuredImage);
-                        final CheckBox featuredInPostCheckBox = (CheckBox) alertView.findViewById(R.id.featuredInPost);
 
-                        // show featured image checkboxes if supported
-                        if (mFeaturedImageSupported) {
-                            featuredCheckBox.setVisibility(View.VISIBLE);
-                            featuredInPostCheckBox.setVisibility(View.VISIBLE);
-                        }
 
-                        featuredCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                            @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                if (isChecked) {
-                                    featuredInPostCheckBox.setVisibility(View.VISIBLE);
-                                } else {
-                                    featuredInPostCheckBox.setVisibility(View.GONE);
-                                }
+                    LayoutInflater factory = LayoutInflater.from(getActivity());
+                    final View alertView = factory.inflate(R.layout.alert_image_options, null);
+                    if (alertView == null)
+                        return false;
+                    final EditText imageWidthText = (EditText) alertView.findViewById(R.id.imageWidthText);
+                    final EditText titleText = (EditText) alertView.findViewById(R.id.title);
+                    final EditText caption = (EditText) alertView.findViewById(R.id.caption);
+                    final CheckBox featuredCheckBox = (CheckBox) alertView.findViewById(R.id.featuredImage);
+                    final CheckBox featuredInPostCheckBox = (CheckBox) alertView.findViewById(R.id.featuredInPost);
 
-                            }
-                        });
-
-                        final SeekBar seekBar = (SeekBar) alertView.findViewById(R.id.imageWidth);
-                        final Spinner alignmentSpinner = (Spinner) alertView.findViewById(R.id.alignment_spinner);
-                        ArrayAdapter<CharSequence> adapter =
-                                ArrayAdapter.createFromResource(getActivity(), R.array.alignment_array,
-                                        android.R.layout.simple_spinner_item);
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        alignmentSpinner.setAdapter(adapter);
-
-                        imageWidthText.setText(String.valueOf(mediaFile.getWidth()) + "px");
-                        seekBar.setProgress(mediaFile.getWidth());
-                        titleText.setText(mediaFile.getTitle());
-                        caption.setText(mediaFile.getCaption());
-                        featuredCheckBox.setChecked(mediaFile.isFeatured());
-
-                        if (mediaFile.isFeatured()) {
-                            featuredInPostCheckBox.setVisibility(View.VISIBLE);
-                        } else {
-                            featuredInPostCheckBox.setVisibility(View.GONE);
-                        }
-
-                        featuredInPostCheckBox.setChecked(mediaFile.isFeaturedInPost());
-
-                        alignmentSpinner.setSelection(mediaFile.getHorizontalAlignment(), true);
-
-                        final int maxWidth = MediaUtils.getMinimumImageWidth(getActivity(),
-                                imageSpan.getImageSource(), mBlogSettingMaxImageWidth);
-                        seekBar.setMax(maxWidth / 10);
-                        if (mediaFile.getWidth() != 0) {
-                            seekBar.setProgress(mediaFile.getWidth() / 10);
-                        }
-                        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                            @Override
-                            public void onStopTrackingTouch(SeekBar seekBar) {
-                            }
-
-                            @Override
-                            public void onStartTrackingTouch(SeekBar seekBar) {
-                            }
-
-                            @Override
-                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                if (progress == 0) {
-                                    progress = 1;
-                                }
-                                imageWidthText.setText(progress * 10 + "px");
-                            }
-                        });
-
-                        imageWidthText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                            @Override
-                            public void onFocusChange(View v, boolean hasFocus) {
-                                if (hasFocus) {
-                                    imageWidthText.setText("");
-                                }
-                            }
-                        });
-
-                        imageWidthText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                            @Override
-                            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                                int width = getEditTextIntegerClamped(imageWidthText, 10, maxWidth);
-                                seekBar.setProgress(width / 10);
-                                imageWidthText.setSelection((String.valueOf(width).length()));
-
-                                InputMethodManager imm = (InputMethodManager) getActivity()
-                                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(imageWidthText.getWindowToken(),
-                                        InputMethodManager.RESULT_UNCHANGED_SHOWN);
-
-                                return true;
-                            }
-                        });
-
-                        showImageSettings(alertView, titleText, caption, imageWidthText, featuredCheckBox,
-                                featuredInPostCheckBox, maxWidth, alignmentSpinner, imageSpan);
-                        mScrollDetected = false;
-                        return true;
+                    // show featured image checkboxes if supported
+                    if (mFeaturedImageSupported) {
+                        featuredCheckBox.setVisibility(View.VISIBLE);
+                        featuredInPostCheckBox.setVisibility(View.VISIBLE);
                     }
+
+                    featuredCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked) {
+                                featuredInPostCheckBox.setVisibility(View.VISIBLE);
+                            } else {
+                                featuredInPostCheckBox.setVisibility(View.GONE);
+                            }
+
+                        }
+                    });
+
+                    final SeekBar seekBar = (SeekBar) alertView.findViewById(R.id.imageWidth);
+                    final Spinner alignmentSpinner = (Spinner) alertView.findViewById(R.id.alignment_spinner);
+                    ArrayAdapter<CharSequence> adapter =
+                            ArrayAdapter.createFromResource(getActivity(), R.array.alignment_array,
+                                    android.R.layout.simple_spinner_item);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    alignmentSpinner.setAdapter(adapter);
+
+                    imageWidthText.setText(String.valueOf(mediaFile.getWidth()) + "px");
+                    seekBar.setProgress(mediaFile.getWidth());
+                    titleText.setText(mediaFile.getTitle());
+                    caption.setText(mediaFile.getCaption());
+                    featuredCheckBox.setChecked(mediaFile.isFeatured());
+
+                    if (mediaFile.isFeatured()) {
+                        featuredInPostCheckBox.setVisibility(View.VISIBLE);
+                    } else {
+                        featuredInPostCheckBox.setVisibility(View.GONE);
+                    }
+
+                    featuredInPostCheckBox.setChecked(mediaFile.isFeaturedInPost());
+
+                    alignmentSpinner.setSelection(mediaFile.getHorizontalAlignment(), true);
+
+                    final int maxWidth = MediaUtils.getMinimumImageWidth(getActivity(),
+                            imageSpan.getImageSource(), mBlogSettingMaxImageWidth);
+                    seekBar.setMax(maxWidth / 10);
+                    if (mediaFile.getWidth() != 0) {
+                        seekBar.setProgress(mediaFile.getWidth() / 10);
+                    }
+                    seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            if (progress == 0) {
+                                progress = 1;
+                            }
+                            imageWidthText.setText(progress * 10 + "px");
+                        }
+                    });
+
+                    imageWidthText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                        @Override
+                        public void onFocusChange(View v, boolean hasFocus) {
+                            if (hasFocus) {
+                                imageWidthText.setText("");
+                            }
+                        }
+                    });
+
+                    imageWidthText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                        @Override
+                        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                            int width = getEditTextIntegerClamped(imageWidthText, 10, maxWidth);
+                            seekBar.setProgress(width / 10);
+                            imageWidthText.setSelection((String.valueOf(width).length()));
+
+                            InputMethodManager imm = (InputMethodManager) getActivity()
+                                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(imageWidthText.getWindowToken(),
+                                    InputMethodManager.RESULT_UNCHANGED_SHOWN);
+
+                            return true;
+                        }
+                    });
+
+                    showImageSettings(alertView, titleText, caption, imageWidthText, featuredCheckBox,
+                            featuredInPostCheckBox, maxWidth, alignmentSpinner, imageSpan);
+                    mScrollDetected = false;
+                    return true;
 
                 } else {
                     mContentEditText.setMovementMethod(ArrowKeyMovementMethod.getInstance());

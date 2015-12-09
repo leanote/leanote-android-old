@@ -1,7 +1,9 @@
 package com.leanote.android.util;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.net.http.SslError;
+import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
@@ -9,13 +11,16 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.leanote.android.Leanote;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.networking.SelfSignedSSLCertsManager;
 
+import org.bson.types.ObjectId;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 
 /**
@@ -23,22 +28,31 @@ import java.security.GeneralSecurityException;
  */
 public class LeaWebViewClient extends WebViewClient {
 
-    private String mToken;
+
+    private OnImageLoadListener imageLoadedListener;
+
+    public void setImageLoadedListener(OnImageLoadListener imageLoadedListener) {
+        this.imageLoadedListener = imageLoadedListener;
+    }
 
     public LeaWebViewClient() {
         super();
-        mToken = AccountHelper.getDefaultAccount().getmAccessToken();
     }
+
+
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         // Found a bug on some pages where there is an incorrect
         // auto-redirect to file:///android_asset/webkit/.
+        AppLog.i("enter shouldoverrideurl...");
         if (!url.equals("file:///android_asset/webkit/")) {
             view.loadUrl(url);
         }
+
         return true;
     }
+
 
     @Override
     public void onPageFinished(WebView view, String url) {
@@ -47,6 +61,7 @@ public class LeaWebViewClient extends WebViewClient {
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
+
     }
 
     @Override
@@ -85,27 +100,78 @@ public class LeaWebViewClient extends WebViewClient {
     }
 
     @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, String stringUrl) {
-        // Intercept requests for private images and add the WP.com authorization header
-        if (!TextUtils.isEmpty(mToken) && UrlUtils.isImageUrl(stringUrl)) {
-            try {
-                URL url = new URL(stringUrl);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", "Bearer " + mToken);
-//                urlConnection.setReadTimeout(WPRestClient.REST_TIMEOUT_MS);
-//                urlConnection.setConnectTimeout(WPRestClient.REST_TIMEOUT_MS);
-                WebResourceResponse response = new WebResourceResponse(urlConnection.getContentType(),
-                        urlConnection.getContentEncoding(),
-                        urlConnection.getInputStream());
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+
+        WebResourceResponse response = null;
+        if (url.indexOf("api/file/getImage") > 0 || url.indexOf("file/outputImage") > 0) {
+            //处理图片逻辑
+            MediaFile mf = Leanote.leaDB.getMediaFileByUrl(url);
+            if (mf != null && !TextUtils.isEmpty(mf.getFilePath())) {
+                AppLog.i("image from cache");
+                FileInputStream stream = null;
+
+                try {
+                    stream = new FileInputStream(mf.getFilePath());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                String mimeType = MediaUtils.getMediaFileMimeType(new File(mf.getFilePath()));
+                response = new WebResourceResponse(mimeType, "UTF-8", stream);
                 return response;
-            } catch (ClassCastException e) {
-                AppLog.e(AppLog.T.POSTS, "Invalid connection type - URL: " + stringUrl);
-            } catch (MalformedURLException e) {
-                AppLog.e(AppLog.T.POSTS, "Malformed URL: " + stringUrl);
-            } catch (IOException e) {
-                AppLog.e(AppLog.T.POSTS, "Invalid post detail request: " + e.getMessage());
+            } else {
+                //本地不存在，从api中下载图片
+                new DownloadMediaTask(url).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Uri.parse(url));
             }
+
         }
-        return super.shouldInterceptRequest(view, stringUrl);
+
+        return super.shouldInterceptRequest(view, url);
+    }
+
+    private class DownloadMediaTask extends AsyncTask<Uri, Integer, Uri> {
+
+        private String url;
+
+        public DownloadMediaTask(String url) {
+            this.url = url;
+        }
+
+        @Override
+        protected Uri doInBackground(Uri... uris) {
+            Uri imageUri = uris[0];
+
+            if (imageUri.toString().indexOf("file/outputImage") > 0) {
+                //换成api地址下载
+                String imageApi = imageUri.toString().replace("file/outputImage", "api/file/getImage");
+                imageUri = Uri.parse(imageApi);
+            }
+
+            //下载图片带上token
+            if (imageUri.toString().indexOf("token=") < 0) {
+                imageUri = Uri.parse(imageUri.toString() + "&token=" + AccountHelper.getDefaultAccount().getmAccessToken());
+            }
+            AppLog.i("download image:" + imageUri);
+            return MediaUtils.downloadExternalMedia(Leanote.getContext(), imageUri);
+        }
+
+        @Override
+        protected void onPostExecute(Uri uri) {
+            super.onPostExecute(uri);
+            MediaFile mf = new MediaFile();
+            mf.setId(new ObjectId().toString());
+            String filePath = uri.toString().replace("file://", "");
+            mf.setFilePath(filePath);
+            mf.setFileURL(url);
+            Leanote.leaDB.saveMediaFile(mf);
+
+            imageLoadedListener.onImageLoaded(mf.getId());
+        }
+    }
+
+    public interface OnImageLoadListener {
+
+        void onImageLoaded(String localFileId);
+
     }
 }

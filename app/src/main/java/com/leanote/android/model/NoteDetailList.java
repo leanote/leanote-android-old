@@ -30,7 +30,7 @@ public class NoteDetailList extends ArrayList<NoteDetail> {
             return -1;
         }
         for (int i = 0; i < size(); i++) {
-            if (this.get(i).getNoteId().equals(note.getNoteId())) {
+            if (this.get(i).getId() == note.getId()) {
                 return i;
             }
         }

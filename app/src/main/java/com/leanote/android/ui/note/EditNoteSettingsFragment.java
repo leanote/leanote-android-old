@@ -151,7 +151,7 @@ public class EditNoteSettingsFragment extends Fragment
 
         String tags = mNote.getTags();
 
-        if (StringUtils.isNotEmpty(tags)) {
+        if (StringUtils.isNotEmpty(tags) && "null".equals(tags)) {
             mTagsEditText.setText(tags);
         }
     }
@@ -203,7 +203,7 @@ public class EditNoteSettingsFragment extends Fragment
 
 
         String tags = EditTextUtils.getText(mTagsEditText);
-
+        AppLog.i("setting tags:" + tags);
 
         mNote.setIsPublicBlog(togglePublicBlog.isChecked());
         mNote.setTags(tags);
@@ -213,7 +213,7 @@ public class EditNoteSettingsFragment extends Fragment
         mNote.setNoteBookId(notebook.getNotebookId());
 
         Leanote.leaDB.saveNoteSettings(mNote);
-        ((EditNoteActivity)getActivity()).reloadNote();
+        //((EditNoteActivity)getActivity()).reloadNote();
     }
 
 

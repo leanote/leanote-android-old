@@ -165,6 +165,14 @@
 
     </style>
 
+    <style name="Leanote.NUXFlatButton">
+        <item name="android:textColor">@drawable/nux_flat_button_text_selector</item>
+        <item name="android:background">@drawable/nux_flat_button_selector</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+
     <style name="Leanote.NUXWhiteButtonNoBg">
         <!--<item name="android:textColor">@drawable/nux_white_button_nobg_selector</item>-->
         <item name="android:padding">8dp</item>

@@ -13,15 +13,16 @@ import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.SqlUtils;
-import com.leanote.android.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LeanoteDB extends SQLiteOpenHelper {
 
+    public static final String COLUMN_NAME_ID                    = "id";
     public static final String COLUMN_NAME_NOTE_ID               = "noteID";
     public static final String COLUMN_NAME_FILE_PATH             = "filePath";
     public static final String COLUMN_NAME_FILE_NAME             = "fileName";
@@ -32,15 +33,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_WIDTH                 = "width";
     public static final String COLUMN_NAME_HEIGHT                = "height";
     public static final String COLUMN_NAME_MIME_TYPE             = "mimeType";
-    public static final String COLUMN_NAME_FEATURED              = "featured";
-    public static final String COLUMN_NAME_IS_VIDEO              = "isVideo";
-    public static final String COLUMN_NAME_IS_FEATURED_IN_POST   = "isFeaturedInPost";
     public static final String COLUMN_NAME_FILE_URL              = "fileURL";
     public static final String COLUMN_NAME_THUMBNAIL_URL         = "thumbnailURL";
     public static final String COLUMN_NAME_MEDIA_ID              = "mediaId";
-    public static final String COLUMN_NAME_BLOG_ID               = "blogId";
-    public static final String COLUMN_NAME_DATE_CREATED_GMT      = "date_created_gmt";
-    public static final String COLUMN_NAME_VIDEO_PRESS_SHORTCODE = "videoPressShortcode";
     public static final String COLUMN_NAME_UPLOAD_STATE          = "uploadState";
     private static final int DATABASE_VERSION = 1;
 
@@ -58,15 +53,15 @@ public class LeanoteDB extends SQLiteOpenHelper {
             + "isMarkDown integer default 0,"
             + "isBlog integer default 0,"
             + "isTrash integer default 0,"
-            + "isDirty integer default 0,"
             + "files text default '',"
             + "createdTime text default '',"
             + "updatedTime text default '',"
             + "publicTime text default '',"
-            + "usn  integer,"
+            + "usn  integer default 0,"
             + "desc text default '',"
             + "note_abstract default '',"
-            + "is_dirty integer default 0)";
+            + "is_dirty integer default 0,"
+            + "isUploading integer default 0)";
 
 //    private static final String CREATE_TABLE_NOTE_CONTENT =
 //            "create table if not exists note_content ("
@@ -93,14 +88,25 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
     private static final String NOTES_TABLE = "notes";
 
+    private static final String ACCOUNTS_TABLE = "accounts";
+
     private static final String NOTEBOOKS_TABLE = "notebooks";
 
     //private static final String NOTE_CONTENT_TABLE = "note_content";
 
     private static final String MEDIA_TABLE = "media";
 
-    private static final String CREATE_TABLE_MEDIA = "create table if not exists media (id integer primary key autoincrement, "
-            + "noteID text not null, filePath text default '', fileName text default '', title text default '', description text default '', caption text default '', horizontalAlignment integer default 0, width integer default 0, height integer default 0, mimeType text default '', featured boolean default false, isVideo boolean default false);";
+    private static final String CREATE_TABLE_MEDIA = "create table if not exists media "
+            + "(id text primary key, "
+            + "mediaID text default '',"
+            + "noteID text default '', filePath text default '', "
+            + "fileName text default '', title text default '', "
+            + "fileURL text default '',"
+            + "thumbnailURL text default '',"
+            + "uploadState text default '',"
+            + "description text default '', caption text default '', "
+            + "horizontalAlignment integer default 0, width integer default 0, "
+            + "height integer default 0, mimeType text default '');";
 
 
     private SQLiteDatabase db;
@@ -123,7 +129,8 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_NOTES);
         db.execSQL(CREATE_TABLE_NOTEBOOKS);
-        //db.execSQL(CREATE_TABLE_NOTE_CONTENT);
+        db.execSQL(CREATE_TABLE_MEDIA);
+
         AccountTable.createTables(db);
     }
 
@@ -139,7 +146,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
             db.beginTransaction();
             try {
                 for (int i = 0; i < notesList.size(); i++) {
-                    ContentValues values = new ContentValues();
+
                     NoteDetail note = (NoteDetail) notesList.get(i);
 
                     String noteId = note.getNoteId();
@@ -147,23 +154,8 @@ public class LeanoteDB extends SQLiteOpenHelper {
                         continue;
                     }
 
-                    values.put("noteId", note.getNoteId());
-                    values.put("notebookId", note.getNoteBookId());
-                    values.put("userId", note.getUserId());
-                    values.put("title", note.getTitle());
-                    values.put("desc", note.getDesc());
-                    values.put("tags", note.getTags());
-                    values.put("note_abstract", note.getNoteAbstract());
-                    values.put("content", note.getContent());
-                    values.put("isMarkdown", note.isMarkDown() ? 1 : 0);
-                    values.put("isBlog", note.isPublicBlog() ? 1 : 0);
-                    values.put("isTrash", note.isTrash() ? 1 : 0);
-                    values.put("usn", note.getUsn());
-                    values.put("updatedTime", note.getUpdatedTime());
-                    values.put("files", note.getFileIds());
-                    values.put("createdTime", note.getCreatedTime());
-                    values.put("updatedTime", note.getUpdatedTime());
-                    values.put("publicTime", note.getPublicTime());
+                    ContentValues values = getContentValuesFromNote(note);
+
                     db.insert(NOTES_TABLE, null, values);
                 }
 
@@ -180,29 +172,10 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
         String[] args = {userId};
         //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "userId=?", args, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
         try {
             while (c.moveToNext()) {
-                String title = c.getString(4);
-                String updateTime = c.getString(13);
-                NoteDetail detail = new NoteDetail();
-
-                detail.setId(c.getLong(0));
-                detail.setNoteId(c.getString(1));
-                detail.setNoteBookId(c.getString(2));
-                detail.setUserId(c.getString(3));
-                detail.setTitle(title);
-                detail.setTags(c.getString(5));
-                detail.setContent(c.getString(6));
-                detail.setIsMarkDown(c.getInt(7) == 0 ? false : true);
-                detail.setIsPublicBlog(c.getInt(8) == 0 ? false : true);
-                detail.setIsTrash(c.getInt(9) == 0 ? false : true);
-                detail.setFileIds(c.getString(11));
-                detail.setCreatedTime(c.getString(12));
-                detail.setUpdatedTime(c.getString(13));
-                detail.setPublicTime(c.getString(14));
-                detail.setUsn(c.getInt(15));
-
+                NoteDetail detail = fillNote(c);
                 listPosts.add(detail);
             }
             return listPosts;
@@ -223,7 +196,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
         String[] args = {userId};
         //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "userId=?", args, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
         List<String> noteIds = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -243,21 +216,40 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
         NoteDetail detail = null;
         try {
-            while (c.moveToNext()) {
-                detail = new NoteDetail();
-
-                detail.setId(c.getLong(0));
-                detail.setNoteId(c.getString(1));
-                detail.setTitle(c.getString(4));
-
-                detail.setContent(c.getString(6));
-                detail.setUpdatedTime(c.getString(13));
+            if (c.moveToNext()) {
+                detail = fillNote(c);
             }
             return detail;
         } finally {
             SqlUtils.closeCursor(c);
         }
     }
+
+    private NoteDetail fillNote(Cursor c) {
+        NoteDetail detail = new NoteDetail();
+
+        detail.setId(c.getLong(0));
+        detail.setNoteId(c.getString(1));
+        detail.setNoteBookId(c.getString(2));
+        detail.setUserId(c.getString(3));
+        detail.setTitle(c.getString(4));
+        detail.setTags(c.getString(5));
+        detail.setContent(c.getString(6));
+        detail.setIsMarkDown(c.getInt(7) == 0 ? false : true);
+        detail.setIsPublicBlog(c.getInt(8) == 0 ? false : true);
+        detail.setIsTrash(c.getInt(9) == 0 ? false : true);
+        detail.setFileIds(c.getString(10));
+        detail.setCreatedTime(c.getString(11));
+        detail.setUpdatedTime(c.getString(12));
+        detail.setPublicTime(c.getString(13));
+        detail.setUsn(c.getInt(14));
+        detail.setDesc(c.getString(15));
+        detail.setNoteAbstract(c.getString(16));
+        detail.setIsDirty(c.getInt(17) == 0 ? false : true);
+        detail.setIsUploading(c.getInt(18) == 0 ? false : true);
+        return detail;
+    }
+
 
 //    public NoteContent getNoteContentByNoteId(String noteId) {
 //        String[] args = {String.valueOf(noteId)};
@@ -271,8 +263,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
 //        return content;
 //    }
 
-    public void saveMediaFile(MediaFile mf) {
+    private ContentValues getContentsFromMf(MediaFile mf) {
         ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME_ID, mf.getId());
         values.put(COLUMN_NAME_NOTE_ID, mf.getNoteID());
         values.put(COLUMN_NAME_FILE_PATH, mf.getFilePath());
         values.put(COLUMN_NAME_FILE_NAME, mf.getFileName());
@@ -283,43 +276,34 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put(COLUMN_NAME_WIDTH, mf.getWidth());
         values.put(COLUMN_NAME_HEIGHT, mf.getHeight());
         values.put(COLUMN_NAME_MIME_TYPE, mf.getMimeType());
-        values.put(COLUMN_NAME_FEATURED, mf.isFeatured());
-        values.put(COLUMN_NAME_IS_VIDEO, mf.isVideo());
-        values.put(COLUMN_NAME_IS_FEATURED_IN_POST, mf.isFeaturedInPost());
+//        values.put(COLUMN_NAME_FEATURED, mf.isFeatured());
+//        values.put(COLUMN_NAME_IS_FEATURED_IN_POST, mf.isFeaturedInPost());
         values.put(COLUMN_NAME_FILE_URL, mf.getFileURL());
         values.put(COLUMN_NAME_THUMBNAIL_URL, mf.getThumbnailURL());
         values.put(COLUMN_NAME_MEDIA_ID, mf.getMediaId());
-        values.put(COLUMN_NAME_BLOG_ID, mf.getBlogId());
-        values.put(COLUMN_NAME_DATE_CREATED_GMT, mf.getDateCreatedGMT());
-        values.put(COLUMN_NAME_VIDEO_PRESS_SHORTCODE, mf.getVideoPressShortCode());
+
+        //values.put(COLUMN_NAME_DATE_CREATED_GMT, mf.getDateCreatedGMT());
+
         if (mf.getUploadState() != null)
             values.put(COLUMN_NAME_UPLOAD_STATE, mf.getUploadState());
         else
             values.putNull(COLUMN_NAME_UPLOAD_STATE);
 
-        synchronized (this) {
-            int result = 0;
-            boolean isMarkedForDelete = false;
-            if (mf.getMediaId() != null) {
-                Cursor cursor = db.rawQuery("SELECT uploadState FROM " + MEDIA_TABLE + " WHERE mediaId=?",
-                        new String[]{StringUtils.notNullStr(mf.getMediaId())});
-                if (cursor != null && cursor.moveToFirst()) {
-                    isMarkedForDelete = "delete".equals(cursor.getString(0));
-                    cursor.close();
-                }
+        return values;
+    }
 
-                if (!isMarkedForDelete)
-                    result = db.update(MEDIA_TABLE, values, "blogId=? AND mediaId=?",
-                            new String[]{StringUtils.notNullStr(mf.getBlogId()), StringUtils.notNullStr(mf.getMediaId())});
-            }
+    public void saveMediaFile(MediaFile mf) {
 
-            if (result == 0 && !isMarkedForDelete) {
-                result = db.update(MEDIA_TABLE, values, "postID=? AND filePath=?",
-                        new String[]{String.valueOf(mf.getNoteID()), StringUtils.notNullStr(mf.getFilePath())});
-                if (result == 0)
-                    db.insert(MEDIA_TABLE, null, values);
-            }
+        ContentValues values = getContentsFromMf(mf);
+
+        int result = db.update(MEDIA_TABLE, values, "id=?",
+                new String[]{mf.getId()});
+
+        if (result == 0) {
+            AppLog.i("insert new media:" + values);
+            db.insert(MEDIA_TABLE, null, values);
         }
+
     }
 
     public void saveNoteContent(String noteId, String content) {
@@ -351,6 +335,19 @@ public class LeanoteDB extends SQLiteOpenHelper {
     }
 
     public void updateNote(NoteDetail note) {
+        ContentValues values = getContentValuesFromNote(note);
+
+        db.update(NOTES_TABLE, values, "id=?", new String[]{String.valueOf(note.getId())});
+    }
+
+    public void updateNoteByNoteId(NoteDetail note) {
+        ContentValues values = getContentValuesFromNote(note);
+
+        db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+
+    }
+
+    private ContentValues getContentValuesFromNote(NoteDetail note) {
         ContentValues values = new ContentValues();
 
         values.put("noteId", note.getNoteId());
@@ -358,10 +355,21 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("userId", note.getUserId());
         values.put("title", note.getTitle());
         values.put("tags", note.getTags());
-        values.put("updatedTime", note.getUpdatedTime());
         values.put("content", note.getContent());
-        db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+        values.put("isMarkDown", note.isMarkDown() ? 1 : 0);
+        values.put("isBlog", note.isPublicBlog() ? 1 : 0);
+        values.put("isTrash", note.isTrash() ? 1 : 0);
+        values.put("files", note.getFileIds());
+        values.put("createdTime", note.getCreatedTime());
+        values.put("updatedTime", note.getUpdatedTime());
+        values.put("publicTime", note.getPublicTime());
+        values.put("usn", note.getUsn());
+        values.put("desc", note.getDesc());
+        values.put("note_abstract", note.getNoteAbstract());
+        values.put("is_dirty", note.isDirty());
+        values.put("isUploading", note.isUploading() ? 1 : 0);
 
+        return values;
     }
 
 
@@ -372,13 +380,8 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
         NoteDetail detail = null;
         try {
-            while (c.moveToNext()) {
-                detail = new NoteDetail();
-                detail.setId(c.getLong(0));
-                detail.setNoteId(c.getString(1));
-                detail.setTitle(c.getString(4));
-                detail.setContent(c.getString(6));
-                detail.setUpdatedTime(c.getString(12));
+            if (c.moveToNext()) {
+                detail = fillNote(c);
             }
             return detail;
         } finally {
@@ -399,10 +402,16 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void deleteNote(String noteId) {
+    public void deleteNote(long id) {
+        String sql = "delete from notes where id='" + id + "'" ;
+        db.execSQL(sql);
+    }
+
+    public void deleteNoteByNoteId(String noteId) {
         String sql = "delete from notes where noteId='" + noteId + "'" ;
         db.execSQL(sql);
     }
+
 
     public void deleteNoteInLocal(String noteId) {
         String sql = "update notes set isDeleted = 1 and is_dirty = 1 where noteId='" + noteId + "'" ;
@@ -518,6 +527,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public void dangerouslyDeleteAllContent() {
         db.delete(NOTES_TABLE, null, null);
         db.delete(NOTEBOOKS_TABLE, null, null);
+        db.delete(MEDIA_TABLE, null, null);
     }
 
     public void publicNote(String noteId, boolean isPublic) {
@@ -570,12 +580,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
         List<NoteDetail> notes = new ArrayList<>();
         try {
             while (c.moveToNext()) {
-                NoteDetail note = new NoteDetail();
-                note.setNoteId(c.getString(1));
-                note.setNoteBookId(c.getString(2));
-                note.setTitle(c.getString(3));
+                NoteDetail note = fillNote(c);
 
-                //notes.add(c.getString(1));
+                notes.add(note);
             }
             return notes;
         } finally {
@@ -642,4 +649,120 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
+    public MediaFile getMediaFile(String imageUri, NoteDetail mNote) {
+        Cursor c = db.query(MEDIA_TABLE, null, "noteId=? AND fileURL=?",
+                new String[]{String.valueOf(mNote.getNoteId()), imageUri}, null, null, null);
+
+        try {
+            if (c.moveToFirst()) {
+                MediaFile mf = getMediaFileFromCursor(c);
+
+                return mf;
+            } else {
+                return null;
+            }
+        } finally {
+            c.close();
+        }
+    }
+
+    private MediaFile getMediaFileFromCursor(Cursor c) {
+        MediaFile mf = new MediaFile();
+
+        mf.setId(c.getString(0));
+        mf.setMediaId(c.getString(1));
+        mf.setNoteID(c.getString(2));
+        mf.setFilePath(c.getString(3));
+        mf.setFileName(c.getString(4));
+        mf.setTitle(c.getString(5));
+        mf.setFileURL(c.getString(6));
+        mf.setThumbnailURL(c.getString(7));
+        mf.setUploadState(c.getString(8));
+        mf.setDescription(c.getString(9));
+        mf.setCaption(c.getString(10));
+        mf.setHorizontalAlignment(c.getInt(11));
+        mf.setWidth(c.getInt(12));
+        mf.setHeight(c.getInt(13));
+        mf.setMimeType(c.getString(14));
+
+        return mf;
+    }
+
+    public MediaFile getMediaFileById(String id) {
+        Cursor c = db.query(MEDIA_TABLE, null, "id=?",
+                new String[]{String.valueOf(id)}, null, null, null);
+
+        try {
+            if (c.moveToFirst()) {
+                MediaFile mf = getMediaFileFromCursor(c);
+
+                return mf;
+            } else {
+                return null;
+            }
+        } finally {
+            c.close();
+        }
+    }
+
+    public void updateDirtyUsn(String noteId, int usn) {
+        ContentValues values = new ContentValues();
+        values.put("usn", usn);
+        values.put("is_dirty", 0);
+
+        db.update(NOTES_TABLE, values, "noteId=?", new String[]{noteId});
+    }
+
+
+    public void updateAccountUsn(int serverUsn) {
+        ContentValues values = new ContentValues();
+        values.put("usn", serverUsn);
+
+        db.update(ACCOUNTS_TABLE, values, "local_id=?", new String[]{String.valueOf(0)});
+
+    }
+
+    public int getAccountUsn() {
+        Cursor c = db.query(ACCOUNTS_TABLE, null, "local_id=?", new String[]{String.valueOf(0)}, null, null, "");
+
+        try {
+            if (c.moveToNext()) {
+                return c.getInt(8);
+            }
+
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+        return 0;
+    }
+
+    public MediaFile getMediaFileByUrl(String url) {
+
+        Cursor c = db.query(MEDIA_TABLE, null, "fileURL=?",
+                new String[]{String.valueOf(url)}, null, null, null);
+
+        try {
+            if (c.moveToFirst()) {
+                MediaFile mf = getMediaFileFromCursor(c);
+
+                return mf;
+            } else {
+                return null;
+            }
+        } finally {
+            c.close();
+        }
+    }
+
+    public void deleteMediaFileByNoteId(String noteId) {
+        String sql = "delete from media where noteId='" + noteId + "'";
+        db.execSQL(sql);
+    }
+
+    public void updateMedia(String localFileId, String serverFileId) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME_MEDIA_ID, serverFileId);
+
+        db.update(MEDIA_TABLE, values, "id=?", new String[]{localFileId});
+    }
 }

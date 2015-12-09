@@ -23,7 +23,7 @@ public class LoginSelfHost extends LoginAbstract {
     protected void login() {
         String login_url = String.format("%s/api/auth/login?email=%s&pwd=%s", hostUrl, mUsername, mPassword);
 
-        AppLog.i("login_url" + login_url);
+        AppLog.i("login_url:" + login_url);
         CustomRequest login_req = new CustomRequest(Request.Method.GET, login_url, null, new Response.Listener<JSONObject>(){
 
             @Override
@@ -59,6 +59,7 @@ public class LoginSelfHost extends LoginAbstract {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+                AppLog.i("error:" + error);
                 mCallback.onError();
 
             }

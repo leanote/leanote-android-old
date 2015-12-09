@@ -1,8 +1,10 @@
 package com.leanote.android.ui.main;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,6 +13,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,16 +25,21 @@ import android.widget.TextView;
 import com.leanote.android.Constants;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
+import com.leanote.android.service.NoteSyncService;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
+import com.leanote.android.ui.RequestCodes;
 import com.leanote.android.ui.note.NoteListAdapter;
 import com.leanote.android.ui.note.service.NoteEvents;
 import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.util.AniUtils;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.util.NoteSyncResultEnum;
 import com.leanote.android.util.SwipeToRefreshHelper;
 import com.leanote.android.util.ToastUtils;
 import com.leanote.android.widget.CustomSwipeRefreshLayout;
@@ -114,13 +122,14 @@ public class NoteListFragment extends Fragment
                         if (!isAdded()) {
                             return;
                         }
+                        AppLog.i("begin to refresh...");
                         if (!NetworkUtils.checkConnection(getActivity())) {
                             setRefreshing(false);
                             updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
                             return;
                         }
                         //该方法拉取笔记后存在本地的db中，然后通过EventBus通知AsyncTask加载到页面中
-                        requestPosts();
+                        requestNotes();
                     }
                 });
     }
@@ -153,7 +162,7 @@ public class NoteListFragment extends Fragment
         // since setRetainInstance(true) is used, we only need to request latest
         // posts the first time this is called (ie: not after device rotation)
         if (bundle == null && NetworkUtils.checkConnection(getActivity())) {
-            requestPosts();
+            requestNotes();
         }
     }
 
@@ -195,7 +204,29 @@ public class NoteListFragment extends Fragment
         mSwipeToRefreshHelper.setRefreshing(refreshing);
     }
 
-    private void requestPosts() {
+    @SuppressWarnings("unused")
+    public void onEventMainThread(NoteEvents.PostUploadStarted event) {
+        if (isAdded()) {
+            loadNotes();
+        }
+    }
+
+    /*
+     * upload ended, reload regardless of success/fail so correct status of uploaded post appears
+     */
+    @SuppressWarnings("unused")
+    public void onEventMainThread(NoteEvents.PostUploadEnded event) {
+        NoteSyncResultEnum result = event.result;
+        if (isAdded() && result.getCode() == NoteSyncResultEnum.SUCCESS.getCode()) {
+            loadNotes();
+
+            ToastUtils.showToast(getActivity(), "upload successfully");
+        } else {
+            ToastUtils.showToast(getActivity(), result.getMsg());
+        }
+    }
+
+    private void requestNotes() {
         if (!isAdded() || mIsFetchingPosts) {
             return;
         }
@@ -220,7 +251,7 @@ public class NoteListFragment extends Fragment
 
 
     /*
-     * PostUpdateService finished a request to retrieve new posts
+     * PostUpdateService finishHed a request to retrieve new posts
      */
     @SuppressWarnings("unused")
     public void onEventMainThread(NoteEvents.RequestNotes event) {
@@ -232,6 +263,14 @@ public class NoteListFragment extends Fragment
             Log.i("is fail:", String.valueOf(event.getFailed()));
             if (!event.getFailed()) {
                 loadNotes();
+                //请求笔记结束后更新本地syncstate
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Leanote.leaDB.updateAccountUsn(NoteSyncService.getServerSyncState());
+                    }
+                }).start();
+
             } else {
 //                ApiHelper.ErrorType errorType = event.getErrorType();
 //                if (errorType != null && errorType != ErrorType.TASK_CANCELLED && errorType != ErrorType.NO_ERROR) {
@@ -322,7 +361,7 @@ public class NoteListFragment extends Fragment
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());
         //load note detail
         AppLog.i("click note id:" + note.getId());
-        NoteDetail fullNote = Leanote.leaDB.getLocalNoteByNoteId(note.getNoteId());
+        NoteDetail fullNote = Leanote.leaDB.getLocalNoteById(note.getId());
         if (fullNote == null) {
             ToastUtils.showToast(getActivity(), R.string.note_not_found);
             return;
@@ -344,9 +383,17 @@ public class NoteListFragment extends Fragment
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RequestCodes.EDIT_NOTE && resultCode == Activity.RESULT_OK) {
+
+        }
+    }
+
     /*
-     * send the passed post to the trash with undo
-     */
+         * send the passed post to the trash with undo
+         */
     private void trashNote(final NoteDetail note) {
         if (!isAdded() || !NetworkUtils.checkConnection(getActivity())) {
             return;
@@ -386,18 +433,39 @@ public class NoteListFragment extends Fragment
                 }
 
                 //delete note in local
-                Leanote.leaDB.deleteNote(note.getNoteId());
+                AppLog.i("delete note id:" + note.getId());
+                Leanote.leaDB.deleteNote(note.getId());
+                Leanote.leaDB.deleteMediaFileByNoteId(note.getNoteId());
                 //delete note in server
-                new deleteNoteTask().execute(note.getNoteId());
+                new DeleteNoteTask().execute(note);
             }
         }, Constants.SNACKBAR_LONG_DURATION_MS);
     }
 
-    private class deleteNoteTask extends AsyncTask<String, Spanned, Void> {
+    private class DeleteNoteTask extends AsyncTask<NoteDetail, Spanned, Void> {
 
 
         @Override
-        protected Void doInBackground(String... strings) {
+        protected Void doInBackground(NoteDetail... params) {
+            NoteDetail note = params[0];
+
+            // local draft note
+            if (TextUtils.isEmpty(note.getNoteId())) {
+                return null;
+            }
+            String api = String.format("%s/api/note/deleteTrash?token=%s&usn=%s&noteId=%s",
+                    AccountHelper.getDefaultAccount().getHost(),
+                    AccountHelper.getDefaultAccount().getmAccessToken(),
+                    note.getUsn(),
+                    note.getNoteId());
+
+            try {
+                NetworkRequest.syncGetRequest(api);
+            } catch (Exception e) {
+                e.printStackTrace();
+                //ToastUtils.showToast(getActivity(), getString(R.string.delete_note_fail));
+            }
+            //ToastUtils.showToast(getActivity(), getString(R.string.delete_note_succ));
             return null;
         }
     }

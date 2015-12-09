@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.HtmlUtils;
 import com.leanote.android.util.LeaWebViewClient;
 import com.leanote.android.util.StringUtils;
@@ -20,7 +21,8 @@ import com.leanote.android.util.ToastUtils;
 /**
  * Created by binnchx on 11/22/15.
  */
-public class NotePreviewFragment extends Fragment {
+public class NotePreviewFragment extends Fragment
+        implements LeaWebViewClient.OnImageLoadListener  {
 
     private long mLocalNoteId;
     private WebView mWebView;
@@ -59,6 +61,8 @@ public class NotePreviewFragment extends Fragment {
 
         mWebView = (WebView) view.findViewById(R.id.webView);
         LeaWebViewClient client = new LeaWebViewClient();
+        client.setImageLoadedListener(this);
+
         mWebView.setWebViewClient(client);
 
         return view;
@@ -78,7 +82,7 @@ public class NotePreviewFragment extends Fragment {
             public void run() {
                 NoteDetail note = Leanote.leaDB.getLocalNoteById(mLocalNoteId);
                 final String htmlContent = formatPostContentForWebView(getActivity(), note);
-
+                AppLog.i("html:" + htmlContent);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -117,8 +121,11 @@ public class NotePreviewFragment extends Fragment {
         String noteContent = note.getContent();
         // if this is a local draft, remove src="null" from image tags then replace the "android-uri"
         // tag added for local image with a valid "src" tag so local images can be viewed
-        if (note.isLocalDraft()) {
+        if (note.getUsn() == 0) {
             noteContent = noteContent.replace("src=\"null\"", "").replace("android-uri=", "src=");
+        } else {
+            //已经提交到服务端的笔记
+
         }
 
         String textColorStr = HtmlUtils.colorResToHtmlColor(context, R.color.grey_dark);
@@ -143,5 +150,22 @@ public class NotePreviewFragment extends Fragment {
                 + StringUtils.addPTags(noteContent)
                 + "</body></html>";
     }
+
+    @Override
+    public void onImageLoaded(String localFileId) {
+        //更新note的fileId字段
+        NoteDetail note = Leanote.leaDB.getLocalNoteById(mLocalNoteId);
+        String fileIds = note.getFileIds();
+        if (fileIds != null && fileIds.length() > 0) {
+            fileIds += "," + localFileId;
+        } else {
+            fileIds = localFileId;
+        }
+        note.setFileIds(fileIds);
+        Leanote.leaDB.updateNote(note);
+
+        refreshPreview();
+    }
+
 
 }

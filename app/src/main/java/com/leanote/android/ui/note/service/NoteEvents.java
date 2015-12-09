@@ -1,5 +1,6 @@
 package com.leanote.android.ui.note.service;
 
+import com.leanote.android.util.NoteSyncResultEnum;
 import com.leanote.android.util.StringUtils;
 
 /**
@@ -8,20 +9,15 @@ import com.leanote.android.util.StringUtils;
 public class NoteEvents {
 
     public static class PostUploadStarted {
-        public final int mLocalBlogId;
 
-        PostUploadStarted(int localBlogId) {
-            mLocalBlogId = localBlogId;
-        }
+        PostUploadStarted() {}
     }
 
     public static class PostUploadEnded {
-        public final int mLocalBlogId;
-        public final boolean mSucceeded;
+        public final NoteSyncResultEnum result;
 
-        PostUploadEnded(boolean succeeded, int localBlogId) {
-            mSucceeded = succeeded;
-            mLocalBlogId = localBlogId;
+        PostUploadEnded(NoteSyncResultEnum result) {
+            this.result = result;
         }
     }
 

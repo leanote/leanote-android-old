@@ -365,6 +365,7 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
             @Override
             public void onSuccess() {
                 Log.i("login in success", "");
+
                 finishCurrentActivity();
                 //NoteUpdateService.startServiceForNote(getActivity());
             }
@@ -527,6 +528,14 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
     public static void newAccountForResult(Activity activity) {
         Intent intent = new Intent(activity, NewAccountActivity.class);
         activity.startActivityForResult(intent, SignInActivity.CREATE_ACCOUNT_REQUEST);
+    }
+
+    public void signInDotComUser(String username, String password) {
+        if (username != null && password != null) {
+            mUsernameEditText.setText(username);
+            mPasswordEditText.setText(password);
+            signIn();
+        }
     }
 
 
