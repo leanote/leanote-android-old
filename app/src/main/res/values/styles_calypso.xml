@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Calypso (WP.com homepage) styles
+-->
+<resources>
+    <style name="CalypsoTheme" parent="@style/Leanote">
+        <item name="android:popupMenuStyle">@style/Calypso.PopupMenu</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/Calypso.TextAppearance</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/Calypso.TextAppearance</item>
+    </style>
+
+    <style name="CalypsoTheme.NoActionBarShadow" parent="CalypsoTheme">
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="Calypso.NoActionBar" parent="CalypsoTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Calypso.PopupMenu" parent="@android:style/Widget.Holo.Light.PopupMenu">
+        <item name="android:textAppearance">@style/Calypso.TextAppearance</item>
+    </style>
+
+    <style name="Calypso.TextAppearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/grey_dark</item>
+    </style>
+
+    <style name="Calypso.Text.Date" parent="android:Widget.TextView">
+        <item name="android:textSize">@dimen/text_sz_large</item>
+        <item name="android:textColor">@color/grey_lighten_10</item>
+    </style>
+
+    <style name="Calypso.Text.Header" parent="android:Widget.TextView">
+        <item name="android:textSize">@dimen/text_sz_medium</item>
+        <item name="android:textColor">@color/grey_lighten_10</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Calypso.FloatingActivity" parent="Calypso.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowFullscreen">false</item>
+    </style>
+
+    <style name="Calypso.SegmentedControl" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">32dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:button">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">4dp</item>
+        <!--<item name="android:textColor">@color/calypso_segmented_control_text</item>-->
+        <item name="android:textSize">@dimen/text_sz_small</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+</resources>

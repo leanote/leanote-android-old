@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by binnchx on 10/22/15.
  */
 public class MediaFile {
-    protected int id;
+    protected String id;
     protected String noteID;
     protected String filePath = null; //path of the file into disk
     protected String fileName = null; //name of the file into the server
@@ -21,27 +21,21 @@ public class MediaFile {
     protected boolean verticalAligment = false; //false = bottom, true = top
     protected int width = 500, height;
     protected String mimeType = "";
-    protected String videoPressShortCode = null;
     protected boolean featured = false;
-    protected boolean isVideo = false;
     protected boolean featuredInPost;
     protected String fileURL = null; // url of the file to download
     protected String thumbnailURL = null;  // url of the thumbnail to download
-    private String blogId;
     private long dateCreatedGmt;
     private String uploadState = null;
     private String mediaId;
 
-    public static String VIDEOPRESS_SHORTCODE_ID = "videopress_shortcode";
 
     public MediaFile(String blogId, Map<?, ?> resultMap, boolean isDotCom) {
-        setBlogId(blogId);
         setMediaId(MapUtils.getMapStr(resultMap, "attachment_id"));
         setNoteID(MapUtils.getMapStr(resultMap, "parent"));
         setTitle(MapUtils.getMapStr(resultMap, "title"));
         setCaption(MapUtils.getMapStr(resultMap, "caption"));
         setDescription(MapUtils.getMapStr(resultMap, "description"));
-        setVideoPressShortCode(MapUtils.getMapStr(resultMap, VIDEOPRESS_SHORTCODE_ID));
 
         // get the file name from the link
         String link = MapUtils.getMapStr(resultMap, "link");
@@ -97,23 +91,20 @@ public class MediaFile {
         this.width = mediaFile.width;
         this.height = mediaFile.height;
         this.mimeType = mediaFile.mimeType;
-        this.videoPressShortCode = mediaFile.videoPressShortCode;
         this.featured = mediaFile.featured;
-        this.isVideo = mediaFile.isVideo;
         this.featuredInPost = mediaFile.featuredInPost;
         this.fileURL = mediaFile.fileURL;
         this.thumbnailURL = mediaFile.thumbnailURL;
-        this.blogId = mediaFile.blogId;
         this.dateCreatedGmt = mediaFile.dateCreatedGmt;
         this.uploadState = mediaFile.uploadState;
         this.mediaId = mediaFile.mediaId;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -229,13 +220,6 @@ public class MediaFile {
         mimeType = StringUtils.notNullStr(type);
     }
 
-    public String getVideoPressShortCode() {
-        return videoPressShortCode;
-    }
-
-    public void setVideoPressShortCode(String videoPressShortCode) {
-        this.videoPressShortCode = videoPressShortCode;
-    }
 
     public int getHorizontalAlignment() {
         return horizontalAlignment;
@@ -245,13 +229,6 @@ public class MediaFile {
         this.horizontalAlignment = horizontalAlignment;
     }
 
-    public boolean isVideo() {
-        return isVideo;
-    }
-
-    public void setVideo(boolean isVideo) {
-        this.isVideo = isVideo;
-    }
 
     public boolean isFeaturedInPost() {
         return featuredInPost;
@@ -261,13 +238,6 @@ public class MediaFile {
         this.featuredInPost = featuredInPost;
     }
 
-    public String getBlogId() {
-        return blogId;
-    }
-
-    public void setBlogId(String blogId) {
-        this.blogId = blogId;
-    }
 
     public void setDateCreatedGMT(long date_created_gmt) {
         this.dateCreatedGmt = date_created_gmt;
@@ -335,5 +305,30 @@ public class MediaFile {
         }
 
         return content;
+    }
+
+    @Override
+    public String toString() {
+        return "MediaFile{" +
+                "id=" + id +
+                ", noteID='" + noteID + '\'' +
+                ", filePath='" + filePath + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", caption='" + caption + '\'' +
+                ", horizontalAlignment=" + horizontalAlignment +
+                ", verticalAligment=" + verticalAligment +
+                ", width=" + width +
+                ", height=" + height +
+                ", mimeType='" + mimeType + '\'' +
+                ", featured=" + featured +
+                ", featuredInPost=" + featuredInPost +
+                ", fileURL='" + fileURL + '\'' +
+                ", thumbnailURL='" + thumbnailURL + '\'' +
+                ", dateCreatedGmt=" + dateCreatedGmt +
+                ", uploadState='" + uploadState + '\'' +
+                ", mediaId='" + mediaId + '\'' +
+                '}';
     }
 }

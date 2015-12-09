@@ -159,7 +159,7 @@ public class NotePreviewActivity extends AppCompatActivity {
         if (mNote == null
                 || mIsUpdatingNote
                 || NoteUploadService.isNoteUploading(mNote.getId())
-                || (!mNote.isDirty())) {
+                || (!mNote.isDirty() && mNote.getUsn() > 0)) {
             messageView.setVisibility(View.GONE);
             return;
         }
@@ -167,6 +167,8 @@ public class NotePreviewActivity extends AppCompatActivity {
         TextView messageText = (TextView) messageView.findViewById(R.id.message_text);
         if (mNote.isDirty()) {
             messageText.setText(R.string.local_changes_explainer);
+        } else if (mNote.getUsn() == 0) {
+            messageText.setText(R.string.local_draft_explainer);
         }
 
         // publish applies to both local draft and local changes
@@ -181,7 +183,7 @@ public class NotePreviewActivity extends AppCompatActivity {
 
         // revert applies to only local changes
         View btnRevert = messageView.findViewById(R.id.btn_revert);
-        btnRevert.setVisibility(mNote.isLocalDraft() ? View.GONE : View.VISIBLE);
+        btnRevert.setVisibility(mNote.getUsn() == 0 ? View.GONE : View.VISIBLE);
         if (mNote.isDirty()) {
             btnRevert.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -216,7 +218,7 @@ public class NotePreviewActivity extends AppCompatActivity {
         if (mIsUpdatingNote) {
             AppLog.d(AppLog.T.POSTS, "post preview > already updating post");
         } else {
-            new UpdateNoteTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new RevertNoteTask().execute(mNote.getNoteId());
         }
     }
 
@@ -251,7 +253,7 @@ public class NotePreviewActivity extends AppCompatActivity {
         }
     }
 
-    private class UpdateNoteTask extends AsyncTask<Void, Void, Boolean> {
+    private class RevertNoteTask extends AsyncTask<String, Void, Boolean> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -267,9 +269,12 @@ public class NotePreviewActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... nada) {
+        protected Boolean doInBackground(String... noteIds) {
             //fetch note from server
-            NoteSyncService.syncNote();
+            String noteId = noteIds[0];
+            NoteDetail serverNote = NoteSyncService.getServerNote(noteId);
+            Leanote.leaDB.updateNoteByNoteId(serverNote);
+            //NoteSyncService.syncPullNote();
             return true;
         }
 

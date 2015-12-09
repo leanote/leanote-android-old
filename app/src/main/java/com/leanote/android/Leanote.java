@@ -42,8 +42,7 @@ public class Leanote extends Application {
 
     private static String mUserAgent;
 
-    private static String mHostUrl;
-
+    private static boolean isFirstSync = true;
 
     private static final String USER_AGENT_APPNAME = "leanote-android";
 
@@ -202,11 +201,11 @@ public class Leanote extends Application {
         }
     }
 
-    public static String getmHostUrl() {
-        return mHostUrl;
+    public static boolean isFirstSync() {
+        return isFirstSync;
     }
 
-    public static void setmHostUrl(String mHostUrl) {
-        Leanote.mHostUrl = mHostUrl;
+    public static void setIsFirstSync(boolean firstSync) {
+        isFirstSync = firstSync;
     }
 }

@@ -1,5 +1,7 @@
 package com.leanote.android.model;
 
+import com.leanote.android.Leanote;
+
 /**
  * Created by binnchx on 8/26/15.
  */
@@ -86,7 +88,7 @@ public class AccountModel {
     }
 
     public int getLastSyncUsn() {
-        return lastSyncUsn;
+        return Leanote.leaDB.getAccountUsn();
     }
 
     public void setLastSyncUsn(int lastSyncUsn) {

@@ -2,6 +2,7 @@ package com.leanote.android.ui;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,5 +59,15 @@ public class SignInActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && data != null) {
+            String username = data.getStringExtra("username");
+            String password = data.getStringExtra("password");
+            if (username != null) {
+                mSignInFragment.signInDotComUser(username, password);
+            }
+        }
+    }
 }

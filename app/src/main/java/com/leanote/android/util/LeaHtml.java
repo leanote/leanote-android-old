@@ -391,19 +391,11 @@ public class LeaHtml {
         if (mediaId == null || mediaId.length() == 0)
             return content;
 
-        boolean isVideo = mediaFile.isVideo();
+        boolean isVideo = false;
         String url = imageSpan.getImageSource().toString();
 
         if (isVideo) {
-            if (!TextUtils.isEmpty(mediaFile.getVideoPressShortCode())) {
-                content = mediaFile.getVideoPressShortCode();
-            } else {
-                int xRes = mediaFile.getWidth();
-                int yRes = mediaFile.getHeight();
-                String mimeType = mediaFile.getMimeType();
-                content = String.format("<video width=\"%s\" height=\"%s\" controls=\"controls\"><source src=\"%s\" type=\"%s\" /><a href=\"%s\">Click to view video</a>.</video>",
-                        xRes, yRes, url, mimeType, url);
-            }
+            //video is not supported
         } else {
             String alignment = "";
             switch (mediaFile.getHorizontalAlignment()) {
@@ -426,7 +418,6 @@ public class LeaHtml {
             int width = mediaFile.getWidth();
 
             String inlineCSS = " ";
-            String localBlogID = imageSpan.getMediaFile().getBlogId();
             //Blog currentBlog = WordPress.wpDB.instantiateBlogByLocalId(Integer.parseInt(localBlogID));
             // If it's not a gif and blog don't keep original size, there is a chance we need to resize
             if (!mediaFile.getMimeType().equals("image/gif")) {
@@ -569,7 +560,7 @@ class HtmlToSpannedConverter implements ContentHandler {
     private void handleStartTag(String tag, Attributes attributes) {
         if (!mysteryTagFound) {
             if (mNote != null) {
-                if (!mNote.isLocalDraft()) {
+                if (mNote.getUsn() > 0) {
                     if (tag.equalsIgnoreCase("img"))
                         startImg(mSpannableStringBuilder, attributes,
                                 mImageGetter);
@@ -644,7 +635,7 @@ class HtmlToSpannedConverter implements ContentHandler {
 
     private void handleEndTag(String tag) {
         if (mNote != null) {
-            if (!mNote.isLocalDraft())
+            if (mNote.getUsn() > 0)
                 return;
         }
         if (!mysteryTagFound) {
@@ -821,7 +812,7 @@ class HtmlToSpannedConverter implements ContentHandler {
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         } else if (mNote != null) {
-            if (mNote.isLocalDraft()) {
+            if (mNote.getUsn() == 0) {
                 if (attributes != null) {
                     text.append("<img");
                     for (int i = 0; i < attributes.getLength(); i++) {

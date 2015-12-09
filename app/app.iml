@@ -133,6 +133,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="design-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="persistentedittext-1.0.1" level="project" />
+    <orderEntry type="library" exported="" name="httpclient-android-4.3.5.1" level="project" />
     <orderEntry type="library" exported="" name="gcm-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="commons-lang-2.6" level="project" />
     <orderEntry type="library" exported="" name="crashlytics-2.2.2" level="project" />
@@ -140,6 +141,7 @@
     <orderEntry type="library" exported="" name="answers-1.1.2" level="project" />
     <orderEntry type="library" exported="" name="annotations-2.0.0" level="project" />
     <orderEntry type="library" exported="" name="mediapicker-1.2.4" level="project" />
+    <orderEntry type="library" exported="" name="mongo-java-driver-2.12.4" level="project" />
     <orderEntry type="library" exported="" name="slidinguppanel-1.0.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="objenesis-2.1" level="project" />
     <orderEntry type="library" exported="" name="library-1.0.16" level="project" />
@@ -149,12 +151,13 @@
     <orderEntry type="library" exported="" name="support-v13-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="emailchecker-0.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-core-2.0.31-beta" level="project" />
-    <orderEntry type="library" exported="" name="httpclient-4.3.6" level="project" />
+    <orderEntry type="library" exported="" name="universal-image-loader-1.9.5" level="project" />
     <orderEntry type="library" exported="" name="drag-sort-listview-0.6.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="dexmaker-1.0" level="project" />
     <orderEntry type="library" exported="" name="AndroidPinning-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="tagsoup-1.2.1" level="project" />
     <orderEntry type="library" exported="" name="library-1.2.3" level="project" />
+    <orderEntry type="library" exported="" name="httpclientandroidlib-4.3.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.2.2" level="project" />
     <orderEntry type="library" exported="" name="eventbus-2.4.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-22.2.1" level="project" />
@@ -165,6 +168,7 @@
     <orderEntry type="library" exported="" name="beta-1.1.2" level="project" />
     <orderEntry type="library" exported="" name="android-aar-3.8.0" level="project" />
     <orderEntry type="library" exported="" name="passcodelock-1.0.0" level="project" />
+    <orderEntry type="library" exported="" name="httpmime-4.3" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="simperium-0.6.4" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.2.1" level="project" />

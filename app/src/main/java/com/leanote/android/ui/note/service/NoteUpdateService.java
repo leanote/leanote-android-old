@@ -57,7 +57,7 @@ public class NoteUpdateService extends Service {
     private void fetchNotes() {
 
         NoteEvents.RequestNotes event = new NoteEvents.RequestNotes();
-        NoteSyncService.syncNote();
+        NoteSyncService.syncPullNote();
 
 
         EventBus.getDefault().post(event);

@@ -227,5 +227,29 @@
     <string name="title_activity_note_preview">NotePreviewActivity</string>
     <string name="fragment_tag_note_preview">fragment_note_preview</string>
     <string name="local_changes_explainer">This note has local changes which haven\\\'t been published to server</string>
+    <string name="select_photo">select photo</string>
+    <string name="media_add_popup_capture_photo">Capture photo</string>
+    <string name="pick_photo">Select photo</string>
+    <string name="sdcard_title">SD Card Required</string>
+    <string name="sdcard_message">A mounted SD card is required to upload media</string>
+    <string name="download">download</string>
+    <string name="gallery_error">The media item couldn\\\'t be retrieved</string>
+    <string name="error_downloading_image">fail to download image</string>
+    <string name="local_changes">local changes</string>
+    <string name="note_uploading">uploading</string>
+    <string name="uploading_note">upload</string>
+    <string name="note">note</string>
+    <string name="file_not_found">file not found</string>
+    <string name="error_media_upload">upload fail</string>
+    <string name="out_of_memory">out of memory</string>
+    <string name="local_draft">local draft</string>
+    <string name="delete_note_fail">delete note fail</string>
+    <string name="delete_note_succ">delete note successful</string>
+    <string name="local_draft_explainer">This note is a local draft which hasn\\\'t been published</string>
+    <string name="invalid_username_too_short">username is too short</string>
+    <string name="invalid_username_too_long">username is too long</string>
+    <string name="username">username</string>
+    <string name="create_account_wpcom">create account on leanote.com</string>
+    <string name="validating_user_data">Validating user data</string>
 
 </resources>

@@ -120,9 +120,14 @@ public class MediaUtils {
     public static int getMinimumImageWidth(Context context, Uri curStream, String imageWidthBlogSettingString) {
         int imageWidthBlogSetting = Integer.MAX_VALUE;
 
-        if (!imageWidthBlogSettingString.equals("Original Size")) {
+        if (!"Original Size".equals(imageWidthBlogSettingString)) {
             try {
-                imageWidthBlogSetting = Integer.valueOf(imageWidthBlogSettingString);
+                if (TextUtils.isEmpty(imageWidthBlogSettingString)) {
+                    imageWidthBlogSetting = 10;
+                } else {
+                    imageWidthBlogSetting = Integer.valueOf(imageWidthBlogSettingString);
+                }
+
             } catch (NumberFormatException e) {
                 AppLog.e(AppLog.T.POSTS, e);
             }
@@ -154,22 +159,28 @@ public class MediaUtils {
         }
         File cacheDir = null;
 
-        String mimeType = context.getContentResolver().getType(imageUri);
-        boolean isVideo = (mimeType != null && mimeType.contains("video"));
-
         // If the device has an SD card
         if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
-            String mediaFolder = isVideo ? "video" : "images";
-            cacheDir = new File(android.os.Environment.getExternalStorageDirectory() + "/WordPress/" + mediaFolder);
+            String mediaFolder = "images";
+            cacheDir = new File(android.os.Environment.getExternalStorageDirectory() + "/Leanote/" + mediaFolder);
         } else {
             if (context.getApplicationContext() != null) {
                 cacheDir = context.getApplicationContext().getCacheDir();
             }
         }
 
+        //必须先删除再创建
+        if (cacheDir.exists()) {
+            cacheDir.delete();
+        }
+
         if (cacheDir != null && !cacheDir.exists()) {
             cacheDir.mkdirs();
         }
+
+        AppLog.i("cache dir:" + cacheDir);
+
+
         try {
             InputStream input;
             // Download the file
@@ -183,12 +194,10 @@ public class MediaUtils {
                 input = new URL(imageUri.toString()).openStream();
             }
 
-            String fileName = "wp-" + System.currentTimeMillis();
-            if (isVideo) {
-                fileName += "." + MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-            }
 
+            String fileName = "lea-" + System.currentTimeMillis();
             File f = new File(cacheDir, fileName);
+
 
             OutputStream output = new FileOutputStream(f);
 

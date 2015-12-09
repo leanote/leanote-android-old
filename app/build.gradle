@@ -24,6 +24,8 @@ android {
     packagingOptions {
         exclude "META-INF/LICENSE.txt"
         exclude "META-INF/NOTICE.txt"
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
     }
     dexOptions {
         jumboMode = true
@@ -73,6 +75,11 @@ dependencies {
     compile ('org.wordpress:mediapicker:1.2.4') {
         exclude group:'com.android.support'
     }
+    compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
+    compile('org.apache.httpcomponents:httpmime:4.3') {
+        exclude module: "httpclient"
+    }
+
     compile 'com.google.code.gson:gson:2.2.2'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile 'com.android.support:support-v13:22.2.1'
@@ -88,8 +95,11 @@ dependencies {
     compile 'org.wordpress:graphview:3.4.0'
     compile 'org.wordpress:persistentedittext:1.0.1'
     compile 'com.loopj.android:android-async-http:1.4.9'
-
+    compile 'com.belladati:httpclientandroidlib:4.3.0'
     compile 'com.mcxiaoke.volley:library:1.0.16'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    compile 'org.mongodb:mongo-java-driver:2.12.4'
+    //compile 'com.nostra13.universalimageloader:universal-image-loader:+'
 
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
     androidTestCompile 'org.objenesis:objenesis:2.1'
