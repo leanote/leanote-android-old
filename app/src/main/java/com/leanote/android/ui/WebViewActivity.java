@@ -1,31 +1,32 @@
 
 package com.leanote.android.ui;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.webkit.WebView;
 
 import com.leanote.android.R;
 
+/**
+ * Basic activity for displaying a WebView.
+ */
+
 public abstract class WebViewActivity extends AppCompatActivity {
     /** Primary webview used to display content. */
 
-    private static final String URL = "url";
+    protected static String URL = "";
 
     protected WebView mWebView;
     //protected ObservableWebView mWebView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        supportRequestWindowFeature(Window.FEATURE_PROGRESS);
-
+//        supportRequestWindowFeature(Window.FEATURE_PROGRESS);
+//
         super.onCreate(savedInstanceState);
+
 
         // clear title text so there's no title until actual web page title can be shown
         // this is done here rather than in the manifest to automatically handle descendants
@@ -60,6 +61,7 @@ public abstract class WebViewActivity extends AppCompatActivity {
         if (url != null) {
             loadUrl(url);
         }
+
     }
 
     @Override

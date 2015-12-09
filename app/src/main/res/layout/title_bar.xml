@@ -11,6 +11,9 @@
         android:text=""
         android:textColor="#fff"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:id = "@+id/title_bar"
+        />
+
 
 </RelativeLayout>
