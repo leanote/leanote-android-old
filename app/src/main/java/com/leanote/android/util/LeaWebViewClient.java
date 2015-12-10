@@ -165,7 +165,10 @@ public class LeaWebViewClient extends WebViewClient {
             mf.setFileURL(url);
             Leanote.leaDB.saveMediaFile(mf);
 
-            imageLoadedListener.onImageLoaded(mf.getId());
+            if (imageLoadedListener != null) {
+                imageLoadedListener.onImageLoaded(mf.getId());
+            }
+
         }
     }
 

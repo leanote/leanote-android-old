@@ -15,16 +15,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leanote.android.R;
+import com.leanote.android.model.NoteDetail;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.LeaMainActivity;
-
+import com.leanote.android.ui.note.NoteListAdapter;
 import com.leanote.android.ui.note.service.NoteEvents;
-
 import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.ui.post.PostAdapter;
 import com.leanote.android.util.SwipeToRefreshHelper;
+import com.leanote.android.util.ToastUtils;
 import com.leanote.android.widget.CustomSwipeRefreshLayout;
 import com.leanote.android.widget.RecyclerItemDecoration;
 
@@ -32,11 +33,9 @@ import de.greenrobot.event.EventBus;
 
 public class PostFragment extends Fragment
             implements LeaMainActivity.OnScrollToTopListener,
-            PostAdapter.OnVisitBlogClickListener{
+            PostAdapter.OnVisitBlogClickListener,
+            NoteListAdapter.OnNotesSelectedListener {
 
-
-    private View mFabView;
-    private int mFabTargetYTranslation;
 
     private RecyclerView mRecyclerView;
 
@@ -44,7 +43,7 @@ public class PostFragment extends Fragment
     private ProgressBar mProgressLoadMore;
     private TextView mEmptyViewTitle;
     private SwipeToRefreshHelper mSwipeToRefreshHelper;
-    private PostAdapter mNoteListAdapter;
+    private PostAdapter mPostAdapter;
     private boolean mIsFetchingPostList;
 
     private ImageView mEmptyViewImage;
@@ -67,25 +66,26 @@ public class PostFragment extends Fragment
 
     }
 
-    public PostAdapter getNoteListAdapter() {
-        if (mNoteListAdapter == null) {
-            mNoteListAdapter = new PostAdapter(getActivity());
-            mNoteListAdapter.setOnVisitBlogClickListener((PostAdapter.OnVisitBlogClickListener) this);
+    public PostAdapter getPostListAdapter() {
+        if (mPostAdapter == null) {
+            mPostAdapter = new PostAdapter(getActivity());
+            mPostAdapter.setOnVisitBlogClickListener(this);
+            mPostAdapter.setmOnNotesSelectedListener(this);
         }
-        return mNoteListAdapter;
+        return mPostAdapter;
     }
 
-    private void loadNotes() {
-        getNoteListAdapter().loadNotes();
+    private void loadPosts() {
+        getPostListAdapter().loadPosts();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (mRecyclerView.getAdapter() == null) {
-            mRecyclerView.setAdapter(getNoteListAdapter());
+            mRecyclerView.setAdapter(getPostListAdapter());
         }
-        loadNotes();
+        loadPosts();
     }
 
     @Override
@@ -93,11 +93,6 @@ public class PostFragment extends Fragment
                              Bundle savedInstanceState) {
 
         final ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.post_fragment, container, false);
-
-        int fabHeight = getResources().getDimensionPixelSize(R.dimen.fab_size_normal);
-        int fabMargin = getResources().getDimensionPixelSize(R.dimen.fab_margin);
-        mFabTargetYTranslation = (fabHeight + fabMargin) * 2;
-        mFabView = rootView.findViewById(R.id.fab_button);
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
 
@@ -121,8 +116,6 @@ public class PostFragment extends Fragment
         return rootView;
     }
 
-    private void showSitePicker() {
-    }
 
     private void setRefreshing(boolean refreshing) {
         mSwipeToRefreshHelper.setRefreshing(refreshing);
@@ -188,14 +181,6 @@ public class PostFragment extends Fragment
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void showAlert(View view) {
-
-    }
-
-    private void refreshBlogDetails() {
-
-    }
-
 
     @Override
     public void onScrollToTop() {
@@ -228,28 +213,16 @@ public class PostFragment extends Fragment
         if (isAdded()) {
             setRefreshing(false);
             hideLoadMoreProgress();
-            Log.i("is fail:", String.valueOf(event.getFailed()));
+
             if (!event.getFailed()) {
-                loadNotes();
+                loadPosts();
             } else {
-//                ApiHelper.ErrorType errorType = event.getErrorType();
-//                if (errorType != null && errorType != ErrorType.TASK_CANCELLED && errorType != ErrorType.NO_ERROR) {
-//                    switch (errorType) {
-//                        case UNAUTHORIZED:
-//                            updateEmptyView(EmptyViewMessageType.PERMISSION_ERROR);
-//                            break;
-//                        default:
-//                            updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
-//                            break;
-//                    }
-//                }
                 updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
             }
         }
     }
 
     private boolean isPostAdapterEmpty() {
-        //return (mNoteListAdapter != null && mNoteListAdapter.getItemCount() == 0);    //--add this
         return false;
     }
 
@@ -278,4 +251,17 @@ public class PostFragment extends Fragment
     public void onVisitBlogButtonClicked() {
         ActivityLauncher.visitBlog(getActivity());
     }
+
+    @Override
+    public void onNotesSelected(NoteDetail note) {
+        if (!isAdded()) return;
+
+        if (note == null) {
+            ToastUtils.showToast(getActivity(), R.string.note_not_found);
+            return;
+        }
+
+        ActivityLauncher.previewNoteForResult(getActivity(), note.getId());
+    }
+
 }

@@ -27,7 +27,6 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -74,33 +73,32 @@
         <activity
             android:name=".ui.accounts.NewAccountActivity"
             android:label="@string/title_activity_new_account"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name=".ui.note.NoteDetailActivity"
             android:label="@string/title_activity_note_detail" >
         </activity>
 
-        <!--<activity-->
-            <!--android:name=".ui.note.EditNoteActivity"-->
-            <!--android:label="@string/title_activity_edit_note" >-->
-        <!--</activity>-->
+        <!-- <activity -->
+        <!-- android:name=".ui.note.EditNoteActivity" -->
+        <!-- android:label="@string/title_activity_edit_note" > -->
+        <!-- </activity> -->
 
         <activity
             android:name=".ui.note.EditNoteActivity"
-            android:label="@string/title_activity_edit_note"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:theme="@style/CalypsoTheme">
+            android:label="@string/title_activity_edit_note"
+            android:theme="@style/CalypsoTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.note.NoteListActivity" />
+
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-
-
         <activity
             android:name=".ui.note.EditNotebookActivity"
             android:label="@string/title_activity_edit_notebook" >
@@ -131,8 +129,13 @@
 
         <activity
             android:name=".ui.post.BlogHomeActivity"
-            android:theme="@style/LeanoteNoActionBarTheme">
+            android:theme="@style/LeanoteNoActionBarTheme" >
         </activity>
+
+        <activity
+            android:name=".ui.search.SearchActivity" >
+        </activity>
+
     </application>
 
 </manifest>

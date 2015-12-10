@@ -1,25 +1,19 @@
 package com.leanote.android.ui.post;
 
-import android.app.ActionBar;
-import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.ui.ObservableWebView;
 import com.leanote.android.ui.WebViewActivity;
+import com.leanote.android.util.BlogWebViewClient;
 
 
 public class BlogHomeActivity extends WebViewActivity {
-    String userid;
+    private String userid;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,10 +41,21 @@ public class BlogHomeActivity extends WebViewActivity {
 
         // load URL if one was provided in the intent
         userid=AccountHelper.getDefaultAccount().getmUserName();
-        String url = "http://blog.leanote.com/" + userid;
+        String url = String.format("%s/blog/%s",
+                AccountHelper.getDefaultAccount().getHost(),
+                AccountHelper.getDefaultAccount().getmUserName());
+
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+
+        BlogWebViewClient client = new BlogWebViewClient();
+        mWebView.setWebViewClient(client);
+
         if (url != null) {
             loadUrl(url);
         }
+
+
     }
 }
 

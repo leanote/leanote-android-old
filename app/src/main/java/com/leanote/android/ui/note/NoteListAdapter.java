@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -23,7 +22,6 @@ import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
-import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.note.service.NoteUploadService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
@@ -39,13 +37,13 @@ import java.util.List;
  */
 public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public interface OnPostButtonClickListener {
-        void onPostButtonClicked(int buttonId, NoteDetail note);
+    public interface OnNotesButtonClickListener {
+        void onNoteButtonClicked(int buttonId, NoteDetail note);
     }
 
-    private OnPostsLoadedListener mOnPostsLoadedListener;
-    private OnPostSelectedListener mOnPostSelectedListener;
-    private OnPostButtonClickListener mOnPostButtonClickListener;
+    private OnNotesLoadedListener mOnNotesLoadedListener;
+    private OnNotesSelectedListener mOnNotesSelectedListener;
+    private OnNotesButtonClickListener mOnNotesButtonClickListener;
 
     private final int mEndlistIndicatorHeight;
 
@@ -72,16 +70,16 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
 
-    public void setOnPostsLoadedListener(OnPostsLoadedListener listener) {
-        mOnPostsLoadedListener = listener;
+    public void setOnPostsLoadedListener(OnNotesLoadedListener listener) {
+        mOnNotesLoadedListener = listener;
     }
 
-    public void setOnPostSelectedListener(OnPostSelectedListener listener) {
-        mOnPostSelectedListener = listener;
+    public void setOnPostSelectedListener(OnNotesSelectedListener listener) {
+        mOnNotesSelectedListener = listener;
     }
 
-    public void setOnPostButtonClickListener(OnPostButtonClickListener listener) {
-        mOnPostButtonClickListener = listener;
+    public void setOnPostButtonClickListener(OnNotesButtonClickListener listener) {
+        mOnNotesButtonClickListener = listener;
     }
 
     private NoteDetail getItem(int position) {
@@ -92,7 +90,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position <= mNotes.size());  
+        return (position >= 0 && position < mNotes.size());
     }
 
     @Override
@@ -122,7 +120,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext()));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Note"));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NoteViewHolder(view);
@@ -172,8 +170,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             @Override
             public void onClick(View v) {
                 NoteDetail selectedNote = getItem(position - 1);    //or position -1
-                if (mOnPostSelectedListener != null && selectedNote != null) {
-                    mOnPostSelectedListener.onPostSelected(selectedNote);
+                if (mOnNotesSelectedListener != null && selectedNote != null) {
+                    mOnNotesSelectedListener.onNotesSelected(selectedNote);
                 }
             }
         });
@@ -211,8 +209,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         animateButtonRows(holder, note, true);
                         break;
                     default:
-                        if (mOnPostButtonClickListener != null) {
-                            mOnPostButtonClickListener.onPostButtonClicked(buttonType, note);
+                        if (mOnNotesButtonClickListener != null) {
+                            mOnNotesButtonClickListener.onNoteButtonClicked(buttonType, note);
                         }
                         break;
                 }
@@ -302,12 +300,12 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 //        void onLoadMore();
 //    }
 
-    public interface OnPostSelectedListener {
-        void onPostSelected(NoteDetail note);
+    public interface OnNotesSelectedListener {
+        void onNotesSelected(NoteDetail note);
     }
 
-    public interface OnPostsLoadedListener {
-        void onPostsLoaded(int postCount);
+    public interface OnNotesLoadedListener {
+        void onNotesLoaded(int postCount);
     }
 
 
@@ -383,24 +381,6 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public SearchViewHolder(View itemView) {
             super(itemView);
             mSearchToolbar = (SearchToolbar) itemView;
-            mSearchToolbar.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    ActivityLauncher.addNewNoteForResult(
-                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
-
-                    return true;
-                }
-
-            });
-            mSearchToolbar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    ActivityLauncher.addNewNoteForResult(
-                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
-
-                }
-            });
         }
     }
 
@@ -453,8 +433,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             mIsLoadingNotes = false;
 
-            if (mOnPostsLoadedListener != null) {
-                mOnPostsLoadedListener.onPostsLoaded(mNotes.size());
+            if (mOnNotesLoadedListener != null) {
+                mOnNotesLoadedListener.onNotesLoaded(mNotes.size());
             }
         }
     }

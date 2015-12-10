@@ -17,8 +17,8 @@ import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
 import com.leanote.android.ui.post.BlogHomeActivity;
+import com.leanote.android.ui.search.SearchActivity;
 import com.leanote.android.util.AppLog;
-import com.leanote.android.ui.WebViewActivity;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -132,5 +132,10 @@ public class ActivityLauncher {
     public static void visitBlog(Activity activity){
         Intent intent = new Intent(activity,BlogHomeActivity.class);
         activity.startActivity(intent);
+    }
+
+    public static void startSearchForResult(Activity context) {
+        Intent intent = new Intent(context, SearchActivity.class);
+        context.startActivityForResult(intent, RequestCodes.SEARCH_NOTE);
     }
 }

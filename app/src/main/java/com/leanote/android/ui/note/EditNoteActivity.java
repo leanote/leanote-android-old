@@ -837,8 +837,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     private void saveAndFinish() {
         saveNote(true);
-        AppLog.i("origin note:" + mOriginalNote);
-        AppLog.i("update note:" + mNote);
         if (mEditorFragment != null && hasEmptyContentFields()) {
             // new and empty post? delete it
             if (mIsNewNote) {

@@ -49,9 +49,9 @@ import com.leanote.android.widget.RecyclerItemDecoration;
 import de.greenrobot.event.EventBus;
 
 public class NoteListFragment extends Fragment
-        implements NoteListAdapter.OnPostsLoadedListener,
-        NoteListAdapter.OnPostSelectedListener,
-        NoteListAdapter.OnPostButtonClickListener {
+        implements NoteListAdapter.OnNotesLoadedListener,
+        NoteListAdapter.OnNotesSelectedListener,
+        NoteListAdapter.OnNotesButtonClickListener {
 
 
     private SwipeToRefreshHelper mSwipeToRefreshHelper;
@@ -326,7 +326,7 @@ public class NoteListFragment extends Fragment
      * called by the adapter after posts have been loaded
      */
     @Override
-    public void onPostsLoaded(int postCount) {
+    public void onNotesLoaded(int postCount) {
         if (!isAdded()) {
             return;
         }
@@ -348,15 +348,15 @@ public class NoteListFragment extends Fragment
      * called by the adapter when the user clicks a post
      */
     @Override
-    public void onPostSelected(NoteDetail note) {
-        onPostButtonClicked(PostListButton.BUTTON_PREVIEW, note);
+    public void onNotesSelected(NoteDetail note) {
+        onNoteButtonClicked(PostListButton.BUTTON_PREVIEW, note);
     }
 
     /*
      * called by the adapter when the user clicks the edit/view/stats/trash button for a post
      */
     @Override
-    public void onPostButtonClicked(int buttonType, NoteDetail note) {
+    public void onNoteButtonClicked(int buttonType, NoteDetail note) {
         if (!isAdded()) return;
 
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());

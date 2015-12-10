@@ -8,6 +8,7 @@ public class RequestCodes {
     public static final int EDIT_NOTE              = 800;
 
     public static final int PREVIEW_NOTE           = 810;
+    public static final int SEARCH_NOTE            = 820;
 
     public static final int PICTURE_LIBRARY = 2000;
     public static final int TAKE_PHOTO = 2100;

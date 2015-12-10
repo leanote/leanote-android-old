@@ -251,5 +251,6 @@
     <string name="username">username</string>
     <string name="create_account_wpcom">create account on leanote.com</string>
     <string name="validating_user_data">Validating user data</string>
+    <string name="title_activity_search">SearchActivity</string>
 
 </resources>
