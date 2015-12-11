@@ -183,7 +183,7 @@ public class EditNotePreviewFragment extends Fragment {
                     mWebView.setVisibility(View.VISIBLE);
 
 
-
+                    //o~
                     mWebView.loadDataWithBaseURL("file:///android_asset/", spanned.toString(),
                             "text/html", "utf-8", null);
 

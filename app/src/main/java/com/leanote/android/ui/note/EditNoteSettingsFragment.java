@@ -3,6 +3,7 @@ package com.leanote.android.ui.note;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -214,6 +215,8 @@ public class EditNoteSettingsFragment extends Fragment
 
         Leanote.leaDB.saveNoteSettings(mNote);
         ((EditNoteActivity)getActivity()).reloadNote();
+
+        Log.v("updateNoteSettingsmNote", mNote == null ? "null" : "full");
     }
 
 

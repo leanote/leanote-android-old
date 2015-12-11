@@ -41,6 +41,7 @@ import com.leanote.android.util.helper.ImageUtils;
 import com.leanote.android.util.helper.MediaGalleryImageSpan;
 import com.leanote.android.widget.LeaViewPager;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -125,6 +126,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                 mIsNewNote = extras.getBoolean(EXTRA_IS_NEW_NOTE);
 
                 mNote = Leanote.leaDB.getLocalNoteById(localNoteId);
+                Log.v("mNote", mNote==null?"null":"full");
 
                 mOriginalNote = Leanote.leaDB.getLocalNoteById(localNoteId);
             } else {
@@ -151,6 +153,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         }
 
 
+        Log.v("mNote", mNote==null?"null":"full");
+        Log.v("Note", mNote.getNoteId());
         // Ensure we have a valid post
 //        if (mNote == null) {
 //            showErrorAndFinish(R.string.note_not_found);
@@ -224,7 +228,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     }
 
     public void reloadNote() {
-        mNote = Leanote.leaDB.getLocalNoteByNoteId(mNote.getNoteId());
+        //mNote = Leanote.leaDB.getLocalNoteByNoteId(mNote.getNoteId());  //这句有必要??
+        Log.v("reloadNote", mNote==null?"null":"full");
     }
 
 
@@ -406,9 +411,12 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         if (mEditorFragment != null) {
             getFragmentManager().putFragment(outState, STATE_KEY_EDITOR_FRAGMENT, mEditorFragment);
         }
+
+        Log.v("OnSaveInstanceState: mNote", mNote==null?"null":"full");
     }
 
     private void updateNoteObject(boolean isAutosave) {
+        Log.v("updateNoteObject: mNote", mNote == null ? "null" : "full");
         if (mNote == null) {
             AppLog.e(AppLog.T.POSTS, "Attempted to save an invalid Post.");
             return;
@@ -510,6 +518,10 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
         note.setTitle(title);
         // split up the post content if there's a more tag
+        Log.v("updateNoteContent", note.getNoteId());  //noteId也是对的
+        Log.v("updateNoteContent", content);  //content内容是正确的
+        Leanote.leaDB.saveNoteContent(note.getNoteId(), content);  //??
+
 
         Toast.makeText(EditNoteActivity.this, "updateNoteContent", Toast.LENGTH_LONG).show();
 
@@ -552,6 +564,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
 
     private void saveNote(boolean isAutosave) {
+
+        Log.v("saveNote: mNote", mNote==null?"null":"full");
         saveNote(isAutosave, true);
     }
 
@@ -560,6 +574,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             updateNoteObject(isAutosave);
         }
 
+        Log.v("saveNote: mNote", mNote==null?"null":"full");
         Leanote.leaDB.updateNote(mNote);
     }
 
@@ -568,6 +583,9 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
+
+        Log.v("lsdkjfsl","ww");
+        Log.v("onOptionsItemSelected; mNote", mNote==null?"null":"full");
         if (itemId == R.id.menu_save_post) {
             // If the post is new and there are no changes, don't publish
             updateNoteObject(false);
@@ -604,6 +622,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     }
 
     private void saveAndFinish() {
+        Log.v("saveAndFinish: mNote", mNote==null?"null":"full");
+
         saveNote(true);
         if (mEditorFragment != null && hasEmptyContentFields()) {
             // new and empty post? delete it
