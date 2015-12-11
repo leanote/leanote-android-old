@@ -161,7 +161,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 //            trackEditorCreatedPost(action, getIntent());
 //        }
 
-        setTitle(StringUtils.unescapeHTML("leanote"));
+        setTitle(StringUtils.unescapeHTML("Leanote Editor"));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
 
@@ -187,6 +187,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                     setTitle(R.string.preview_note);
                     saveNote(true);
                     if (mEditNotePreviewFragment != null) {
+                        Log.v("myMsg", "mEditNotePreviewFragment != null");
                         mEditNotePreviewFragment.loadPost();
                     }
                 }
@@ -330,6 +331,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             Fragment fragment = (Fragment) super.instantiateItem(container, position);
+
+
 
             switch (position) {
                 case 0:
@@ -508,6 +511,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         note.setTitle(title);
         // split up the post content if there's a more tag
 
+        Toast.makeText(EditNoteActivity.this, "updateNoteContent", Toast.LENGTH_LONG).show();
+
     }
 
     private void updateMediaFileOnServer(LeaImageSpan wpIS) {
@@ -555,7 +560,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             updateNoteObject(isAutosave);
         }
 
-        //Leanote.leaDB.updateNote(mNote);
+        Leanote.leaDB.updateNote(mNote);
     }
 
 

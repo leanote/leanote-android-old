@@ -16,10 +16,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
@@ -27,6 +29,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
+import com.leanote.android.ui.LeaMainActivity;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.GravatarUtils;
 import com.leanote.android.util.ToggleListener;
@@ -56,7 +59,7 @@ public class MeFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         final ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.me_fragment, container, false);
 
         mAvatarFrame = (ViewGroup) rootView.findViewById(R.id.frame_avatar);
@@ -86,12 +89,26 @@ public class MeFragment extends Fragment {
             }
         });
 
+        // switch markdown
+        switch_markdown.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    Toast.makeText(getActivity(), "Markdown On", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "Markdown Off", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
         if (savedInstanceState != null && savedInstanceState.getBoolean(IS_DISCONNECTING, false)) {
             showDisconnectDialog(getActivity());
         }
 
         return rootView;
     }
+
 
 
     private void setListeners() {
