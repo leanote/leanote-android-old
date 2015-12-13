@@ -5,7 +5,7 @@
 
     <com.leanote.android.widget.LeaTextView
         android:id="@+id/search_note_title"
-        android:layout_width="50dp"
+        android:layout_width="80dp"
         android:layout_height="20dp"
         android:layout_centerVertical="true"
         android:textSize="15dp"
@@ -17,7 +17,7 @@
 
 
     <ImageButton
-        android:id="@+id/switch_markdown_button"
+        android:id="@+id/search_note_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

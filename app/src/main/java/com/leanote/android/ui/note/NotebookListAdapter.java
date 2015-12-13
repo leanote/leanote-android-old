@@ -115,7 +115,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_MENU) {
-            return new NotebookAddViewHolder(new SearchToolbar(parent.getContext()));
+            return new NotebookAddViewHolder(new SearchToolbar(parent.getContext(), "Notebook"));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NotebookViewHolder(view);

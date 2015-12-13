@@ -5,11 +5,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -21,7 +22,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
-import com.leanote.android.ui.ActivityLauncher;
+import com.leanote.android.ui.note.service.NoteUploadService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
 import com.leanote.android.widget.PostListButton;
@@ -36,13 +37,13 @@ import java.util.List;
  */
 public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public interface OnPostButtonClickListener {
-        void onPostButtonClicked(int buttonId, NoteDetail note);
+    public interface OnNotesButtonClickListener {
+        void onNoteButtonClicked(int buttonId, NoteDetail note);
     }
 
-    private OnPostsLoadedListener mOnPostsLoadedListener;
-    private OnPostSelectedListener mOnPostSelectedListener;
-    private OnPostButtonClickListener mOnPostButtonClickListener;
+    private OnNotesLoadedListener mOnNotesLoadedListener;
+    private OnNotesSelectedListener mOnNotesSelectedListener;
+    private OnNotesButtonClickListener mOnNotesButtonClickListener;
 
     private final int mEndlistIndicatorHeight;
 
@@ -69,16 +70,16 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
 
-    public void setOnPostsLoadedListener(OnPostsLoadedListener listener) {
-        mOnPostsLoadedListener = listener;
+    public void setOnPostsLoadedListener(OnNotesLoadedListener listener) {
+        mOnNotesLoadedListener = listener;
     }
 
-    public void setOnPostSelectedListener(OnPostSelectedListener listener) {
-        mOnPostSelectedListener = listener;
+    public void setOnPostSelectedListener(OnNotesSelectedListener listener) {
+        mOnNotesSelectedListener = listener;
     }
 
-    public void setOnPostButtonClickListener(OnPostButtonClickListener listener) {
-        mOnPostButtonClickListener = listener;
+    public void setOnPostButtonClickListener(OnNotesButtonClickListener listener) {
+        mOnNotesButtonClickListener = listener;
     }
 
     private NoteDetail getItem(int position) {
@@ -89,7 +90,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position <= mNotes.size());
+        return (position >= 0 && position < mNotes.size());
     }
 
     @Override
@@ -119,7 +120,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext()));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Note"));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NoteViewHolder(view);
@@ -130,6 +131,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         // nothing to do if this is the static endlist indicator
+
+        AppLog.i("onbindview execute...");
         int posType = getItemViewType(position);
         if (posType == VIEW_TYPE_ENDLIST_INDICATOR) {
             return;
@@ -140,34 +143,35 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         final NoteDetail note = mNotes.get(position - 1);
-        Log.i("note", note.toString());
+        //Log.i("note", note.toString());
         Context context = holder.itemView.getContext();
 
         if (holder instanceof NoteViewHolder) {
-            NoteViewHolder postHolder = (NoteViewHolder) holder;
+            NoteViewHolder noteHolder = (NoteViewHolder) holder;
 
             if (StringUtils.isNotEmpty(note.getTitle())) {
-                postHolder.txtTitle.setText(note.getTitle());
+                noteHolder.txtTitle.setText(note.getTitle());
             } else {
-                postHolder.txtTitle.setText("(" + context.getResources().getText(R.string.untitled) + ")");
+                noteHolder.txtTitle.setText("(" + context.getResources().getText(R.string.untitled) + ")");
             }
 
 
 
-            postHolder.txtDate.setText(note.getUpdatedTime());
-            postHolder.txtDate.setVisibility(View.VISIBLE);
-            postHolder.btnTrash.setButtonType(PostListButton.BUTTON_TRASH);
+            noteHolder.txtDate.setText(note.getUpdatedTime());
+            noteHolder.txtDate.setVisibility(View.VISIBLE);
+            noteHolder.btnTrash.setButtonType(PostListButton.BUTTON_TRASH);
 
-            configurePostButtons(postHolder, note);
+            updateStatusText(noteHolder.txtStatus, note);
+            configurePostButtons(noteHolder, note);
         }
 
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NoteDetail selectedNote = getItem(position - 1);
-                if (mOnPostSelectedListener != null && selectedNote != null) {
-                    mOnPostSelectedListener.onPostSelected(selectedNote);
+                NoteDetail selectedNote = getItem(position - 1);    //or position -1
+                if (mOnNotesSelectedListener != null && selectedNote != null) {
+                    mOnNotesSelectedListener.onNotesSelected(selectedNote);
                 }
             }
         });
@@ -205,8 +209,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         animateButtonRows(holder, note, true);
                         break;
                     default:
-                        if (mOnPostButtonClickListener != null) {
-                            mOnPostButtonClickListener.onPostButtonClicked(buttonType, note);
+                        if (mOnNotesButtonClickListener != null) {
+                            mOnNotesButtonClickListener.onNoteButtonClicked(buttonType, note);
                         }
                         break;
                 }
@@ -278,7 +282,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (position > -1) {
             mNotes.remove(position);
             if (mNotes.size() > 0) {
-                notifyItemRemoved(position);
+                notifyItemRemoved(position + 1);
             } else {
                 notifyDataSetChanged();
             }
@@ -296,17 +300,51 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 //        void onLoadMore();
 //    }
 
-    public interface OnPostSelectedListener {
-        void onPostSelected(NoteDetail note);
+    public interface OnNotesSelectedListener {
+        void onNotesSelected(NoteDetail note);
     }
 
-    public interface OnPostsLoadedListener {
-        void onPostsLoaded(int postCount);
+    public interface OnNotesLoadedListener {
+        void onNotesLoaded(int postCount);
+    }
+
+
+    private void updateStatusText(TextView txtStatus, NoteDetail note) {
+        AppLog.i("is uploading:" + NoteUploadService.isNoteUploading(note.getId()));
+        if (!note.isDirty()) {
+            txtStatus.setVisibility(View.GONE);
+        } else {
+            int statusTextResId = 0;
+            int statusIconResId = 0;
+            int statusColorResId = R.color.grey_darken_10;
+
+            boolean isUploading = NoteUploadService.isNoteUploading(note.getId());
+            if (isUploading) {
+                statusTextResId = R.string.note_uploading;
+                statusColorResId = R.color.alert_yellow;
+            } else if (note.getUsn() == 0) {
+                statusTextResId = R.string.local_draft;
+                statusIconResId = R.drawable.noticon_scheduled;
+                statusColorResId = R.color.alert_yellow;
+            } else if (note.isDirty()) {
+                statusTextResId = R.string.local_changes;
+                statusIconResId = R.drawable.noticon_scheduled;
+                statusColorResId = R.color.alert_yellow;
+            }
+
+            Resources resources = txtStatus.getContext().getResources();
+            txtStatus.setTextColor(resources.getColor(statusColorResId));
+            txtStatus.setText(statusTextResId != 0 ? resources.getString(statusTextResId) : "");
+            Drawable drawable = (statusIconResId != 0 ? resources.getDrawable(statusIconResId) : null);
+            txtStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+            txtStatus.setVisibility(View.VISIBLE);
+        }
     }
 
     class NoteViewHolder extends RecyclerView.ViewHolder {
         private final TextView txtTitle;
         private final TextView txtDate;
+        private final TextView txtStatus;
 
         private final PostListButton btnEdit;
         private final PostListButton btnView;
@@ -320,6 +358,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             txtTitle = (TextView) view.findViewById(R.id.text_title);
             txtDate = (TextView) view.findViewById(R.id.text_date);
+            txtStatus = (TextView) view.findViewById(R.id.text_status);
 
             btnEdit = (PostListButton) view.findViewById(R.id.btn_edit);
             btnView = (PostListButton) view.findViewById(R.id.btn_view);
@@ -342,24 +381,6 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public SearchViewHolder(View itemView) {
             super(itemView);
             mSearchToolbar = (SearchToolbar) itemView;
-            mSearchToolbar.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    ActivityLauncher.addNewNoteForResult(
-                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
-
-                    return true;
-                }
-
-            });
-            mSearchToolbar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    ActivityLauncher.addNewNoteForResult(
-                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
-
-                }
-            });
         }
     }
 
@@ -384,12 +405,17 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         protected Boolean doInBackground(Void... voids) {
 
             tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
-            Log.i("load notes from local:", String.valueOf(tmpNotes.size()));
             // make sure we don't return any hidden posts
-            Log.i("hidden note size:", String.valueOf(mHiddenNotes.size()));
+
+
             for (NoteDetail hiddenNote : mHiddenNotes) {
+                AppLog.i("hidden note:" + hiddenNote);
                 int index = tmpNotes.indexOfPost(hiddenNote);
-                tmpNotes.remove(index);
+                if (index >= 0 && index < tmpNotes.size()) {
+                    tmpNotes.remove(index);
+                }
+
+
             }
 
             Log.i("after remove, size:", String.valueOf(tmpNotes.size()));
@@ -407,8 +433,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             mIsLoadingNotes = false;
 
-            if (mOnPostsLoadedListener != null) {
-                mOnPostsLoadedListener.onPostsLoaded(mNotes.size());
+            if (mOnNotesLoadedListener != null) {
+                mOnNotesLoadedListener.onNotesLoaded(mNotes.size());
             }
         }
     }

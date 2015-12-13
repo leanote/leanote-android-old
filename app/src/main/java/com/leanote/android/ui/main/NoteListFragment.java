@@ -402,5 +402,5 @@ public class NoteListFragment extends Fragment
         }
     }
 
-    
+
 }

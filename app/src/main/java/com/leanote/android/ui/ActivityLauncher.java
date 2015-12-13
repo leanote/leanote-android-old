@@ -17,6 +17,7 @@ import com.leanote.android.ui.accounts.NewAccountActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
+import com.leanote.android.ui.search.SearchActivity;
 import com.leanote.android.util.AppLog;
 
 import java.io.IOException;
@@ -129,4 +130,10 @@ public class ActivityLauncher {
                 R.anim.do_nothing);
         ActivityCompat.startActivityForResult(activity, intent, requestCode, options.toBundle());
     }
+
+    public static void startSearchForResult(Activity context) {
+        Intent intent = new Intent(context, SearchActivity.class);
+        context.startActivityForResult(intent, RequestCodes.SEARCH_NOTE);
+    }
+
 }

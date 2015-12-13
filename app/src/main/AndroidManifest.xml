@@ -79,7 +79,17 @@
         </activity>
         <activity
             android:name=".ui.note.EditNoteActivity"
-            android:label="@string/title_activity_edit_note" >
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_edit_note"
+            android:theme="@style/CalypsoTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.note.NoteListActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.note.EditNotebookActivity"
@@ -108,6 +118,10 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
+        <activity
+            android:name=".ui.search.SearchActivity" >
+        </activity>
     </application>
 
 </manifest>
