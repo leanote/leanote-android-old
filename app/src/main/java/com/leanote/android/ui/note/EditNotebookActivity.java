@@ -110,8 +110,6 @@ public class EditNotebookActivity extends AppCompatActivity {
 
         String notebookTitle = ((EditText)viewGroup.findViewById(R.id.edit_notebook_title)).getText().toString();
 
-        Log.v("sdfsdf", "sdfsdf");
-
         if (itemId == R.id.menu_save_notebook) {
 
             if (TextUtils.isEmpty(notebookTitle)) {

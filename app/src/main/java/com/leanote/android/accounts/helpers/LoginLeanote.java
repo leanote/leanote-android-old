@@ -28,6 +28,7 @@ public class LoginLeanote extends LoginAbstract {
             @Override
             public void onResponse(JSONObject response) {
                 try {
+
                     boolean isOk = (boolean) response.get("Ok");
                     if (isOk) {
                         Account account = AccountHelper.getDefaultAccount();

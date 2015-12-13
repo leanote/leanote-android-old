@@ -12,4 +12,5 @@ public class RequestCodes {
 
     public static final int PICTURE_LIBRARY = 2000;
     public static final int TAKE_PHOTO = 2100;
+
 }

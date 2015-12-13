@@ -3,7 +3,6 @@ package com.leanote.android.ui.note;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -11,24 +10,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
-import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.EditTextUtils;
-import com.leanote.android.util.ToastUtils;
 import com.leanote.android.util.ToggleListener;
 
 import org.apache.commons.lang.StringUtils;
@@ -56,15 +51,9 @@ public class EditNoteSettingsFragment extends Fragment
     private List<String> mNotebooks;
     private List<NotebookInfo> mNotebookInfos;
 
-    private LinearLayout markdown_editor_setting;
-    private ToggleButton switch_markdown;
-    private ImageButton switch_markdown_button;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        Log.v("setting create", "sdfsdfs");
         mNote = ((EditNoteActivity) getActivity()).getNote();
         mRootView = (ViewGroup) inflater.inflate(R.layout.edit_note_settings_fragment, container, false);
 
@@ -98,26 +87,8 @@ public class EditNoteSettingsFragment extends Fragment
         mTagsEditText = (EditText) mRootView.findViewById(R.id.tags);
 
 
-        markdown_editor_setting = (LinearLayout) mRootView.findViewById(R.id.markdown_editor_setting);
-        switch_markdown = (ToggleButton) mRootView.findViewById(R.id.switch_markdown);
-        switch_markdown_button = (ImageButton) mRootView.findViewById(R.id.switch_markdown_button);
-        // switch markdown
-        switch_markdown.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Toast.makeText(getActivity(), "Markdown On", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getActivity(), "Markdown Off", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-
-
         initSettingsFields();
         setListeners();
-
 
         return mRootView;
     }
@@ -146,31 +117,6 @@ public class EditNoteSettingsFragment extends Fragment
 
         toggleButtonPublicBlog.setOnClickListener(clickToToggleListener);
         notePublicSettings.setOnClickListener(clickToToggleListener);
-
-
-        switch_markdown.setOnCheckedChangeListener(new ToggleListener(getActivity(),
-                "use_markdown", switch_markdown, switch_markdown_button, null));
-
-
-        View.OnClickListener clickToToggleListener_markdown = new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                mNote.setIsMarkDown(switch_markdown.isChecked());
-                switch_markdown.toggle();
-                mNote.setIsMarkDown(!mNote.isMarkDown());
-                if (mNote.isMarkDown()) {
-                    Toast.makeText(getActivity(), "Markdown On", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(getActivity(), "Markdown Off", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-
-        switch_markdown_button.setOnClickListener(clickToToggleListener_markdown);
-        markdown_editor_setting.setOnClickListener(clickToToggleListener_markdown);
-
 
     }
 
@@ -205,34 +151,9 @@ public class EditNoteSettingsFragment extends Fragment
 
         String tags = mNote.getTags();
 
-        if (StringUtils.isNotEmpty(tags)) {
+        if (StringUtils.isNotEmpty(tags) && "null".equals(tags)) {
             mTagsEditText.setText(tags);
         }
-
-
-        boolean isMarkdown = mNote.isMarkDown();
-        Log.v("initMarkdown", "haha");
-        ////////
-        switch_markdown.setChecked(isMarkdown);
-        RelativeLayout.LayoutParams params2 = (RelativeLayout.LayoutParams) switch_markdown_button
-                .getLayoutParams();
-
-
-        if (isMarkdown) {
-            params2.addRule(RelativeLayout.ALIGN_RIGHT, -1);
-            switch_markdown_button.setLayoutParams(params2);
-            switch_markdown_button
-                    .setImageResource(R.drawable.progress_thumb_selector);
-            switch_markdown.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        } else {
-            params2.addRule(RelativeLayout.ALIGN_RIGHT, R.id.switch_markdown);
-            params2.addRule(RelativeLayout.ALIGN_LEFT, -1);
-            switch_markdown_button.setLayoutParams(params2);
-            switch_markdown_button
-                    .setImageResource(R.drawable.progress_thumb_off_selector);
-            switch_markdown.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-        }
-
     }
 
 
@@ -282,7 +203,7 @@ public class EditNoteSettingsFragment extends Fragment
 
 
         String tags = EditTextUtils.getText(mTagsEditText);
-
+        AppLog.i("setting tags:" + tags);
 
         mNote.setIsPublicBlog(togglePublicBlog.isChecked());
         mNote.setTags(tags);
@@ -292,9 +213,7 @@ public class EditNoteSettingsFragment extends Fragment
         mNote.setNoteBookId(notebook.getNotebookId());
 
         Leanote.leaDB.saveNoteSettings(mNote);
-        ((EditNoteActivity)getActivity()).reloadNote();
-
-        Log.v("updateNoteSettingsmNote", mNote == null ? "null" : "full");
+        //((EditNoteActivity)getActivity()).reloadNote();
     }
 
 

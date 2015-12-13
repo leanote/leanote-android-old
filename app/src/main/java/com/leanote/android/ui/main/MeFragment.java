@@ -16,26 +16,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
-import com.leanote.android.R;
+
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
-import com.leanote.android.ui.LeaMainActivity;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.GravatarUtils;
 import com.leanote.android.util.ToggleListener;
 import com.leanote.android.widget.LeaNetworkImageView;
 
 import java.lang.ref.WeakReference;
+import com.leanote.android.R;
 
 public class MeFragment extends Fragment {
 
@@ -48,13 +46,18 @@ public class MeFragment extends Fragment {
     private TextView mLoginLogoutTextView;
     private ProgressDialog mDisconnectProgressDialog;
 
+    private LinearLayout markdown_editor_setting;
+    private ToggleButton switch_markdown;
+    private ImageButton switch_markdown_button;
+
+
     public static MeFragment newInstance() {
         return new MeFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             final Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         final ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.me_fragment, container, false);
 
         mAvatarFrame = (ViewGroup) rootView.findViewById(R.id.frame_avatar);
@@ -62,6 +65,10 @@ public class MeFragment extends Fragment {
         mDisplayNameTextView = (TextView) rootView.findViewById(R.id.me_display_name);
         mUsernameTextView = (TextView) rootView.findViewById(R.id.me_username);
         mLoginLogoutTextView = (TextView) rootView.findViewById(R.id.me_login_logout_text_view);
+
+        markdown_editor_setting = (LinearLayout) rootView.findViewById(R.id.markdown_editor_setting);
+        switch_markdown = (ToggleButton) rootView.findViewById(R.id.switch_markdown);
+        switch_markdown_button = (ImageButton) rootView.findViewById(R.id.switch_markdown_button);
 
         addDropShadowToAvatar();
         refreshAccountDetails();
@@ -80,7 +87,6 @@ public class MeFragment extends Fragment {
             }
         });
 
-
         if (savedInstanceState != null && savedInstanceState.getBoolean(IS_DISCONNECTING, false)) {
             showDisconnectDialog(getActivity());
         }
@@ -92,9 +98,49 @@ public class MeFragment extends Fragment {
 
     private void setListeners() {
 
+        switch_markdown.setOnCheckedChangeListener(new ToggleListener(getActivity(),
+                "use_markdown", switch_markdown, switch_markdown_button, null));
+
+
+        View.OnClickListener clickToToggleListener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                switch_markdown.toggle();
+                AccountHelper.getDefaultAccount().setUseMarkdown(switch_markdown.isChecked());
+            }
+        };
+
+        switch_markdown_button.setOnClickListener(clickToToggleListener);
+        markdown_editor_setting.setOnClickListener(clickToToggleListener);
+
     }
 
+
     private void initSettingsFields() {
+        boolean isMarkdown = AccountHelper.getDefaultAccount().isUseMarkdown();
+        AppLog.i("ismarkdown:" + isMarkdown);
+        switch_markdown.setChecked(isMarkdown);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) switch_markdown_button
+                .getLayoutParams();
+
+
+        if (isMarkdown) {
+            params.addRule(RelativeLayout.ALIGN_RIGHT, -1);
+            params.addRule(RelativeLayout.ALIGN_LEFT,
+                    R.id.toggleButton_public_blog);
+            switch_markdown_button.setLayoutParams(params);
+            switch_markdown_button
+                    .setImageResource(R.drawable.progress_thumb_selector);
+            switch_markdown.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        } else {
+            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.switch_markdown);
+            params.addRule(RelativeLayout.ALIGN_LEFT, -1);
+            switch_markdown_button.setLayoutParams(params);
+            switch_markdown_button
+                    .setImageResource(R.drawable.progress_thumb_off_selector);
+            switch_markdown.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        }
     }
 
     @Override

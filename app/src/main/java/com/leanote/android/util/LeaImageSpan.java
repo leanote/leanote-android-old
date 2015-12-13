@@ -75,11 +75,10 @@ public class LeaImageSpan extends ImageSpan implements Parcelable {
         boolean[] booleans = new boolean[2];
         in.readBooleanArray(booleans);
         setNetworkImageLoaded(booleans[0]);
-        mediaFile.setVideo(booleans[1]);
 
         setImageSource(Uri.parse(in.readString()));
         mediaFile.setMediaId(in.readString());
-        mediaFile.setBlogId(in.readString());
+
         mediaFile.setNoteID(in.readString());
         mediaFile.setCaption(in.readString());
         mediaFile.setDescription(in.readString());
@@ -87,7 +86,7 @@ public class LeaImageSpan extends ImageSpan implements Parcelable {
         mediaFile.setMimeType(in.readString());
         mediaFile.setFileName(in.readString());
         mediaFile.setThumbnailURL(in.readString());
-        mediaFile.setVideoPressShortCode(in.readString());
+
         mediaFile.setFileURL(in.readString());
         mediaFile.setFilePath(in.readString());
         mediaFile.setDateCreatedGMT(in.readLong());
@@ -118,10 +117,9 @@ public class LeaImageSpan extends ImageSpan implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeBooleanArray(new boolean[] {mNetworkImageLoaded, mMediaFile.isVideo()});
+        parcel.writeBooleanArray(new boolean[] {mNetworkImageLoaded, false});
         parcel.writeString(mImageSource.toString());
         parcel.writeString(mMediaFile.getMediaId());
-        parcel.writeString(mMediaFile.getBlogId());
         parcel.writeString(mMediaFile.getNoteID());
         parcel.writeString(mMediaFile.getCaption());
         parcel.writeString(mMediaFile.getDescription());
@@ -129,7 +127,7 @@ public class LeaImageSpan extends ImageSpan implements Parcelable {
         parcel.writeString(mMediaFile.getMimeType());
         parcel.writeString(mMediaFile.getFileName());
         parcel.writeString(mMediaFile.getThumbnailURL());
-        parcel.writeString(mMediaFile.getVideoPressShortCode());
+
         parcel.writeString(mMediaFile.getFileURL());
         parcel.writeString(mMediaFile.getFilePath());
         parcel.writeLong(mMediaFile.getDateCreatedGMT());

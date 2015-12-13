@@ -1,9 +1,12 @@
 
 package com.leanote.android.ui;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -11,16 +14,13 @@ import android.webkit.WebView;
 
 import com.leanote.android.R;
 
-/**
- * Basic activity for displaying a WebView.
- */
 public abstract class WebViewActivity extends AppCompatActivity {
     /** Primary webview used to display content. */
 
     private static final String URL = "url";
 
     protected WebView mWebView;
-
+    //protected ObservableWebView mWebView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_PROGRESS);
@@ -33,7 +33,6 @@ public abstract class WebViewActivity extends AppCompatActivity {
         setTitle("");
 
         setContentView(R.layout.webview);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -42,8 +41,19 @@ public abstract class WebViewActivity extends AppCompatActivity {
         // note: do NOT call mWebView.getSettings().setUserAgentString(WordPress.getUserAgent())
         // here since it causes problems with the browser-sniffing that some sites rely on to
         // format the page for mobile display
+
         mWebView = (WebView) findViewById(R.id.webView);
         mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
+        //mWebView = (ObservableWebView) findViewById(R.id.webView);
+        //mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
+//        mWebView.setOnScrollChangedCallback(new ObservableWebView.OnScrollChangedCallback() {
+//            public void onScroll(int dx, int dy) {
+//                //这里我们根据dx和dy参数做自己想做的事情
+//                Log.i("dxdy","dx: "+ dx + "dy: " + dy);
+//            }
+//        });
 
         // load URL if one was provided in the intent
         String url = getIntent().getStringExtra(URL);
@@ -76,6 +86,8 @@ public abstract class WebViewActivity extends AppCompatActivity {
             mWebView.onResume();
         }
     }
+
+
 
     /**
      * Load the specified URL in the webview.

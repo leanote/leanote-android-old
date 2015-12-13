@@ -27,5 +27,4 @@ public class AccountHelper {
         return StringUtils.isNotEmpty(getDefaultAccount().getmAccessToken());
     }
 
-
 }

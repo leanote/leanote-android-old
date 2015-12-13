@@ -17,6 +17,7 @@ import com.leanote.android.ui.accounts.NewAccountActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
+import com.leanote.android.ui.post.BlogHomeActivity;
 import com.leanote.android.ui.search.SearchActivity;
 import com.leanote.android.util.AppLog;
 
@@ -59,7 +60,6 @@ public class ActivityLauncher {
 
     public static void addNewNoteForResult(Activity context) {
 
-        Log.v("addNewNoteForResult", "haha");
         // Create a new post object
         NoteDetail newNote = new NoteDetail();
         //WordPress.wpDB.savePost(newPost);
@@ -67,7 +67,6 @@ public class ActivityLauncher {
         Intent intent = new Intent(context, EditNoteActivity.class);
         intent.putExtra(EditNoteActivity.EXTRA_NOTEID, newNote.getId());
         intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_NOTE, true);
-        Log.v("addNote noteid", newNote.getNoteId() == null ? "1" : "0");
         context.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 
@@ -131,9 +130,13 @@ public class ActivityLauncher {
         ActivityCompat.startActivityForResult(activity, intent, requestCode, options.toBundle());
     }
 
+    public static void visitBlog(Activity activity){
+        Intent intent = new Intent(activity,BlogHomeActivity.class);
+        activity.startActivity(intent);
+    }
+
     public static void startSearchForResult(Activity context) {
         Intent intent = new Intent(context, SearchActivity.class);
         context.startActivityForResult(intent, RequestCodes.SEARCH_NOTE);
     }
-
 }

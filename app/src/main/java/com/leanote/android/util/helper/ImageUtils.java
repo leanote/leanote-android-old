@@ -457,6 +457,7 @@ public class ImageUtils {
             scale = (int) d;
         }
 
+        scale = 10;
         BitmapFactory.Options optActual = new BitmapFactory.Options();
         optActual.inSampleSize = scale;
 

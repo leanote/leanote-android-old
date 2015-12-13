@@ -29,6 +29,7 @@ public class NoteDetail implements Serializable {
     private String updatedTime;
     private String publicTime;
     private int usn;
+    private boolean isUploading;
 
 
 
@@ -124,13 +125,21 @@ public class NoteDetail implements Serializable {
     @Override
     public String toString() {
         return "NoteDetail{" +
-                "noteId='" + noteId + '\'' +
+                "id=" + id +
+                ", noteId='" + noteId + '\'' +
                 ", noteBookId='" + noteBookId + '\'' +
                 ", userId='" + userId + '\'' +
                 ", title='" + title + '\'' +
-                ", tags=" + tags +
+                ", desc='" + desc + '\'' +
+                ", tags='" + tags + '\'' +
+                ", noteAbstract='" + noteAbstract + '\'' +
+                ", content='" + content + '\'' +
+                ", fileIds='" + fileIds + '\'' +
                 ", isMarkDown=" + isMarkDown +
                 ", isTrash=" + isTrash +
+                ", isDeleted=" + isDeleted +
+                ", isDirty=" + isDirty +
+                ", isPublicBlog=" + isPublicBlog +
                 ", createdTime='" + createdTime + '\'' +
                 ", updatedTime='" + updatedTime + '\'' +
                 ", publicTime='" + publicTime + '\'' +
@@ -151,13 +160,14 @@ public class NoteDetail implements Serializable {
     }
 
 
-    public boolean isLocalDraft() {
-        return true;
-    }
-
     public boolean hasChanges(NoteDetail otherNote) {
+
         return otherNote == null || !StringUtils.equals(title, otherNote.title)
-            || !StringUtils.equals(updatedTime, otherNote.updatedTime);
+            || !StringUtils.equals(content, otherNote.content)
+            || !StringUtils.equals(noteBookId, otherNote.noteBookId)
+            || isMarkDown != otherNote.isMarkDown
+            || !StringUtils.equals(tags, otherNote.tags)
+            || isPublicBlog != otherNote.isPublicBlog;
     }
 
     public boolean isPublicBlog() {
@@ -215,5 +225,13 @@ public class NoteDetail implements Serializable {
 
     public void setFileIds(String fileIds) {
         this.fileIds = fileIds;
+    }
+
+    public boolean isUploading() {
+        return isUploading;
+    }
+
+    public void setIsUploading(boolean isUploading) {
+        this.isUploading = isUploading;
     }
 }
