@@ -2,6 +2,7 @@ package com.leanote.android.service;
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.model.AccountHelper;
@@ -135,6 +136,25 @@ public class NoteSyncService {
     }
 
 
+    private static NoteDetail parseServerNote(JSONObject item) throws JSONException {
+        NoteDetail note = new NoteDetail();
+
+        note.setNoteId(item.getString("NoteId"));
+        note.setUsn(item.getInt("Usn"));
+        note.setNoteBookId(item.getString("NotebookId"));
+        note.setTitle(item.getString("Title"));
+        //note.setContent(json.getString("Content"));
+        //note.setNoteAbstract(json.getString("Abstract"));
+        note.setIsMarkDown(item.getBoolean("IsMarkdown"));
+        note.setIsDeleted(item.getBoolean("IsTrash"));
+        note.setCreatedTime(item.getString("CreatedTime"));
+        note.setUpdatedTime(item.getString("UpdatedTime"));
+
+        return note;
+    }
+
+
+
     public static int getServerSyncState() {
 
         String host = AccountHelper.getDefaultAccount().getHost();
@@ -247,12 +267,44 @@ public class NoteSyncService {
     }
 
 
-    public void sendNoteChanges() {
-        List<NoteDetail> dirtyNotes = Leanote.leaDB.getDirtyNotes();
+    public static void sendNoteChanges(String userId) {
+        ArrayList<NoteDetail> dirtyNotes = Leanote.leaDB.getNotesList(userId);
+        String host = AccountHelper.getDefaultAccount().getHost();
+        String token = AccountHelper.getDefaultAccount().getmAccessToken();
+        Log.v("sendNoteChanges", "doing");
+        Log.v("sendNoteChanges", new Integer(dirtyNotes.size()).toString());
+
+
+        List<String> noteApis = new ArrayList<>();
         for (NoteDetail note : dirtyNotes) {
+            Log.v("dirtyNote", "haha");
+            String noteId = note.getNoteId();
+
+            String api;
+            if (TextUtils.isEmpty(noteId)) {
+                api = String.format("%s/api/note/addNote?token=%s&title=%s", host, token,
+                        note.getTitle());
+
+            } else if (note.isDeleted()) {
+                api = String.format("%s/api/note/deleteNote?token=%s&noteId=%s&usn=%s", host, token,
+                        noteId, note.getUsn());
+
+            } else {
+                api = String.format("%s/api/note/updateNote?token=%s&noteId=%s&title=%s&usn=%s&Content=%s", host,
+                        token, noteId, note.getTitle(), note.getUsn(), note.getContent());
+
+            }
+
+
+            noteApis.add(api);
 
         }
+        new SyncNoteTask(noteApis).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
+
+
+
 
     public static void sendNotebookChanges() throws ExecutionException, InterruptedException {
         List<NotebookInfo> dirtyNotebooks = Leanote.leaDB.getDirtyNotebooks();
@@ -285,6 +337,95 @@ public class NoteSyncService {
         new SyncNotebooksTask(notebookApis).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
+
+
+
+    private static class SyncNoteTask extends AsyncTask<Void, Void, Boolean> {
+        private List<String> noteApis;
+
+        public SyncNoteTask(List<String> noteApis) {
+            this.noteApis = noteApis;
+        }
+
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            boolean succ = true;
+            for (String api : noteApis) {
+                Log.v("Sync api", api);
+                try {
+                    String response = NetworkRequest.syncGetRequest(api);
+                    JSONObject json = new JSONObject(response);
+                    String noteId = json.getString("NoteId");
+
+                    if (json.getBoolean("Ok") || !TextUtils.isEmpty(noteId)) {
+                        //更新成功
+                        NoteDetail note = new NoteDetail();
+                        note.setNoteId(json.getString("NoteId"));
+                        note.setUsn(json.getInt("Usn"));
+                        note.setNoteBookId(json.getString("NotebookId"));
+                        note.setTitle(json.getString("Title"));
+                        //note.setContent(json.getString("Content"));
+                        //note.setNoteAbstract(json.getString("Abstract"));
+                        note.setIsMarkDown(json.getBoolean("IsMarkdown"));
+                        note.setIsDeleted(json.getBoolean("IsTrash"));
+                        note.setCreatedTime(json.getString("CreatedTime"));
+                        note.setUpdatedTime(json.getString("UpdatedTime"));
+
+                        note.setIsDirty(false);
+
+                        Leanote.leaDB.updateNote(note);
+                    } else {
+                        //处理冲突
+                        succ = false;
+                        //冲突，重新拉取server note更新到本地
+                        String noteApi = String.format("%s/api//note/updateNote?token=%s",
+                                AccountHelper.getDefaultAccount().getHost(),
+                                AccountHelper.getDefaultAccount().getmAccessToken());
+
+                        String noteRes = NetworkRequest.syncGetRequest(noteApi);
+                        JSONArray jsonArray = new JSONArray(noteRes);
+                        JSONObject note = null;
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject noteObj = jsonArray.getJSONObject(i);
+                            if (StringUtils.equals(noteId, noteObj.getString("NoteId"))) {
+                                note = noteObj;
+                            }
+                        }
+
+                        NoteDetail serverNote = parseServerNote(note);
+                        Leanote.leaDB.updateNote(serverNote);
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    succ = false;
+                }
+            }
+            Log.v("Sync api", "haha");
+            return succ;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            //noteSyncListener.onNotePullDone(result);
+        }
+    }
+
+
+
 
 
     private static class SyncNotebooksTask extends AsyncTask<Void, Void, Boolean> {

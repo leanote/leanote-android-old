@@ -7,12 +7,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.leanote.android.datasets.AccountTable;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.service.NoteSyncService;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.SqlUtils;
 import com.leanote.android.util.StringUtils;
@@ -179,10 +181,11 @@ public class LeanoteDB extends SQLiteOpenHelper {
         NoteDetailList listPosts = new NoteDetailList();
 
         String[] args = {userId};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "userId=?", args, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        //Cursor c = db.query(NOTES_TABLE, null, "userId=?", args, null, null, "");
         try {
             while (c.moveToNext()) {
+
                 String title = c.getString(4);
                 String updateTime = c.getString(13);
                 NoteDetail detail = new NoteDetail();
@@ -337,6 +340,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public long addNote(NoteDetail newNote) {
         ContentValues values = new ContentValues();
 
+        Log.v("addNote noteid", newNote.getNoteId() == null ? "1" : "0");
         values.put("noteId", newNote.getNoteId());
         values.put("notebookId", newNote.getNoteBookId());
         values.put("userId", newNote.getUserId());
@@ -344,6 +348,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("updatedTime", newNote.getUpdatedTime());
 
         long result = db.insert(NOTES_TABLE, null, values);
+        Log.v("addNote result", new Long(result).toString());
         if (result > 0) {
             newNote.setId(result);
         }
@@ -360,7 +365,12 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("tags", note.getTags());
         values.put("updatedTime", note.getUpdatedTime());
         values.put("content", note.getContent());
+        values.put("is_dirty", note.isDirty() ? 1 : 0);
         db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+
+        Log.v("LeaDB", "zhixing");
+
+        NoteSyncService.sendNoteChanges(note.getUserId());
 
     }
 

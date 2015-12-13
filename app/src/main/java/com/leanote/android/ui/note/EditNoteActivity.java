@@ -30,6 +30,7 @@ import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
+import com.leanote.android.service.NoteSyncService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.LeaHtml;
 import com.leanote.android.util.LeaImageSpan;
@@ -44,7 +45,9 @@ import com.leanote.android.widget.LeaViewPager;
 import org.apache.commons.lang.ObjectUtils;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +110,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
 
+
+        Log.v("onCreate haha ", mNote == null ? "null" : "full");
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -154,7 +159,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
 
         Log.v("mNote", mNote==null?"null":"full");
-        Log.v("Note", mNote.getNoteId());
+        //Log.v("Note", mNote.getNoteId());
         // Ensure we have a valid post
 //        if (mNote == null) {
 //            showErrorAndFinish(R.string.note_not_found);
@@ -412,7 +417,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             getFragmentManager().putFragment(outState, STATE_KEY_EDITOR_FRAGMENT, mEditorFragment);
         }
 
-        Log.v("OnSaveInstanceState: mNote", mNote==null?"null":"full");
+        Log.v("OnSaveInstanceState: mNote", mNote == null ? "null" : "full");
     }
 
     private void updateNoteObject(boolean isAutosave) {
@@ -431,6 +436,20 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         }
     }
 
+
+    @Override
+    public void onBackPressed() {
+        AppLog.i("onbackpressed");
+        if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
+            mViewPager.setCurrentItem(PAGE_CONTENT);
+            invalidateOptionsMenu();
+            return;
+        }
+
+        if (mEditorFragment != null && !mEditorFragment.onBackPressed()) {
+            saveAndFinish();
+        }
+    }
 
     private void updateNoteContent(boolean isAutoSave) {
         NoteDetail note = getNote();
@@ -517,10 +536,25 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         String moreTag = "<!--more-->";
 
         note.setTitle(title);
+        note.setContent(postContent.toString());
+        //note.setContent(content);
+
+
+
+        note.setIsDirty(true);
         // split up the post content if there's a more tag
         Log.v("updateNoteContent", note.getNoteId());  //noteId也是对的
-        Log.v("updateNoteContent", content);  //content内容是正确的
-        Leanote.leaDB.saveNoteContent(note.getNoteId(), content);  //??
+        Log.v("updateNoteContent", note.getContent());  //content内容是正确的
+        //Leanote.leaDB.saveNoteContent(note.getNoteId(), content);  //??
+        Leanote.leaDB.updateNote(note);  //??
+
+        String host = AccountHelper.getDefaultAccount().getHost();
+        String noteApi = String.format("%s/api/user/getSyncState?token=%s", host,
+                AccountHelper.getDefaultAccount().getmAccessToken());
+
+
+        //notebook.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        //NoteSyncService.updateNote(notebook);
 
 
         Toast.makeText(EditNoteActivity.this, "updateNoteContent", Toast.LENGTH_LONG).show();
@@ -584,8 +618,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         int itemId = item.getItemId();
 
 
-        Log.v("lsdkjfsl","ww");
-        Log.v("onOptionsItemSelected; mNote", mNote==null?"null":"full");
+//        Log.v("lsdkjfsl","ww");
+//        Log.v("onOptionsItemSelected; mNote", mNote==null?"null":"full");
         if (itemId == R.id.menu_save_post) {
             // If the post is new and there are no changes, don't publish
             updateNoteObject(false);
@@ -610,6 +644,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         } else if (itemId == R.id.menu_preview_post) {
             mViewPager.setCurrentItem(PAGE_PREVIEW);
         } else if (itemId == android.R.id.home) {
+            Log.v("onOptionsItemSelected", "home");
             if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
                 mViewPager.setCurrentItem(PAGE_CONTENT);
                 invalidateOptionsMenu();

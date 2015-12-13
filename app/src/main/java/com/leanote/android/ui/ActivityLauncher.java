@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.util.Log;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
@@ -57,6 +58,7 @@ public class ActivityLauncher {
 
     public static void addNewNoteForResult(Activity context) {
 
+        Log.v("addNewNoteForResult", "haha");
         // Create a new post object
         NoteDetail newNote = new NoteDetail();
         //WordPress.wpDB.savePost(newPost);
@@ -64,6 +66,7 @@ public class ActivityLauncher {
         Intent intent = new Intent(context, EditNoteActivity.class);
         intent.putExtra(EditNoteActivity.EXTRA_NOTEID, newNote.getId());
         intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_NOTE, true);
+        Log.v("addNote noteid", newNote.getNoteId() == null ? "1" : "0");
         context.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 

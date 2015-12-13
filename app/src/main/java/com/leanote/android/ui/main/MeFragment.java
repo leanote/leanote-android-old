@@ -48,11 +48,6 @@ public class MeFragment extends Fragment {
     private TextView mLoginLogoutTextView;
     private ProgressDialog mDisconnectProgressDialog;
 
-    private LinearLayout markdown_editor_setting;
-    private ToggleButton switch_markdown;
-    private ImageButton switch_markdown_button;
-
-
     public static MeFragment newInstance() {
         return new MeFragment();
     }
@@ -67,10 +62,6 @@ public class MeFragment extends Fragment {
         mDisplayNameTextView = (TextView) rootView.findViewById(R.id.me_display_name);
         mUsernameTextView = (TextView) rootView.findViewById(R.id.me_username);
         mLoginLogoutTextView = (TextView) rootView.findViewById(R.id.me_login_logout_text_view);
-
-        markdown_editor_setting = (LinearLayout) rootView.findViewById(R.id.markdown_editor_setting);
-        switch_markdown = (ToggleButton) rootView.findViewById(R.id.switch_markdown);
-        switch_markdown_button = (ImageButton) rootView.findViewById(R.id.switch_markdown_button);
 
         addDropShadowToAvatar();
         refreshAccountDetails();
@@ -89,18 +80,6 @@ public class MeFragment extends Fragment {
             }
         });
 
-        // switch markdown
-        switch_markdown.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Toast.makeText(getActivity(), "Markdown On", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getActivity(), "Markdown Off", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
 
         if (savedInstanceState != null && savedInstanceState.getBoolean(IS_DISCONNECTING, false)) {
             showDisconnectDialog(getActivity());
@@ -113,47 +92,9 @@ public class MeFragment extends Fragment {
 
     private void setListeners() {
 
-        switch_markdown.setOnCheckedChangeListener(new ToggleListener(getActivity(),
-                "use_markdown", switch_markdown, switch_markdown_button, null));
-
-
-        View.OnClickListener clickToToggleListener = new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                switch_markdown.toggle();
-            }
-        };
-
-        switch_markdown_button.setOnClickListener(clickToToggleListener);
-        markdown_editor_setting.setOnClickListener(clickToToggleListener);
-
     }
 
     private void initSettingsFields() {
-        boolean isMarkdown = AccountHelper.getDefaultAccount().isUseMarkdown();
-        AppLog.i("ismarkdown:" + isMarkdown);
-        switch_markdown.setChecked(isMarkdown);
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) switch_markdown_button
-                .getLayoutParams();
-
-
-        if (isMarkdown) {
-            params.addRule(RelativeLayout.ALIGN_RIGHT, -1);
-            params.addRule(RelativeLayout.ALIGN_LEFT,
-                    R.id.toggleButton_public_blog);
-            switch_markdown_button.setLayoutParams(params);
-            switch_markdown_button
-                    .setImageResource(R.drawable.progress_thumb_selector);
-            switch_markdown.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        } else {
-            params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.switch_markdown);
-            params.addRule(RelativeLayout.ALIGN_LEFT, -1);
-            switch_markdown_button.setLayoutParams(params);
-            switch_markdown_button
-                    .setImageResource(R.drawable.progress_thumb_off_selector);
-            switch_markdown.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-        }
     }
 
     @Override

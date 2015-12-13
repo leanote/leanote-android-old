@@ -70,7 +70,8 @@
         </activity>
         <activity
             android:name=".ui.accounts.NewAccountActivity"
-            android:label="@string/title_activity_new_account" >
+            android:label="@string/title_activity_new_account"
+            android:theme="@style/Leanote.NoActionBar" >
         </activity>
         <activity
             android:name=".ui.note.NoteDetailActivity"
@@ -99,7 +100,7 @@
         <activity
             android:name=".ui.note.NotePreviewActivity"
             android:label="@string/title_activity_note_preview"
-            android:theme="@style/AppTheme4Preview">
+            android:theme="@style/AppTheme4Preview" >
         </activity>
 
         <service
