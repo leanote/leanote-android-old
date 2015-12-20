@@ -12,39 +12,61 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.ConsoleMessage;
+import android.webkit.URLUtil;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ToggleButton;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.leanote.android.R;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.util.AppLog.T;
+import com.leanote.android.util.LeaWebViewClient;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.StringUtils;
+import com.leanote.android.util.ToastUtils;
 import com.leanote.android.util.helper.MediaGallery;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class EditorFragment extends EditorFragmentAbstract implements View.OnClickListener, View.OnTouchListener,
-        OnJsEditorStateChangedListener, OnImeBackListener {
+        OnJsEditorStateChangedListener, OnImeBackListener
+//        , EditorMediaUploadListener
+    {
     private static final String ARG_PARAM_TITLE = "param_title";
     private static final String ARG_PARAM_CONTENT = "param_content";
 
     private static final String JS_CALLBACK_HANDLER = "nativeCallbackHandler";
+
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_CONTENT = "content";
 
     private static final String TAG_FORMAT_BAR_BUTTON_MEDIA = "media";
     private static final String TAG_FORMAT_BAR_BUTTON_LINK = "link";
 
     private static final float TOOLBAR_ALPHA_ENABLED = 1;
     private static final float TOOLBAR_ALPHA_DISABLED = 0.5f;
+
+    protected static final int BUTTON_ID_LOG_HTML = 555;
 
     private String mTitle = "";
     private String mContentHtml = "";
@@ -60,7 +82,14 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     private String mTitlePlaceholder = "";
     private String mContentPlaceholder = "";
 
-    private boolean mHideActionBarOnSoftKeyboardUp;
+    private boolean mDomHasLoaded = false;
+    private boolean mIsKeyboardOpen = false;
+    private boolean mEditorWasPaused = false;
+    private boolean mHideActionBarOnSoftKeyboardUp = false;
+
+    private ConcurrentHashMap<String, MediaFile> mWaitingMediaFiles;
+    //private Set<String> mUploadingMediaIds;
+    private Set<String> mFailedMediaIds;
 
     private String mJavaScriptResult = "";
 
@@ -91,11 +120,16 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_editor, container, false);
 
+        Log.i("enter...", "new editor");
         // Setup hiding the action bar when the soft keyboard is displayed for narrow viewports
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
                 && !getResources().getBoolean(R.bool.is_large_tablet_landscape)) {
             mHideActionBarOnSoftKeyboardUp = true;
         }
+
+        mWaitingMediaFiles = new ConcurrentHashMap<>();
+        //mUploadingMediaIds = new HashSet<>();
+        mFailedMediaIds = new HashSet<>();
 
         // -- WebView configuration
 
@@ -103,6 +137,18 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
         mWebView.setOnTouchListener(this);
         mWebView.setOnImeBackListener(this);
+        mWebView.setWebViewClient(new LeaWebViewClient());
+
+        mWebView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage cm)
+            {
+                Log.i("js console:", String.format("%s @ %d: %s",
+                        cm.message(), cm.lineNumber(), cm.sourceId()));
+                return true;
+            }
+
+        });
 
         // Ensure that the content field is always filling the remaining screen space
         mWebView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -121,6 +167,11 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         mEditorFragmentListener.onEditorFragmentInitialized();
 
         initJsEditor();
+
+        if (savedInstanceState != null) {
+            setTitle(savedInstanceState.getCharSequence(KEY_TITLE));
+            setContent(savedInstanceState.getCharSequence(KEY_CONTENT));
+        }
 
         // -- HTML mode configuration
 
@@ -155,8 +206,41 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        mEditorWasPaused = true;
+        mIsKeyboardOpen = false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // If the editor was previously paused and the current orientation is landscape,
+        // hide the actionbar because the keyboard is going to appear (even if it was hidden
+        // prior to being paused).
+        mWebView.setWebViewClient(new LeaWebViewClient());
+        if (mEditorWasPaused
+                && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                && !getResources().getBoolean(R.bool.is_large_tablet_landscape)) {
+            mIsKeyboardOpen = true;
+            mHideActionBarOnSoftKeyboardUp = true;
+            hideActionBarIfNeeded();
+        }
+    }
+
+    @Override
     public void onDetach() {
+        // Soft cancel (delete flag off) all media uploads currently in progress
+//        for (String mediaId : mUploadingMediaIds) {
+//            mEditorFragmentListener.onMediaUploadCancelClicked(mediaId, false);
+//        }
         super.onDetach();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putCharSequence(KEY_TITLE, getTitle());
+        outState.putCharSequence(KEY_CONTENT, getContent());
     }
 
     private ActionBar getActionBar() {
@@ -261,6 +345,8 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         ToggleButton mediaButton = (ToggleButton) view.findViewById(R.id.format_bar_button_media);
         mTagToggleButtonMap.put(TAG_FORMAT_BAR_BUTTON_MEDIA, mediaButton);
 
+        registerForContextMenu(mediaButton);
+
         ToggleButton linkButton = (ToggleButton) view.findViewById(R.id.format_bar_button_link);
         mTagToggleButtonMap.put(TAG_FORMAT_BAR_BUTTON_LINK, linkButton);
 
@@ -283,13 +369,27 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
         mWebView.loadDataWithBaseURL("file:///android_asset/", htmlEditor, "text/html", "utf-8", "");
 
-        enableWebDebugging(true);
+        if (mDebugModeEnabled) {
+            enableWebDebugging(true);
+            // Enable the HTML logging button
+            setHasOptionsMenu(true);
+        }
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.format_bar_button_html) {
+            // Don't switch to HTML mode if currently uploading media
+//            if (!mUploadingMediaIds.isEmpty()) {
+//                ((ToggleButton) v).setChecked(false);
+//
+//                if (isAdded()) {
+//                    ToastUtils.showToast(getActivity(), R.string.alert_html_toggle_uploading, ToastUtils.Duration.LONG);
+//                }
+//                return;
+//            }
+
             clearFormatBarButtons();
             updateFormatBarEnabledState(true);
 
@@ -320,8 +420,16 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 mWebView.execJavaScriptFromString("ZSSEditor.getField('zss_field_content').focus();");
             }
         } else if (id == R.id.format_bar_button_media) {
-            // TODO: Handle inserting media
             ((ToggleButton) v).setChecked(false);
+
+            if (mSourceView.getVisibility() == View.VISIBLE) {
+                ToastUtils.showToast(getActivity(), R.string.alert_insert_image_html_mode, ToastUtils.Duration.LONG);
+            } else {
+                mEditorFragmentListener.onAddMediaClicked();
+                if (isAdded()) {
+                    getActivity().openContextMenu(mTagToggleButtonMap.get(TAG_FORMAT_BAR_BUTTON_MEDIA));
+                }
+            }
         } else if (id == R.id.format_bar_button_link) {
             if (!((ToggleButton) v).isChecked()) {
                 // The link button was checked when it was pressed; remove the current link
@@ -371,6 +479,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         if (event.getAction() == MotionEvent.ACTION_UP) {
             // If the WebView or EditText has received a touch event, the keyboard will be displayed and the action bar
             // should hide
+            mIsKeyboardOpen = true;
             hideActionBarIfNeeded();
         }
         return false;
@@ -381,6 +490,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
      */
     @Override
     public void onImeBack() {
+        mIsKeyboardOpen = false;
         showActionBarIfNeeded();
     }
 
@@ -436,14 +546,75 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 mWebView.execJavaScriptFromString(jsMethod + "('" + Utils.escapeHtml(linkUrl) + "', '" +
                         Utils.escapeHtml(linkText) + "');");
             }
+        } else if (requestCode == ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_REQUEST_CODE) {
+            if (data == null) {
+                return;
+            }
+
+            Bundle extras = data.getExtras();
+            if (extras == null) {
+                return;
+            }
+
+            final String imageMeta = extras.getString("imageMeta");
+            final int imageRemoteId = extras.getInt("imageRemoteId");
+            final boolean isFeaturedImage = extras.getBoolean("isFeatured");
+
+            mWebView.post(new Runnable() {
+                @Override
+                public void run() {
+                    mWebView.execJavaScriptFromString("ZSSEditor.updateCurrentImageMeta('" + imageMeta + "');");
+                }
+            });
+
+            if (imageRemoteId != 0) {
+                if (isFeaturedImage) {
+                    mFeaturedImageId = imageRemoteId;
+                    mEditorFragmentListener.onFeaturedImageChanged(mFeaturedImageId);
+                } else {
+                    // If this image was unset as featured, clear the featured image id
+                    if (mFeaturedImageId == imageRemoteId) {
+                        mFeaturedImageId = 0;
+                        mEditorFragmentListener.onFeaturedImageChanged(mFeaturedImageId);
+                    }
+                }
+            }
         }
     }
 
     @SuppressLint("NewApi")
     private void enableWebDebugging(boolean enable) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            AppLog.i(AppLog.T.EDITOR, "Enabling web debugging");
+            AppLog.i(T.EDITOR, "Enabling web debugging");
             WebView.setWebContentsDebuggingEnabled(enable);
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.add(0, BUTTON_ID_LOG_HTML, 0, "Log HTML")
+                .setIcon(R.drawable.ic_log_html)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == BUTTON_ID_LOG_HTML) {
+            if (mDebugModeEnabled) {
+                // Log the raw html
+                mWebView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mWebView.execJavaScriptFromString("console.log(document.body.innerHTML);");
+                    }
+                });
+            } else {
+                AppLog.d(AppLog.T.EDITOR, "Could not execute JavaScript - debug mode not enabled");
+            }
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -467,13 +638,13 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             return "";
         }
 
-        if (mSourceView.getVisibility() == View.VISIBLE) {
+        if (mSourceView != null && mSourceView.getVisibility() == View.VISIBLE) {
             mTitle = mSourceViewTitle.getText().toString();
             return StringUtils.notNullStr(mTitle);
         }
 
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            AppLog.d(AppLog.T.EDITOR, "getTitle() called from UI thread");
+            AppLog.d(T.EDITOR, "getTitle() called from UI thread");
         }
 
         mGetTitleCountDownLatch = new CountDownLatch(1);
@@ -489,7 +660,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         try {
             mGetTitleCountDownLatch.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            AppLog.e(AppLog.T.EDITOR, e);
+            AppLog.e(T.EDITOR, e);
             Thread.currentThread().interrupt();
         }
 
@@ -506,13 +677,13 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             return "";
         }
 
-        if (mSourceView.getVisibility() == View.VISIBLE) {
+        if (mSourceView != null && mSourceView.getVisibility() == View.VISIBLE) {
             mContentHtml = mSourceViewContent.getText().toString();
             return StringUtils.notNullStr(mContentHtml);
         }
 
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            AppLog.d(AppLog.T.EDITOR, "getContent() called from UI thread");
+            AppLog.d(T.EDITOR, "getContent() called from UI thread");
         }
 
         mGetContentCountDownLatch = new CountDownLatch(1);
@@ -528,23 +699,55 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         try {
             mGetContentCountDownLatch.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            AppLog.e(AppLog.T.EDITOR, e);
+            AppLog.e(T.EDITOR, e);
             Thread.currentThread().interrupt();
         }
 
         return StringUtils.notNullStr(mContentHtml);
     }
 
-
     @Override
-    public void appendMediaFile(MediaFile mediaFile, String imageUrl, ImageLoader imageLoader) {
-        // TODO
+    public void appendMediaFile(final MediaFile mediaFile, final String mediaUrl, ImageLoader imageLoader) {
+        if (!mDomHasLoaded) {
+            // If the DOM hasn't loaded yet, we won't be able to add media to the ZSSEditor
+            // Place them in a queue to be handled when the DOM loaded callback is received
+            mWaitingMediaFiles.put(mediaUrl, mediaFile);
+            return;
+        }
+
+        mWebView.post(new Runnable() {
+            @Override
+            public void run() {
+                if (URLUtil.isNetworkUrl(mediaUrl)) {
+                    String mediaId = mediaFile.getMediaId();
+                    mWebView.execJavaScriptFromString("ZSSEditor.insertImage('" + mediaUrl + "', '" + mediaId + "');");
+                } else {
+                    String id = mediaFile.getMediaId();
+                    //String id = mediaFile.getId();
+                    //报错在这里
+                    //需要把本地url替换成leanote url
+                    //http://leanote.com/api/file/getImage?fileId=5503537b38f4111dcb0000d1
+
+                    String imageUrl = mediaFile.getFileURL();
+                    mWebView.execJavaScriptFromString("ZSSEditor.insertLocalImage(" + id + ", '" + imageUrl + "');");
+                    //mWebView.execJavaScriptFromString("ZSSEditor.setProgressOnImage(" + id + ", " + 0 + ");");
+                    //mUploadingMediaIds.add(id);
+                }
+            }
+        });
     }
 
-    @Override
+
+
+        @Override
     public void appendGallery(MediaGallery mediaGallery) {
         // TODO
     }
+
+//    @Override
+//    public boolean hasFailedMediaUploads() {
+//        return (mFailedMediaIds.size() > 0);
+//    }
 
     @Override
     public Spanned getSpannedContent() {
@@ -561,9 +764,47 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         mContentPlaceholder = placeholderText.toString();
     }
 
+//    @Override
+//    public void onMediaUploadSucceeded(final String mediaId, final String remoteId, final String remoteUrl) {
+//        mWebView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mWebView.execJavaScriptFromString("ZSSEditor.replaceLocalImageWithRemoteImage(" + mediaId + ", '" +
+//                        remoteId + "', '" + remoteUrl + "');");
+//                mUploadingMediaIds.remove(mediaId);
+//            }
+//        });
+//    }
+
+//    @Override
+//    public void onMediaUploadProgress(final String mediaId, final float progress) {
+//        mWebView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                String progressString = String.format(Locale.US, "%.1f", progress);
+//                mWebView.execJavaScriptFromString("ZSSEditor.setProgressOnImage(" + mediaId + ", " +
+//                        progressString + ");");
+//            }
+//        });
+//    }
+
+//    @Override
+//    public void onMediaUploadFailed(final String mediaId) {
+//        mWebView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mWebView.execJavaScriptFromString("ZSSEditor.markImageUploadFailed(" + mediaId + ");");
+//                mFailedMediaIds.add(mediaId);
+//                mUploadingMediaIds.remove(mediaId);
+//            }
+//        });
+//    }
+
     public void onDomLoaded() {
         mWebView.post(new Runnable() {
             public void run() {
+                mDomHasLoaded = true;
+
                 mWebView.execJavaScriptFromString("ZSSEditor.getField('zss_field_content').setMultiline('true');");
 
                 // Set title and content placeholder text
@@ -574,6 +815,14 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
                 // Load title and content into ZSSEditor
                 updateVisualEditorFields();
+
+                // If there are images that are still in progress (because the editor exited before they completed),
+                // set them to failed, so the user can restart them (otherwise they will stay stuck in 'uploading' mode)
+                //mWebView.execJavaScriptFromString("ZSSEditor.markAllUploadingImagesAsFailed();");
+
+                // Update the list of failed media uploads
+                //mWebView.execJavaScriptFromString("ZSSEditor.getFailedImages();");
+
                 hideActionBarIfNeeded();
 
                 // Reset all format bar buttons (in case they remained active through activity re-creation)
@@ -581,6 +830,18 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 htmlButton.setChecked(false);
                 for (ToggleButton button : mTagToggleButtonMap.values()) {
                     button.setChecked(false);
+                }
+
+                // Add any media files that were placed in a queue due to the DOM not having loaded yet
+                if (mWaitingMediaFiles.size() > 0) {
+                    // Image insertion will only work if the content field is in focus
+                    // (for a new post, no field is in focus until user action)
+                    mWebView.execJavaScriptFromString("ZSSEditor.getField('zss_field_content').focus();");
+
+                    for (Map.Entry<String, MediaFile> entry : mWaitingMediaFiles.entrySet()) {
+                        appendMediaFile(entry.getValue(), entry.getKey(), null);
+                    }
+                    mWaitingMediaFiles.clear();
                 }
             }
         });
@@ -606,7 +867,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             @Override
             public void run() {
                 if (!focusedFieldId.isEmpty()) {
-                    switch(focusedFieldId) {
+                    switch (focusedFieldId) {
                         case "zss_field_title":
                             updateFormatBarEnabledState(false);
                             break;
@@ -617,6 +878,86 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 }
             }
         });
+    }
+
+    public void onMediaTapped(final String mediaId, String url, final JSONObject meta, String uploadStatus) {
+//        switch (uploadStatus) {
+//            case "uploading":
+//                // Display 'cancel upload' dialog
+//                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//                builder.setTitle(getString(R.string.stop_upload_dialog_title));
+//                builder.setPositiveButton(R.string.stop_upload_button, new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        mEditorFragmentListener.onMediaUploadCancelClicked(mediaId, true);
+//
+//                        mWebView.post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                mWebView.execJavaScriptFromString("ZSSEditor.removeImage(" + mediaId + ");");
+//                                mUploadingMediaIds.remove(mediaId);
+//                            }
+//                        });
+//                        dialog.dismiss();
+//                    }
+//                });
+//
+//                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        dialog.dismiss();
+//                    }
+//                });
+//
+//                AlertDialog dialog = builder.create();
+//                dialog.show();
+//                break;
+//            case "failed":
+//                // Retry media upload
+//                mEditorFragmentListener.onMediaRetryClicked(mediaId);
+//
+//                mWebView.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mWebView.execJavaScriptFromString("ZSSEditor.unmarkImageUploadFailed(" + mediaId + ");");
+//                        mWebView.execJavaScriptFromString("ZSSEditor.setProgressOnImage(" + mediaId + ", " + 0 + ");");
+//                        mFailedMediaIds.remove(mediaId);
+//                        mUploadingMediaIds.add(mediaId);
+//                    }
+//                });
+//                break;
+//            default:
+//                // Show media options fragment
+//                FragmentManager fragmentManager = getFragmentManager();
+//
+//                if (fragmentManager.findFragmentByTag(ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_TAG) != null) {
+//                    return;
+//                }
+//
+//                ImageSettingsDialogFragment imageSettingsDialogFragment = new ImageSettingsDialogFragment();
+//                imageSettingsDialogFragment.setTargetFragment(this,
+//                        ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_REQUEST_CODE);
+//
+//                Bundle dialogBundle = new Bundle();
+//
+//                dialogBundle.putString("imageMeta", meta.toString());
+//                dialogBundle.putString("maxWidth", mBlogSettingMaxImageWidth);
+//                dialogBundle.putBoolean("featuredImageSupported", mFeaturedImageSupported);
+//
+//                String imageId = JSONUtils.getString(meta, "attachment_id");
+//                if (!imageId.isEmpty()) {
+//                    dialogBundle.putBoolean("isFeatured", mFeaturedImageId == Integer.parseInt(imageId));
+//                }
+//
+//                imageSettingsDialogFragment.setArguments(dialogBundle);
+//
+//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//
+//                fragmentTransaction.add(android.R.id.content, imageSettingsDialogFragment,
+//                        ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_TAG)
+//                        .addToBackStack(null)
+//                        .commit();
+//                break;
+//        }
     }
 
     public void onLinkTapped(String url, String title) {
@@ -660,6 +1001,13 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 mJavaScriptResult = inputArgs.get("result");
                 mGetSelectedTextCountDownLatch.countDown();
                 break;
+            case "getFailedImages":
+                String[] mediaIds = inputArgs.get("ids").split(",");
+                for (String mediaId : mediaIds) {
+                    if (!mediaId.equals("")) {
+                        mFailedMediaIds.add(mediaId);
+                    }
+                }
         }
     }
 
@@ -679,6 +1027,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         if (getActionBar() != null
                 && !isHardwareKeyboardPresent()
                 && mHideActionBarOnSoftKeyboardUp
+                && mIsKeyboardOpen
                 && actionBar.isShowing()) {
             getActionBar().hide();
         }

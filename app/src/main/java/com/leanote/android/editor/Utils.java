@@ -1,15 +1,23 @@
 package com.leanote.android.editor;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 
+import com.leanote.android.Leanote;
 import com.leanote.android.util.AppLog;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +28,22 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 public class Utils {
+
+    public static String getImageRealPath(Uri imageUri) {
+        if (imageUri.toString().contains("content:")) {
+            String[] projection = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA,
+                    MediaStore.Images.Media.MIME_TYPE};
+
+            Cursor cur = Leanote.getContext().getContentResolver().query(imageUri, projection, null, null, null);
+            if (cur != null && cur.moveToFirst()) {
+                int dataColumn = cur.getColumnIndex(MediaStore.Images.Media.DATA);
+                int mimeTypeColumn = cur.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
+                return cur.getString(dataColumn);
+            }
+        }
+        return imageUri.toString();
+    }
+
 
     public static String getHtmlFromFile(Activity activity, String filename) {
         try {
@@ -147,5 +171,50 @@ public class Utils {
         }
 
         return changeMap;
+    }
+
+    public static Uri downloadExternalMedia(Context context, Uri imageUri) {
+        if(context != null && imageUri != null) {
+            File cacheDir = null;
+
+            if(context.getApplicationContext() != null) {
+                cacheDir = context.getCacheDir();
+            }
+
+            try {
+                InputStream inputStream;
+                if(imageUri.toString().startsWith("content://")) {
+                    inputStream = context.getContentResolver().openInputStream(imageUri);
+                    if(inputStream == null) {
+                        AppLog.e(AppLog.T.UTILS, "openInputStream returned null");
+                        return null;
+                    }
+                } else {
+                    inputStream = (new URL(imageUri.toString())).openStream();
+                }
+
+                String fileName = "thumb-" + System.currentTimeMillis();
+
+                File f = new File(cacheDir, fileName);
+                FileOutputStream output = new FileOutputStream(f);
+                byte[] data = new byte[1024];
+
+                int count;
+                while((count = inputStream.read(data)) != -1) {
+                    output.write(data, 0, count);
+                }
+
+                output.flush();
+                output.close();
+                inputStream.close();
+                return Uri.fromFile(f);
+            } catch (IOException e) {
+                AppLog.e(AppLog.T.UTILS, e);
+            }
+
+            return null;
+        } else {
+            return null;
+        }
     }
 }

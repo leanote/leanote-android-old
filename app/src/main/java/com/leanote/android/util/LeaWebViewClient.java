@@ -1,9 +1,11 @@
 package com.leanote.android.util;
 
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
@@ -102,15 +104,21 @@ public class LeaWebViewClient extends WebViewClient {
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
 
+        AppLog.i("intercept url:" + url);
         WebResourceResponse response = null;
         if (url.indexOf("api/file/getImage") > 0 || url.indexOf("file/outputImage") > 0) {
             //处理图片逻辑
             MediaFile mf = Leanote.leaDB.getMediaFileByUrl(url);
             if (mf != null && !TextUtils.isEmpty(mf.getFilePath())) {
                 AppLog.i("image from cache");
+                if (mf.getFilePath().contains("content://media/external/images")) {
+                    getRealImagePath(mf);
+                }
                 FileInputStream stream = null;
 
                 try {
+                    //filepath不能是content provider,把content provider的地址改为sd卡地址
+                    //http://stackoverflow.com/questions/11303118/android-set-a-local-image-to-an-img-element-in-webview
                     stream = new FileInputStream(mf.getFilePath());
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -127,6 +135,23 @@ public class LeaWebViewClient extends WebViewClient {
         }
 
         return super.shouldInterceptRequest(view, url);
+    }
+
+    private void getRealImagePath(MediaFile mf) {
+        String[] projection = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.MIME_TYPE};
+
+        Cursor cur = Leanote.getContext().getContentResolver().query(Uri.parse(mf.getFilePath()),
+                projection, null, null, null);
+
+        if (cur != null && cur.moveToFirst()) {
+            int dataColumn = cur.getColumnIndex(MediaStore.Images.Media.DATA);
+            String thumbData = cur.getString(dataColumn);
+
+            mf.setFilePath(thumbData);
+            Leanote.leaDB.saveMediaFile(mf);
+
+        }
     }
 
     private class DownloadMediaTask extends AsyncTask<Uri, Integer, Uri> {
@@ -157,6 +182,11 @@ public class LeaWebViewClient extends WebViewClient {
 
         @Override
         protected void onPostExecute(Uri uri) {
+            if (uri == null) {
+                AppLog.e(AppLog.T.API, "download image uri is null");
+                return;
+            }
+
             super.onPostExecute(uri);
             MediaFile mf = new MediaFile();
             mf.setId(new ObjectId().toString());

@@ -61,7 +61,7 @@ public class NoteListFragment extends Fragment
     private RecyclerView mRecyclerView;
 
     private View mEmptyView;
-    private ProgressBar mProgressLoadMore;
+    private ProgressBar mProgressBar;
     private TextView mEmptyViewTitle;
     private ImageView mEmptyViewImage;
 
@@ -86,9 +86,10 @@ public class NoteListFragment extends Fragment
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
-        mProgressLoadMore = (ProgressBar) view.findViewById(R.id.progress);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
         mFabView = view.findViewById(R.id.fab_button);
 
+        mProgressBar.setVisibility(ProgressBar.GONE);
 
         mEmptyView = view.findViewById(R.id.empty_view);
         mEmptyViewTitle = (TextView) mEmptyView.findViewById(R.id.title_empty);
@@ -245,8 +246,8 @@ public class NoteListFragment extends Fragment
 
 
     private void hideLoadMoreProgress() {
-        if (mProgressLoadMore != null) {
-            mProgressLoadMore.setVisibility(View.GONE);
+        if (mProgressBar != null) {
+            mProgressBar.setVisibility(View.GONE);
         }
     }
 
@@ -273,17 +274,6 @@ public class NoteListFragment extends Fragment
                 }).start();
 
             } else {
-//                ApiHelper.ErrorType errorType = event.getErrorType();
-//                if (errorType != null && errorType != ErrorType.TASK_CANCELLED && errorType != ErrorType.NO_ERROR) {
-//                    switch (errorType) {
-//                        case UNAUTHORIZED:
-//                            updateEmptyView(EmptyViewMessageType.PERMISSION_ERROR);
-//                            break;
-//                        default:
-//                            updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
-//                            break;
-//                    }
-//                }
                 updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
             }
         }
@@ -417,7 +407,6 @@ public class NoteListFragment extends Fragment
 
         // different undo text if this is a local draft since it will be deleted rather than trashed
 //        String text = getString(R.string.note_trashed);
-
         Snackbar.make(getView().findViewById(R.id.coordinator), R.string.note_trashed, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, undoListener)
                 .show();

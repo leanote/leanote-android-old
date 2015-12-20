@@ -16,6 +16,8 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.CharacterStyle;
+import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -28,8 +30,9 @@ import android.widget.Toast;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.editor.EditorFragment;
 import com.leanote.android.editor.EditorFragmentAbstract;
-import com.leanote.android.editor.LegacyEditorFragment;
+import com.leanote.android.editor.Utils;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.networking.NetworkRequest;
@@ -40,7 +43,6 @@ import com.leanote.android.ui.note.service.NoteUploadService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DeviceUtils;
 import com.leanote.android.util.LeaHtml;
-import com.leanote.android.util.LeaImageSpan;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.MediaUtils;
 import com.leanote.android.util.StringUtils;
@@ -56,6 +58,9 @@ import org.wordpress.passcodelock.AppLockManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class EditNoteActivity extends AppCompatActivity implements EditorFragmentAbstract.EditorFragmentListener {
 
@@ -100,7 +105,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     private NoteDetail mOriginalNote;
 
-    private EditorFragmentAbstract mEditorFragment;
+    private EditorFragment mEditorFragment;
+
 
     private EditNoteSettingsFragment mEditNoteSettingsFragment;
 
@@ -136,9 +142,9 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                 mIsNewNote = extras.getBoolean(EXTRA_IS_NEW_NOTE);
 
                 mNote = Leanote.leaDB.getLocalNoteById(localNoteId);
-                AppLog.i("isnewnote: " + mIsNewNote);
-                AppLog.i("mnote:" + mNote);
                 mOriginalNote = Leanote.leaDB.getLocalNoteById(localNoteId);
+
+                mEditorFragment = new EditorFragment();
             } else {
                 // A postId extra must be passed to this activity
                 showErrorAndFinish(R.string.note_not_found);
@@ -147,20 +153,19 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         } else {
             if (savedInstanceState.containsKey(STATE_KEY_ORIGINAL_NOTE)) {
                 try {
-
                     mNote = (NoteDetail) savedInstanceState.getSerializable(STATE_KEY_CURRENT_NOTE);
                     mOriginalNote = (NoteDetail) savedInstanceState.getSerializable(STATE_KEY_ORIGINAL_NOTE);
                 } catch (ClassCastException e) {
-                    Log.e("error", ":", e);
+                    Log.e("editor error", ":", e);
                     mNote = null;
                 }
             }
-            mEditorFragment = (EditorFragmentAbstract) fragmentManager.getFragment(savedInstanceState, STATE_KEY_EDITOR_FRAGMENT);
+            mEditorFragment = (EditorFragment) fragmentManager.getFragment(savedInstanceState, STATE_KEY_EDITOR_FRAGMENT);
         }
 
-        if (mHasSetNoteContent = mEditorFragment != null) {
-            mEditorFragment.setImageLoader(Leanote.imageLoader);
-        }
+//        if (mHasSetNoteContent = mEditorFragment != null) {
+//            mEditorFragment.setImageLoader(Leanote.imageLoader);
+//        }
 
 
         // Ensure we have a valid post
@@ -216,6 +221,21 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     @Override
     public void onAddMediaClicked() {
+
+    }
+
+//    @Override
+//    public void onMediaRetryClicked(String mediaId) {
+//
+//    }
+
+//    @Override
+//    public void onMediaUploadCancelClicked(String mediaId, boolean delete) {
+//
+//    }
+
+    @Override
+    public void onFeaturedImageChanged(int mediaId) {
 
     }
 
@@ -286,7 +306,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     private class LoadNoteContentTask extends AsyncTask<Void, Spanned, Spanned> {
 
         @Override
-        protected Spanned doInBackground(Void... voids) {
+        protected Spanned doInBackground(Void... params) {
             String content = fetchNoteContent(getNote().getNoteId());
 
             if (org.apache.commons.lang.StringUtils.isEmpty(content)) {
@@ -343,12 +363,13 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                             if (!addMedia(capturedImageUri)) {
                                 ToastUtils.showToast(this, R.string.gallery_error, ToastUtils.Duration.SHORT);
                             }
-                            this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"
+//                            this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"
+//                                    + Environment.getExternalStorageDirectory())));
+
+                            this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://"
                                     + Environment.getExternalStorageDirectory())));
 
                         } catch (RuntimeException e) {
-                            AppLog.e(AppLog.T.POSTS, e);
-                        } catch (OutOfMemoryError e) {
                             AppLog.e(AppLog.T.POSTS, e);
                         }
                     } else if (TextUtils.isEmpty(mEditorFragment.getContent())) {
@@ -421,8 +442,14 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         mediaFile.setId(new ObjectId().toString());
         mediaFile.setNoteID(getNote().getNoteId());
         mediaFile.setTitle(mediaTitle);
-        mediaFile.setFilePath(imageUri.toString());
 
+        mediaFile.setFilePath(Utils.getImageRealPath(imageUri));
+
+        String leanoteImageUrl = String.format("%s/api/file/getImage?fileId=%s",
+                AccountHelper.getDefaultAccount().getHost(),
+                mediaFile.getId());
+
+        mediaFile.setFileURL(leanoteImageUrl);
         //更新到db
         Leanote.leaDB.saveMediaFile(mediaFile);
         mEditorFragment.appendMediaFile(mediaFile, mediaFile.getFilePath(), Leanote.imageLoader);
@@ -468,24 +495,23 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         // Set post title and content
         NoteDetail note = getNote();
         if (note != null) {
-            if (!mHasSetNoteContent) {
+            if (!TextUtils.isEmpty(note.getContent()) && !mHasSetNoteContent) {
                 mHasSetNoteContent = true;
                 if (!mIsNewNote && org.apache.commons.lang.StringUtils.isEmpty(note.getContent())) {
                     // Load local post content in the background, as it may take time to generate images
-//                    new LoadNoteContentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-//                            note.getContent().replaceAll("\uFFFC", ""));
                     new LoadNoteContentTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
                 }
                 else if (!TextUtils.isEmpty(note.getContent())){
-                    mEditorFragment.setContent(note.getContent().replaceAll("\uFFFC", ""));
+                    String content = note.getContent().replaceAll("\uFFFC", "").replace("<img&nbsp;", "<img")
+                            .replace("</p><br>", "");
+                    mEditorFragment.setContent(content);
                 }
             }
             if (!TextUtils.isEmpty(note.getTitle())) {
                 mEditorFragment.setTitle(note.getTitle());
             }
             // TODO: postSettingsButton.setText(post.isPage() ? R.string.page_settings : R.string.post_settings);
-            //mEditorFragment.setLocalDraft(note.isLocalDraft());
+            mEditorFragment.setLocalDraft(note.getUsn() == 0);
         }
 
 
@@ -503,7 +529,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             switch (position) {
                 case 0:
                     // TODO: switch between legacy and new editor here (AB test?)
-                    return new LegacyEditorFragment();
+                    return new EditorFragment();
+                //return new LegacyEditorFragment();
                 case 1:
                     return new EditNoteSettingsFragment();
                 default:
@@ -517,7 +544,8 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
             switch (position) {
                 case 0:
-                    mEditorFragment = (EditorFragmentAbstract) fragment;
+                    //mEditorFragment = (EditorFragmentAbstract) fragment;
+                    mEditorFragment = (EditorFragment) fragment;
                     break;
                 case 1:
                     mEditNoteSettingsFragment = (EditNoteSettingsFragment) fragment;
@@ -582,7 +610,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     @Override
     public void onBackPressed() {
-        AppLog.i("onbackpressed");
+
         if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
             mViewPager.setCurrentItem(PAGE_CONTENT);
             invalidateOptionsMenu();
@@ -616,150 +644,139 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             noteContent = new SpannableStringBuilder(StringUtils.notNullStr((String) mEditorFragment.getContent()));
         }
 
-        String content;
+        String content = null;
+
 
         //note 可用usn是否为0表示isLocalDraft
-//        if (note.getUsn() == 0) {
-//            // remove suggestion spans, they cause craziness in WPHtml.toHTML().
-//            CharacterStyle[] characterStyles = noteContent.getSpans(0, noteContent.length(), CharacterStyle.class);
-//            for (CharacterStyle characterStyle : characterStyles) {
-//                if (characterStyle instanceof SuggestionSpan) {
-//                    noteContent.removeSpan(characterStyle);
-//                }
-//            }
-//            content = LeaHtml.toHtml(noteContent);
-//            // replace duplicate <p> tags so there's not duplicates, trac #86
-//            content = content.replace("<p><p>", "<p>");
-//            content = content.replace("</p></p>", "</p>");
-//            content = content.replace("<br><br>", "<br>");
-//            // sometimes the editor creates extra tags
-//            content = content.replace("</strong><strong>", "").replace("</em><em>", "").replace("</u><u>", "")
-//                    .replace("</strike><strike>", "").replace("</blockquote><blockquote>", "");
-//        } else {
-//            if (!isAutoSave) {
-//                // Add gallery shortcode
-//                MediaGalleryImageSpan[] gallerySpans = noteContent.getSpans(0, noteContent.length(),
-//                        MediaGalleryImageSpan.class);
-//                for (MediaGalleryImageSpan gallerySpan : gallerySpans) {
-//                    int start = noteContent.getSpanStart(gallerySpan);
-//                    noteContent.removeSpan(gallerySpan);
-//                    noteContent.insert(start, LeaHtml.getGalleryShortcode(gallerySpan));
-//                }
-//            }
+        //本地草稿笔记如何更新note的fileId?
+        if (note.getUsn() == 0) {
+            // remove suggestion spans, they cause craziness in WPHtml.toHTML().
+            CharacterStyle[] characterStyles = noteContent.getSpans(0, noteContent.length(), CharacterStyle.class);
+            for (CharacterStyle characterStyle : characterStyles) {
+                if (characterStyle instanceof SuggestionSpan) {
+                    noteContent.removeSpan(characterStyle);
+                }
+            }
+            content = LeaHtml.toHtml(noteContent);
+            // replace duplicate <p> tags so there's not duplicates, trac #86
+            content = content.replace("<p><p>", "<p>");
+            content = content.replace("</p></p>", "</p>");
+            content = content.replace("<br><br>", "<br>");
+            // sometimes the editor creates extra tags
+            content = content.replace("</strong><strong>", "").replace("</em><em>", "").replace("</u><u>", "")
+                    .replace("</strike><strike>", "").replace("</blockquote><blockquote>", "");
+        } else {
+            if (!isAutoSave) {
+                // Add gallery shortcode
+                MediaGalleryImageSpan[] gallerySpans = noteContent.getSpans(0, noteContent.length(),
+                        MediaGalleryImageSpan.class);
+                for (MediaGalleryImageSpan gallerySpan : gallerySpans) {
+                    int start = noteContent.getSpanStart(gallerySpan);
+                    noteContent.removeSpan(gallerySpan);
+                    noteContent.insert(start, LeaHtml.getGalleryShortcode(gallerySpan));
+                }
+            }
+
+
+        }
+
+        //获取图片id并更新到note表的fileid字段
+        AppLog.i("save note content:" + noteContent);
+//        LeaImageSpan[] imageSpans = noteContent.getSpans(0, noteContent.length(), LeaImageSpan.class);
+//        if (imageSpans.length != 0) {
+//            List<String> fileIds = new ArrayList<>();
+//            for (LeaImageSpan wpIS : imageSpans) {
+//                MediaFile mediaFile = wpIS.getMediaFile();
+//                AppLog.i("mediafile:" + mediaFile);
+//                if (mediaFile == null)
+//                    continue;
 //
-//            LeaImageSpan[] imageSpans = noteContent.getSpans(0, noteContent.length(), LeaImageSpan.class);
-//            if (imageSpans.length != 0) {
-//                List<String> fileIds = new ArrayList<>();
-//                for (LeaImageSpan wpIS : imageSpans) {
-//                    MediaFile mediaFile = wpIS.getMediaFile();
-//                    AppLog.i("mediafile:" + mediaFile);
-//                    if (mediaFile == null)
-//                        continue;
-////                    if (mediaFile.getMediaId() != null) {
-////                        updateMediaFileOnServer(wpIS);
-////                    } else {
-////                        mediaFile.setFileName(wpIS.getImageSource().toString());
-////                        mediaFile.setFilePath(wpIS.getImageSource().toString());
-////                        AppLog.i("save media file");
-////                        Leanote.leaDB.saveMediaFile(mediaFile);
-////                        fileIds.add(mediaFile.getId());
-////                    }
-//                    mediaFile.setFileName(wpIS.getImageSource().toString());
-//                    //mediaFile.setFilePath(wpIS.getImageSource().toString());
+//                mediaFile.setFileName(wpIS.getImageSource().toString());
+//                //mediaFile.setFilePath(wpIS.getImageSource().toString());
 //
-//                    Leanote.leaDB.saveMediaFile(mediaFile);
-//                    fileIds.add(mediaFile.getId());
+//                Leanote.leaDB.saveMediaFile(mediaFile);
+//                AppLog.i("get media id:" + mediaFile.getId());
+//                fileIds.add(mediaFile.getId());
 //
-//                    int tagStart = noteContent.getSpanStart(wpIS);
-//                    if (!isAutoSave) {
-//                        noteContent.removeSpan(wpIS);
+//                int tagStart = noteContent.getSpanStart(wpIS);
+//                if (!isAutoSave) {
+//                    noteContent.removeSpan(wpIS);
 //
-//                        // network image has a mediaId
-//                        if (mediaFile.getMediaId() != null && mediaFile.getMediaId().length() > 0) {
-//                            noteContent.insert(tagStart, LeaHtml.getContent(wpIS));
-//                        } else {
-//                            // local image for upload
-//                            //http://leanote.com/api/file/getImage?fileId=24位本地LocalFileId 或
-//                            noteContent.insert(tagStart,
-//                                    "<img android-uri=\"" + wpIS.getImageSource().toString() + "\" />");
-//                        }
+//                    // network image has a mediaId
+//                    if (mediaFile.getMediaId() != null && mediaFile.getMediaId().length() > 0) {
+//                        noteContent.insert(tagStart, LeaHtml.getContent(wpIS));
+//                    } else {
+//                        // local image for upload
+//                        //http://leanote.com/api/file/getImage?fileId=24位本地LocalFileId 或
+//                        noteContent.insert(tagStart,
+//                                "<img android-uri=\"" + wpIS.getImageSource().toString() + "\" />");
 //                    }
 //                }
-//
-//                String fileIdStr = org.apache.commons.lang.StringUtils.join(fileIds, ",");
-//                note.setFileIds(fileIdStr);
-//                AppLog.i("fileids:" + fileIdStr);
-//                //Leanote.leaDB.updateNote(note);
-//            } else {
-//                //清空fileids
-//                note.setFileIds("");
 //            }
-//            content = noteContent.toString();
+//
+//            String fileIdStr = org.apache.commons.lang.StringUtils.join(fileIds, ",");
+//            note.setFileIds(fileIdStr);
+//            AppLog.i("fileids:" + fileIdStr);
+//            //Leanote.leaDB.updateNote(note);
+//        } else {
+//            //清空fileids
+//            note.setFileIds("");
 //        }
 
 
 
-
-        if (!isAutoSave) {
-            // Add gallery shortcode
-            MediaGalleryImageSpan[] gallerySpans = noteContent.getSpans(0, noteContent.length(),
-                    MediaGalleryImageSpan.class);
-            for (MediaGalleryImageSpan gallerySpan : gallerySpans) {
-                int start = noteContent.getSpanStart(gallerySpan);
-                noteContent.removeSpan(gallerySpan);
-                noteContent.insert(start, LeaHtml.getGalleryShortcode(gallerySpan));
-            }
+        if (note.getUsn() != 0) {
+            content = noteContent.toString();
         }
-
-        LeaImageSpan[] imageSpans = noteContent.getSpans(0, noteContent.length(), LeaImageSpan.class);
-        if (imageSpans.length != 0) {
-            List<String> fileIds = new ArrayList<>();
-            for (LeaImageSpan wpIS : imageSpans) {
-                MediaFile mediaFile = wpIS.getMediaFile();
-                AppLog.i("mediafile:" + mediaFile);
-                if (mediaFile == null)
-                    continue;
-
-                mediaFile.setFileName(wpIS.getImageSource().toString());
-                //mediaFile.setFilePath(wpIS.getImageSource().toString());
-
-                Leanote.leaDB.saveMediaFile(mediaFile);
-                AppLog.i("get media id:" + mediaFile.getId());
-                fileIds.add(mediaFile.getId());
-
-                int tagStart = noteContent.getSpanStart(wpIS);
-                if (!isAutoSave) {
-                    noteContent.removeSpan(wpIS);
-
-                    // network image has a mediaId
-                    if (mediaFile.getMediaId() != null && mediaFile.getMediaId().length() > 0) {
-                        noteContent.insert(tagStart, LeaHtml.getContent(wpIS));
-                    } else {
-                        // local image for upload
-                        //http://leanote.com/api/file/getImage?fileId=24位本地LocalFileId 或
-                        noteContent.insert(tagStart,
-                                "<img android-uri=\"" + wpIS.getImageSource().toString() + "\" />");
-                    }
-                }
-            }
-
-            String fileIdStr = org.apache.commons.lang.StringUtils.join(fileIds, ",");
-            note.setFileIds(fileIdStr);
-            AppLog.i("fileids:" + fileIdStr);
-            //Leanote.leaDB.updateNote(note);
-        } else {
-            //清空fileids
-            note.setFileIds("");
-        }
-        content = noteContent.toString();
+        setNoteFileIds(content);
 
 
+        AppLog.i("note content:" + content);
         note.setTitle(title);
         note.setContent(content);
-        //note.setIsDirty(true);
 
     }
 
+    private void setNoteFileIds(String content) {
+        //note upload 前需要更新图片链接
+        if (TextUtils.isEmpty(content)) {
+            AppLog.i("content is empty!");
+            return;
+        }
+        String imageTagsPattern = "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
+        Pattern pattern = Pattern.compile(imageTagsPattern);
+        Matcher matcher = pattern.matcher(content);
+
+        List<String> imageTags = new ArrayList<>();
+        while (matcher.find()) {
+            imageTags.add(matcher.group());
+        }
+
+        if (imageTags.size() == 0) {
+            mNote.setFileIds("");
+        }
+
+        for (String tag : imageTags) {
+            Pattern p = Pattern.compile("src=\"([^\"]+)\"");
+            Matcher m = p.matcher(tag);
+            if (m.find()) {
+                String imageUri = m.group(1);
+                if (!"".equals(imageUri)) {
+                    MediaFile mediaFile = Leanote.leaDB.getMediaFile(imageUri);
+                    String fileId = mNote.getFileIds();
+                    if (TextUtils.isEmpty(fileId)) {
+                        fileId = mediaFile.getId();
+                    } else {
+                        fileId = fileId + "," + mediaFile.getId();
+                    }
+                    mNote.setFileIds(fileId);
+
+                }
+            }
+        }
+
+
+    }
 
 
     public NoteDetail getNote() {
@@ -776,7 +793,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             updateNoteObject(isAutosave);
         }
 
-        AppLog.i("after update note:" + mNote);
+
         Leanote.leaDB.updateNote(mNote);
     }
 

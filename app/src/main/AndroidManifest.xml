@@ -116,6 +116,11 @@
             android:label="@string/title_activity_note_list" >
         </activity>
         <activity
+            android:name=".editor.legacy.EditLinkActivity"
+            android:label="@string/edit_link_activity" >
+        </activity>
+
+        <activity
             android:name=".ui.note.NotePreviewActivity"
             android:label="@string/title_activity_note_preview"
             android:theme="@style/AppTheme4Preview" >
@@ -131,9 +136,12 @@
             android:name=".ui.post.BlogHomeActivity"
             android:theme="@style/LeanoteNoActionBarTheme" >
         </activity>
-
+        <activity android:name=".ui.search.SearchActivity" >
+        </activity>
         <activity
-            android:name=".ui.search.SearchActivity" >
+            android:name=".ui.lea.LeaActivity"
+            android:label="@string/title_activity_lea"
+            android:theme="@style/LeanoteNoActionBarTheme" >
         </activity>
 
     </application>

@@ -9,19 +9,19 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leanote.android.Constants;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.service.NoteSyncService;
 import com.leanote.android.ui.ActivityLauncher;
@@ -36,6 +36,9 @@ import com.leanote.android.util.ToastUtils;
 import com.leanote.android.widget.CustomSwipeRefreshLayout;
 import com.leanote.android.widget.PostListButton;
 import com.leanote.android.widget.RecyclerItemDecoration;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +58,7 @@ public class NotebookFragment extends Fragment
     private RecyclerView mRecyclerView;
 
     private View mEmptyView;
-    private ProgressBar mProgressLoadMore;
+    //private ProgressBar mProgressLoadMore;
     private TextView mEmptyViewTitle;
     private ImageView mEmptyViewImage;
 
@@ -81,7 +84,7 @@ public class NotebookFragment extends Fragment
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
-        mProgressLoadMore = (ProgressBar) view.findViewById(R.id.progress);
+        //mProgressLoadMore = (ProgressBar) view.findViewById(R.id.progress);
         mFabView = view.findViewById(R.id.fab_button);
 
 
@@ -209,9 +212,9 @@ public class NotebookFragment extends Fragment
 
 
     private void hideLoadMoreProgress() {
-        if (mProgressLoadMore != null) {
-            mProgressLoadMore.setVisibility(View.GONE);
-        }
+//        if (mProgressLoadMore != null) {
+//            mProgressLoadMore.setVisibility(View.GONE);
+//        }
     }
 
 
@@ -311,9 +314,9 @@ public class NotebookFragment extends Fragment
                 }
 
                 //delete note in local
-                Leanote.leaDB.deletenotebookInLocal(notebook.getNotebookId());
+                Leanote.leaDB.deletenotebookInLocal(notebook.getId());
                 //delete note in server
-                new DeleteNotebookTask().execute(notebook.getNotebookId());
+                new DeleteNotebookTask(notebook.getNotebookId(), notebook.getUsn()).execute();
             }
         }, Constants.SNACKBAR_LONG_DURATION_MS);
     }
@@ -324,7 +327,8 @@ public class NotebookFragment extends Fragment
 
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());
         //load note detail
-        NotebookInfo fullNotebook = Leanote.leaDB.getLocalNotebookByNotebookId(notebook.getNotebookId());
+        NotebookInfo fullNotebook = Leanote.leaDB.getLocalNotebookById(notebook.getId());
+
         if (fullNotebook == null) {
             ToastUtils.showToast(getActivity(), R.string.note_not_found);
             return;
@@ -382,25 +386,59 @@ public class NotebookFragment extends Fragment
 
     }
 
-    private class DeleteNotebookTask extends AsyncTask<String, Void, Boolean> {
+    private class DeleteNotebookTask extends AsyncTask<Void, Void, String> {
+
+        private String notebookId;
+        private int usn;
+
+        public DeleteNotebookTask(String notebookId, int usn) {
+            this.notebookId = notebookId;
+            this.usn = usn;
+        }
 
         @Override
-        protected void onPostExecute(Boolean result) {
+        protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
+            boolean ok = false;
+            String msg = "";
+            try {
+                JSONObject json = new JSONObject(result);
+                if (json.has("Ok")) {
+                    ok = json.getBoolean("Ok");
+                }
+                if (json.has("msg")) {
+                    msg = json.getString("msg");
+                }
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if (ok) {
+                ToastUtils.showToast(getActivity(), "success");
+            } else {
+                ToastUtils.showToast(getActivity(), msg);
+            }
 
         }
 
         @Override
-        protected Boolean doInBackground(String... params) {
-            String notebookiId = params[0];
-            if (TextUtils.isEmpty(notebookiId)) {
-                ToastUtils.showToast(getActivity(), getString(R.string.notebook_not_found));
-                return false;
+        protected String doInBackground(Void... params) {
+
+            String api = String.format("%s/api/notebook/deleteNotebook?token=%s&notebookId=%s&usn=%s",
+                    AccountHelper.getDefaultAccount().getHost(),
+                    AccountHelper.getDefaultAccount().getmAccessToken(),
+                    this.notebookId, this.usn);
+
+            try {
+                String response = NetworkRequest.syncGetRequest(api);
+                return response;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-
-            return false;
+            return null;
         }
     }
 

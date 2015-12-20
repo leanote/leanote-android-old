@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/postEditor"
-        android:name="org.wordpress.android.editor.LegacyEditorFragment"
+        android:name="com.leanote.android.editor.LegacyEditorFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

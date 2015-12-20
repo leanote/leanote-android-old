@@ -1,10 +1,5 @@
 package com.leanote.android.model;
 
-import android.os.AsyncTask;
-import android.util.Log;
-
-import com.leanote.android.Leanote;
-
 import java.util.ArrayList;
 
 /**
@@ -34,8 +29,9 @@ public class NoteDetailList extends ArrayList<NoteDetail> {
         if (note == null) {
             return -1;
         }
+
         for (int i = 0; i < size(); i++) {
-            if (this.get(i).getId() == note.getId()) {
+            if (this.get(i).getId().longValue() == note.getId().longValue()) {
                 return i;
             }
         }

@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <TextView android:text="Loading, please wait . . ."
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/progress_tv" android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:textColor="#000000"></TextView>
+
+
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
@@ -11,17 +19,27 @@
         android:layout_marginTop="?attr/actionBarSize"
         />
 
+
     <include
         layout="@layout/toolbar"
         android:id="@+id/toolbar" />
 
+    <!--<ProgressBar-->
+        <!--android:id="@+id/progress_bar"-->
+        <!--style="@android:style/Widget.ProgressBar.Horizontal"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/progress_bar_height"-->
+        <!--android:indeterminate="false"-->
+        <!--android:layout_alignTop="@+id/webView"-->
+        <!--android:progressDrawable="@drawable/progressbar_horizontal" />-->
+
     <ProgressBar
         android:id="@+id/progress_bar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/progress_bar_height"
-        android:indeterminate="false"
-        android:layout_alignTop="@+id/webView"
-        android:progressDrawable="@drawable/progressbar_horizontal" />
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_marginTop="200px"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
 </FrameLayout>

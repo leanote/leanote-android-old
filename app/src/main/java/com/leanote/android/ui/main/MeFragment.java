@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
-
+import com.leanote.android.R;
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
@@ -33,7 +33,6 @@ import com.leanote.android.util.ToggleListener;
 import com.leanote.android.widget.LeaNetworkImageView;
 
 import java.lang.ref.WeakReference;
-import com.leanote.android.R;
 
 public class MeFragment extends Fragment {
 
@@ -44,6 +43,7 @@ public class MeFragment extends Fragment {
     private TextView mDisplayNameTextView;
     private TextView mUsernameTextView;
     private TextView mLoginLogoutTextView;
+    private LinearLayout leaLink;
     private ProgressDialog mDisconnectProgressDialog;
 
     private LinearLayout markdown_editor_setting;
@@ -65,6 +65,7 @@ public class MeFragment extends Fragment {
         mDisplayNameTextView = (TextView) rootView.findViewById(R.id.me_display_name);
         mUsernameTextView = (TextView) rootView.findViewById(R.id.me_username);
         mLoginLogoutTextView = (TextView) rootView.findViewById(R.id.me_login_logout_text_view);
+        leaLink = (LinearLayout) rootView.findViewById(R.id.lea_link);
 
         markdown_editor_setting = (LinearLayout) rootView.findViewById(R.id.markdown_editor_setting);
         switch_markdown = (ToggleButton) rootView.findViewById(R.id.switch_markdown);
@@ -75,6 +76,13 @@ public class MeFragment extends Fragment {
 
         initSettingsFields();
         setListeners();
+
+        leaLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ActivityLauncher.startLeaForResult(getActivity());
+            }
+        });
 
         rootView.findViewById(R.id.row_logout).setOnClickListener(new View.OnClickListener() {
             @Override

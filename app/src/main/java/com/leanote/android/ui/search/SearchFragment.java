@@ -95,7 +95,9 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
             final String content = model.getContent().toLowerCase();
             final String title = model.getTitle().toLowerCase();
 
-            if (title.contains(query) || (!TextUtils.isEmpty(content) && content.contains(query))) {
+            if ((!TextUtils.isEmpty(title) && title.contains(query))
+                    || (!TextUtils.isEmpty(content) && content.contains(query))) {
+
                 filteredModelList.add(model);
             }
 

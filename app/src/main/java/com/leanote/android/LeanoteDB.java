@@ -423,8 +423,8 @@ public class LeanoteDB extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
-    public void deletenotebookInLocal(String notebookId) {
-        String sql = "update notebooks set isDeleted = 1 and is_dirty = 1 where notebookId='" + notebookId + "'" ;
+    public void deletenotebookInLocal(long id) {
+        String sql = "delete from notebooks where id = " + id;
         db.execSQL(sql);
     }
 
@@ -476,11 +476,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
         NotebookInfo notebook = null;
         try {
             if (c.moveToNext()) {
-                notebook = new NotebookInfo();
-                notebook.setId(c.getInt(0));
-                notebook.setNotebookId(c.getString(1));
-                notebook.setTitle(c.getString(4));
-                notebook.setIsDirty(c.getInt(8) == 1);
+                notebook = getNotebookFromCursor(c);
             }
             return notebook;
         } finally {
@@ -525,6 +521,10 @@ public class LeanoteDB extends SQLiteOpenHelper {
     }
 
     public void dangerouslyDeleteAllContent() {
+//        db.execSQL("drop table " + NOTES_TABLE);
+//        db.execSQL("drop table " + NOTEBOOKS_TABLE);
+//        db.execSQL("drop table " + MEDIA_TABLE);
+
         db.delete(NOTES_TABLE, null, null);
         db.delete(NOTEBOOKS_TABLE, null, null);
         db.delete(MEDIA_TABLE, null, null);
@@ -591,10 +591,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
         List<NotebookInfo> notebooks = new ArrayList<>();
         try {
             while (c.moveToNext()) {
-                NotebookInfo notebook = new NotebookInfo();
-                notebook.setTitle(c.getString(4));
-                notebook.setNotebookId(c.getString(1));
-                notebook.setUpdateTime(c.getString(10));
+                NotebookInfo notebook = getNotebookFromCursor(c);
                 notebooks.add(notebook);
             }
             return notebooks;
@@ -602,6 +599,25 @@ public class LeanoteDB extends SQLiteOpenHelper {
             SqlUtils.closeCursor(c);
         }
 
+    }
+
+    private NotebookInfo getNotebookFromCursor(Cursor c) {
+        NotebookInfo notebook = new NotebookInfo();
+        notebook.setId(c.getLong(0));
+        notebook.setNotebookId(c.getString(1));
+        notebook.setParentNotebookId(c.getString(2));
+        notebook.setUserId(c.getString(3));
+        notebook.setTitle(c.getString(4));
+        notebook.setUrlTitle(c.getString(5));
+        notebook.setIsBlog(c.getInt(6) == 0 ? false : true);
+        notebook.setIsTrash(c.getInt(7) == 0 ? false : true);
+        notebook.setIsDeleted(c.getInt(8) == 0 ? false : true);
+        notebook.setCreateTime(c.getString(9));
+        notebook.setUpdateTime(c.getString(10));
+        notebook.setUsn(c.getInt(11));
+        notebook.setIsDirty(c.getInt(12) == 0 ? false : true);
+
+        return notebook;
     }
 
     public void saveNoteSettings(NoteDetail note) {
@@ -679,11 +695,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
         NotebookInfo notebook = null;
         try {
             if (c.moveToNext()) {
-                notebook = new NotebookInfo();
-                notebook.setId(c.getInt(0));
-                notebook.setNotebookId(c.getString(1));
-                notebook.setTitle(c.getString(4));
-                notebook.setIsDirty(c.getInt(8) == 1);
+                notebook = getNotebookFromCursor(c);
             }
             return notebook;
         } finally {
@@ -691,9 +703,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public MediaFile getMediaFile(String imageUri, NoteDetail mNote) {
-        Cursor c = db.query(MEDIA_TABLE, null, "noteId=? AND fileURL=?",
-                new String[]{String.valueOf(mNote.getNoteId()), imageUri}, null, null, null);
+    public MediaFile getMediaFile(String imageUri) {
+        Cursor c = db.query(MEDIA_TABLE, null, "fileURL=?",
+                new String[]{imageUri}, null, null, null);
 
         try {
             if (c.moveToFirst()) {

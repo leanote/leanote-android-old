@@ -12,6 +12,7 @@ import com.leanote.android.util.AppLog.T;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * <p>Compatibility <code>EditorWebView</code> for pre-Chromium WebView (API<19). Provides a custom method for executing
@@ -53,9 +54,12 @@ public class EditorWebViewCompatibility extends EditorWebViewAbstract {
                 webViewProvider = webViewProviderField.get(this);
 
                 // Access WebViewCore object
+                AppLog.i("webViewProvider" + webViewProvider.getClass());
+                AppLog.i("fields:" + Arrays.asList(webViewProvider.getClass().getDeclaredFields()));
                 Field webViewCoreField = webViewProvider.getClass().getDeclaredField("mWebViewCore");
                 webViewCoreField.setAccessible(true);
                 mWebViewCore = webViewCoreField.get(webViewProvider);
+
             } else {
                 // On API < 16, the WebViewCore is directly accessible from the WebView
 

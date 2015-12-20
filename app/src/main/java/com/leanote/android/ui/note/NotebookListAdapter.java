@@ -8,7 +8,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -18,7 +17,6 @@ import android.widget.TextView;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.NotebookInfo;
-import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
 import com.leanote.android.widget.PostListButton;
@@ -85,7 +83,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private boolean isValidPostPosition(int position) {
-        return (position >= 0 && position <= mNotebooks.size());
+        return (position >= 0 && position < mNotebooks.size());
     }
 
     @Override
@@ -115,7 +113,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_MENU) {
-            return new NotebookAddViewHolder(new SearchToolbar(parent.getContext(), "Notebook"));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Notebook"));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NotebookViewHolder(view);
@@ -249,7 +247,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         int position = -1;
         for (int i = 0; i < mNotebooks.size(); i++) {
-            if (mNotebooks.get(i).getNotebookId().equals(notebook.getNotebookId())) {
+            if (mNotebooks.get(i).getId() == notebook.getId()) {
                 position = i;
                 break;
             }
@@ -258,7 +256,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (position > -1) {
             mNotebooks.remove(position);
             if (mNotebooks.size() > 0) {
-                notifyItemRemoved(position);
+                notifyItemRemoved(position + 1);
             } else {
                 notifyDataSetChanged();
             }
@@ -313,31 +311,14 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    class NotebookAddViewHolder extends RecyclerView.ViewHolder {
+    class SearchViewHolder extends RecyclerView.ViewHolder {
         private final SearchToolbar mSearchToolbar;
-        public NotebookAddViewHolder(View itemView) {
+        public SearchViewHolder(View itemView) {
             super(itemView);
             mSearchToolbar = (SearchToolbar) itemView;
-            mSearchToolbar.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    ActivityLauncher.addNewNoteForResult(
-                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
-
-                    return true;
-                }
-
-            });
-            mSearchToolbar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    ActivityLauncher.addNewNoteForResult(
-                            ((Leanote) Leanote.getContext().getApplicationContext()).getCurrentActivity());
-
-                }
-            });
         }
     }
+
 
 
 
@@ -369,7 +350,9 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         break;
                     }
                 }
-                tmpNotebooks.remove(index);
+                if (index >= 0 && index < tmpNotebooks.size()) {
+                    tmpNotebooks.remove(index);
+                }
             }
 
             return true;

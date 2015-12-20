@@ -1128,6 +1128,11 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         editableText.insert(selectionEnd + 1, "\n\n");
     }
 
+//    @Override
+//    public boolean hasFailedMediaUploads() {
+//        return false;
+//    }
+
     @Override
     public void setTitlePlaceholder(CharSequence text) {
 

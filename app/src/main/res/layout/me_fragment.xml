@@ -53,25 +53,6 @@
             android:textSize="@dimen/text_sz_medium"
             tools:text="username" />
 
-        <!--<LinearLayout-->
-            <!--android:id="@+id/row_settings"-->
-            <!--style="@style/MeListRowLayout"-->
-            <!--android:layout_marginTop="@dimen/me_list_margin_top">-->
-
-            <!--<com.leanote.android.widget.LeaTextView-->
-                <!--android:id="@+id/me_settings_text_view"-->
-                <!--style="@style/MeListRowTextView"-->
-                <!--android:text="@string/default_editor" />-->
-
-
-            <!--<CheckBox-->
-                <!--android:id="@+id/isPublicCheckBox"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:checked="false"-->
-                <!--android:text="" />-->
-
-        <!--</LinearLayout>-->
 
         <LinearLayout
             android:id="@+id/markdown_editor_setting"
@@ -138,6 +119,18 @@
 
         <!--</LinearLayout>-->
 
+        <LinearLayout
+            android:id="@+id/lea_link"
+            style="@style/MeListRowLayout">
+
+
+            <com.leanote.android.widget.LeaAutoResizeTextView
+                android:id="@+id/lea_link_text_view"
+                style="@style/MeListRowTextView"
+                android:text="@string/Lea"
+                tools:text="@string/Lea" />
+
+        </LinearLayout>
 
         <View style="@style/MeListSectionDividerView" />
 

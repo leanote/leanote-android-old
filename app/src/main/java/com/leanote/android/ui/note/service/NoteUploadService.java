@@ -4,7 +4,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
@@ -30,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,8 +48,8 @@ import java.util.regex.Pattern;
 import de.greenrobot.event.EventBus;
 
 public class NoteUploadService extends Service {
-    public NoteUploadService() {
-    }
+
+    public NoteUploadService() {}
 
     private static Context mContext;
     private static final ArrayList<NoteDetail> mNoteDetailsList = new ArrayList<>();
@@ -64,7 +68,7 @@ public class NoteUploadService extends Service {
      */
     public static boolean isNoteUploading(long localNoteId) {
         // first check the currently uploading NoteDetail
-        if (mCurrentUploadingNote != null && mCurrentUploadingNote.getId() == localNoteId) {
+        if (mCurrentUploadingNote != null && mCurrentUploadingNote.getId().longValue() == localNoteId) {
             return true;
         }
 
@@ -72,7 +76,7 @@ public class NoteUploadService extends Service {
         if (mNoteDetailsList.size() > 0) {
             synchronized (mNoteDetailsList) {
                 for (NoteDetail note : mNoteDetailsList) {
-                    if (note.getId() == localNoteId) {
+                    if (note.getId().longValue() == localNoteId) {
                         return true;
                     }
                 }
@@ -166,7 +170,7 @@ public class NoteUploadService extends Service {
 
             mNote = params[0];
 
-            processNoteMedia(mNote.getContent());
+            //processNoteMedia(mNote.getContent());
 
             Leanote.leaDB.updateNote(mNote);
 
@@ -217,8 +221,9 @@ public class NoteUploadService extends Service {
                 if (m.find()) {
                     String imageUri = m.group(1);
                     if (!"".equals(imageUri)) {
-                        MediaFile mediaFile = Leanote.leaDB.getMediaFile(imageUri, mNote);
+                        MediaFile mediaFile = Leanote.leaDB.getMediaFile(imageUri);
 
+                        //本地草稿笔记无法查到
                         if (mediaFile != null) {
                             String leanoteImageUrl = String.format("%s/api/file/getImage?fileId=%s",
                                     AccountHelper.getDefaultAccount().getHost(),
@@ -345,16 +350,18 @@ public class NoteUploadService extends Service {
         if (!TextUtils.isEmpty(tags)) {
             String[] tagArray = tags.split(",");
             for (int i = 0; i < tagArray.length; i++) {
-                if (!TextUtils.isEmpty(tagArray[i])) {
+                if (!TextUtils.isEmpty(tagArray[i]) && !"\"\"".equals(tagArray[i])) {
                     contentStruct.put(String.format("Tags[%s]", i), tagArray[i]);
                 }
             }
         }
 
+        //本地新创建笔记的fileId
         String fileIds = mNote.getFileIds();
         AppLog.i("fileIds:" + fileIds);
 
         if (!TextUtils.isEmpty(fileIds)) {
+            //mediafile本地id
             String[] fileIdArray = fileIds.split(",");
             for (int i = 0; i < fileIdArray.length; i++) {
                 MediaFile mf = Leanote.leaDB.getMediaFileById(fileIdArray[i]);
@@ -367,6 +374,7 @@ public class NoteUploadService extends Service {
                     } else {
                         contentStruct.put(String.format("Files[%s][HasBody]", i), true);
                         MediaFile compressedFile = getCompressedFile(mf);
+
                         File tempFile;
                         try {
                             String fileExtension = MimeTypeMap.getFileExtensionFromUrl(mf.getFileName());
@@ -429,33 +437,43 @@ public class NoteUploadService extends Service {
         String fileName = MediaUtils.getMediaFileName(imageFile, mimeType);
         String fileExtension = "." + MimeTypeMap.getFileExtensionFromUrl(fileName).toLowerCase();
 
-        //int orientation = ImageUtils.getImageOrientation(mContext, path);
-        int orientation = 0;
+        int orientation = ImageUtils.getImageOrientation(mContext, path);
 
-        boolean shouldUploadResizedVersion = false;
+        boolean shouldUploadResizedVersion = true;
         // If it's not a gif and blog don't keep original size, there is a chance we need to resize
         if (!mimeType.equals("image/gif")) {
             //check the picture settings
-            int pictureSettingWidth = mf.getWidth();
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, options);
-            int imageHeight = options.outHeight;
-            int imageWidth = options.outWidth;
-            int[] dimensions = {imageWidth, imageHeight};
-            if (dimensions[0] != 0 && dimensions[0] != pictureSettingWidth) {
-                shouldUploadResizedVersion = true;
-            }
+            return mf;
+//            int pictureSettingWidth = mf.getWidth();
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            options.inJustDecodeBounds = true;
+//            BitmapFactory.decodeFile(path, options);
+//            int imageHeight = options.outHeight;
+//            int imageWidth = options.outWidth;
+//            int[] dimensions = {imageWidth, imageHeight};
+//            if (dimensions[0] != 0 && dimensions[0] != pictureSettingWidth) {
+//                shouldUploadResizedVersion = true;
+//            }
         }
+
+        Bitmap.CompressFormat fmt;
+        if (fileExtension != null && fileExtension.equalsIgnoreCase("png")) {
+            fmt = Bitmap.CompressFormat.PNG;
+        } else {
+            fmt = Bitmap.CompressFormat.JPEG;
+        }
+
 
         if (shouldUploadResizedVersion) {
             MediaFile resizedMediaFile = new MediaFile(mf);
             // Create resized image
-            byte[] bytes = ImageUtils.createThumbnailFromUri(mContext, imageUri, resizedMediaFile.getWidth(),
-                    fileExtension, orientation);
+//            byte[] bytes = ImageUtils.createThumbnailFromUri(mContext, imageUri, resizedMediaFile.getWidth(),
+//                    fileExtension, orientation);
 
-            if (bytes == null) {
+            Bitmap bitmap = getSmallBitmap(resizedMediaFile.getFilePath(), fmt);
+            if (bitmap == null) {
                 // We weren't able to resize the image, so we will upload the full size image with css to resize it
+                AppLog.i("unable to compress image...");
                 shouldUploadResizedVersion = false;
             } else {
                 // Save temp image
@@ -464,7 +482,11 @@ public class NoteUploadService extends Service {
                 try {
                     resizedImageFile = File.createTempFile("lea-image-", fileExtension);
                     FileOutputStream out = new FileOutputStream(resizedImageFile);
-                    out.write(bytes);
+
+
+                    bitmap.compress(fmt, 100, out);
+//                    out.write(bytes);
+                    out.flush();
                     out.close();
                     tempFilePath = resizedImageFile.getPath();
                 } catch (IOException e) {
@@ -495,6 +517,106 @@ public class NoteUploadService extends Service {
 
         return mf;
     }
+
+
+    public static Bitmap getSmallBitmap(String filePath, Bitmap.CompressFormat fmt) {
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, 480, 800);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+
+        Bitmap bm = BitmapFactory.decodeFile(filePath, options);
+        if(bm == null){
+            return  null;
+        }
+        int degree = readPictureDegree(filePath);
+        bm = rotateBitmap(bm,degree) ;
+        ByteArrayOutputStream baos = null ;
+        try{
+            baos = new ByteArrayOutputStream();
+
+            bm.compress(fmt, 30, baos);
+
+        }finally{
+            try {
+                if(baos != null)
+                    baos.close() ;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bm ;
+
+    }
+
+    private static Bitmap rotateBitmap(Bitmap bitmap, int rotate){
+        if(bitmap == null)
+            return null ;
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        // Setting post rotate to 90
+        Matrix mtx = new Matrix();
+        mtx.postRotate(rotate);
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+    }
+
+
+    private static int calculateInSampleSize(BitmapFactory.Options options,
+                                             int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            // Calculate ratios of height and width to requested height and
+            // width
+            final int heightRatio = Math.round((float) height
+                    / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+
+            // Choose the smallest ratio as inSampleSize value, this will
+            // guarantee
+            // a final image with both dimensions larger than or equal to the
+            // requested height and width.
+            inSampleSize = heightRatio < widthRatio ? widthRatio : heightRatio;
+        }
+
+        return inSampleSize;
+    }
+
+
+    private static int readPictureDegree(String path) {
+        int degree  = 0;
+        try {
+            ExifInterface exifInterface = new ExifInterface(path);
+            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    degree = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    degree = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    degree = 270;
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return degree;
+    }
+
 
     private void updateLocalNote(JSONObject response, NoteDetail mNote) throws JSONException {
         int usn = response.getInt("Usn");

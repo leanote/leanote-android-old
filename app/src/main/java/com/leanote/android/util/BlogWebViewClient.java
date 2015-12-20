@@ -13,4 +13,5 @@ public class BlogWebViewClient extends WebViewClient  {
         view.loadUrl(url);
         return true;
     }
+
 }

@@ -38,6 +38,7 @@ public class NoteSyncService {
         boolean ifNeedSync = lastSyncUsn < serverUsn;
 
         AppLog.i("needsync:[localsync:" + lastSyncUsn + ", serverUsn:" + serverUsn + "]");
+
         if (ifNeedSync) {
             String host = AccountHelper.getDefaultAccount().getHost();
 
@@ -125,7 +126,7 @@ public class NoteSyncService {
         Leanote.leaDB.saveNotebooks(newNotebooks);
     }
 
-    private static NotebookInfo parseServerNotebook(JSONObject item) throws JSONException {
+    public static NotebookInfo parseServerNotebook(JSONObject item) throws JSONException {
         NotebookInfo serverNotebook = new NotebookInfo();
 
         serverNotebook.setNotebookId(item.getString("NotebookId"));
@@ -247,18 +248,6 @@ public class NoteSyncService {
     }
 
 
-    public static boolean pushNoteChanges(NoteDetail note, boolean isNew) {
-        if (!note.isDirty()) {
-            return true;
-        }
-
-        String api;
-        if (isNew) {
-            api = String.format("%s/note/addNote");
-        }
-        return false;
-    }
-
     private static void updateNoteToLocal(JSONArray jsonArray, List<String> localNoteIds) throws Exception {
         NoteDetailList syncNotes = new NoteDetailList();
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -279,10 +268,9 @@ public class NoteSyncService {
         boolean isDeleted = item.getBoolean("IsDeleted");
         boolean isTrash = item.getBoolean("IsTrash");
         String noteId = item.getString("NoteId");
-        if (isDeleted) {
+
+        if (isDeleted || isTrash) {
             Leanote.leaDB.deleteNoteByNoteId(noteId);
-            return null;
-        } else if (isTrash) {
             return null;
         }
 
@@ -296,7 +284,10 @@ public class NoteSyncService {
         serverNote.setCreatedTime(item.getString("CreatedTime"));
         serverNote.setIsMarkDown(item.getBoolean("IsMarkdown"));
 
-        if (!TextUtils.isEmpty(item.getString("Tags"))) {
+        String tags = item.getString("Tags");
+        if (!TextUtils.isEmpty(tags) && !"null".equalsIgnoreCase(tags)
+                && !"\"\"".equals(tags)) {
+
             AppLog.i("server tags:" + item.getString("Tags"));
             serverNote.setTags(item.getString("Tags").toString().replaceAll("[\\[\\]]", ""));
         } else {
@@ -348,12 +339,6 @@ public class NoteSyncService {
     }
 
 
-    public void sendNoteChanges() {
-        List<NoteDetail> dirtyNotes = Leanote.leaDB.getDirtyNotes();
-        for (NoteDetail note : dirtyNotes) {
-
-        }
-    }
 
     public static void sendNotebookChanges() throws ExecutionException, InterruptedException {
         List<NotebookInfo> dirtyNotebooks = Leanote.leaDB.getDirtyNotebooks();

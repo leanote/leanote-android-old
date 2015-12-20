@@ -8,11 +8,13 @@ import android.support.v4.app.ActivityOptionsCompat;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.SSLCertsViewActivity;
 import com.leanote.android.networking.SelfSignedSSLCertsManager;
 import com.leanote.android.ui.accounts.NewAccountActivity;
+import com.leanote.android.ui.lea.LeaActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
@@ -131,11 +133,22 @@ public class ActivityLauncher {
 
     public static void visitBlog(Activity activity){
         Intent intent = new Intent(activity,BlogHomeActivity.class);
+        String url = String.format("%s/blog/%s",
+                AccountHelper.getDefaultAccount().getHost(),
+                AccountHelper.getDefaultAccount().getmUserName());
+
+        intent.putExtra("url", url);
         activity.startActivity(intent);
     }
 
     public static void startSearchForResult(Activity context) {
         Intent intent = new Intent(context, SearchActivity.class);
         context.startActivityForResult(intent, RequestCodes.SEARCH_NOTE);
+    }
+
+    public static void startLeaForResult(Activity context) {
+        Intent intent = new Intent(context, LeaActivity.class);
+        intent.putExtra("url", "http://lea.leanote.com");
+        context.startActivityForResult(intent, RequestCodes.START_LEA);
     }
 }

@@ -1,26 +1,31 @@
 
 package com.leanote.android.ui;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.leanote.android.R;
+import com.leanote.android.util.AppLog;
+import com.leanote.android.util.BlogWebViewClient;
 
 public abstract class WebViewActivity extends AppCompatActivity {
     /** Primary webview used to display content. */
 
     private static final String URL = "url";
 
+    protected ProgressBar progressBar;
     protected WebView mWebView;
-    //protected ObservableWebView mWebView;
+    protected TextView progressTv;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_PROGRESS);
@@ -38,24 +43,32 @@ public abstract class WebViewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // note: do NOT call mWebView.getSettings().setUserAgentString(WordPress.getUserAgent())
-        // here since it causes problems with the browser-sniffing that some sites rely on to
-        // format the page for mobile display
-
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressTv = (TextView) findViewById(R.id.progress_tv);
         mWebView = (WebView) findViewById(R.id.webView);
         mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 
-        //mWebView = (ObservableWebView) findViewById(R.id.webView);
-        //mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int progress) {
+                AppLog.i("progress:" + progress);
+                if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
+                    progressBar.setVisibility(ProgressBar.VISIBLE);
+                    progressTv.setVisibility(View.VISIBLE);
+                }
+                progressBar.setProgress(progress);
+                if (progress == 100) {
+                    progressBar.setVisibility(ProgressBar.GONE);
+                    progressTv.setVisibility(View.GONE);
+                }
 
-//        mWebView.setOnScrollChangedCallback(new ObservableWebView.OnScrollChangedCallback() {
-//            public void onScroll(int dx, int dy) {
-//                //这里我们根据dx和dy参数做自己想做的事情
-//                Log.i("dxdy","dx: "+ dx + "dy: " + dy);
-//            }
-//        });
+            }
+        });
 
-        // load URL if one was provided in the intent
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+
+        mWebView.setWebViewClient(new BlogWebViewClient());
         String url = getIntent().getStringExtra(URL);
         if (url != null) {
             loadUrl(url);
@@ -86,8 +99,6 @@ public abstract class WebViewActivity extends AppCompatActivity {
             mWebView.onResume();
         }
     }
-
-
 
     /**
      * Load the specified URL in the webview.

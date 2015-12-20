@@ -7,6 +7,7 @@
     <string name="title_activity_sign_in">SignInActivity</string>
 
     <!-- TODO: Remove or change this placeholder text -->
+    <string name="save">Save</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sign_in">Sign in</string>
     <string name="email">Email</string>
@@ -197,7 +198,7 @@
     <string name="fetch_note_content_fail">fetch note content fail</string>
 
     <string name="tags_separate_with_commas">tags separate with commas</string>
-    <string name="me_disconnect_from_leanote_com">Disconnect from leanote.com</string>
+    <string name="me_disconnect_from_leanote_com">log out</string>
     <string name="me_connect_to_leanote_com">Connect to leanote.com</string>
     <string name="sign_out_leacom_confirm">Disconnecting your account will remove all of @%s’s leanote.com data from this device, including local drafts and local changes.</string>
     <string name="signout">Disconnect</string>
@@ -252,5 +253,19 @@
     <string name="create_account_wpcom">create account on leanote.com</string>
     <string name="validating_user_data">Validating user data</string>
     <string name="title_activity_search">SearchActivity</string>
+    <string name="Lea">Lea</string>
+    <string name="title_activity_lea">LeaActivity</string>
+    <string name="edit_link_activity">edit link</string>
+    <string name="alert_html_toggle_uploading">alert_html_toggle_uploading</string>
+    <string name="alert_insert_image_html_mode">alert_insert_image_html_mode</string>
+    <string name="image_settings_save_toast">Changes saved</string>
+    <string name="image_caption">Caption</string>
+    <string name="image_alt_text">Alt text</string>
+    <string name="image_link_to">Link to</string>
+    <string name="image_width">Width</string>
+    <string name="image_settings_dismiss_dialog_title">Discard unsaved changes?</string>
+    <string name="discard">Discard</string>
+    <string name="stop_upload_dialog_title">Stop uploading?</string>
+    <string name="stop_upload_button">Stop Upload</string>
 
 </resources>

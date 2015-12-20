@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,8 @@ import com.leanote.android.widget.PostListButton;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -409,14 +412,37 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
             for (NoteDetail hiddenNote : mHiddenNotes) {
-                AppLog.i("hidden note:" + hiddenNote);
+
                 int index = tmpNotes.indexOfPost(hiddenNote);
                 if (index >= 0 && index < tmpNotes.size()) {
                     tmpNotes.remove(index);
                 }
 
-
             }
+
+            // 根据updatetime 排序
+            Collections.sort(tmpNotes, new Comparator<NoteDetail>() {
+                @Override
+                public int compare(NoteDetail lnote, NoteDetail rnote) {
+                    String lTime = lnote.getUpdatedTime();
+                    String rTime = rnote.getUpdatedTime();
+
+                    if (TextUtils.isEmpty(lTime)) {
+                        return 1;
+                    } else if (TextUtils.isEmpty(rTime)) {
+                        return -1;
+                    }
+
+                    if (lTime.compareToIgnoreCase(rTime) > 0) {
+                        return -1;
+                    } else if (lnote.getUpdatedTime().compareToIgnoreCase(rnote.getUpdatedTime()) == 0) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+
+                }
+            });
 
             Log.i("after remove, size:", String.valueOf(tmpNotes.size()));
             return true;

@@ -83,15 +83,17 @@ public class NotePreviewFragment extends Fragment
                 NoteDetail note = Leanote.leaDB.getLocalNoteById(mLocalNoteId);
                 final String htmlContent = formatPostContentForWebView(getActivity(), note);
                 AppLog.i("html:" + htmlContent);
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         if (!isAdded()) return;
 
+                        String html = htmlContent.replace("&nbsp;", "");
                         if (htmlContent != null) {
                             mWebView.loadDataWithBaseURL(
                                     null,
-                                    htmlContent,
+                                    html,
                                     "text/html",
                                     "utf-8",
                                     null);
