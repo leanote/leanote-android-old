@@ -149,4 +149,9 @@
     <!-- Notifications -->
     <color name="notifications_settings_divider_color">#d0d5d9</color>
 
+
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
 </resources>

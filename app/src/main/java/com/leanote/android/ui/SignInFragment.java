@@ -70,6 +70,7 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
     private RelativeLayout mUrlButtonLayout;
 //    private RelativeLayout mTwoStepLayout;
 //    private LinearLayout mTwoStepFooter;
+//
 
     private ImageView mInfoButton;
     private ImageView mInfoButtonSecondary;
@@ -233,22 +234,22 @@ public class SignInFragment extends AbstractFragment implements TextWatcher {
         if (passwordVisibility == null) {
             return;
         }
-        passwordVisibility.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPasswordVisible = !mPasswordVisible;
-                if (mPasswordVisible) {
-                    passwordVisibility.setImageResource(R.drawable.show_pwd);
-                    passwordVisibility.setColorFilter(v.getContext().getResources().getColor(R.color.nux_eye_icon_color_open));
-                    passwordEditText.setTransformationMethod(null);
-                } else {
-                    passwordVisibility.setImageResource(R.drawable.not_show_pwd);
-                    passwordVisibility.setColorFilter(v.getContext().getResources().getColor(R.color.nux_eye_icon_color_closed));
-                    passwordEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                }
-                passwordEditText.setSelection(passwordEditText.length());
-            }
-        });
+//        passwordVisibility.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mPasswordVisible = !mPasswordVisible;
+//                if (mPasswordVisible) {
+//                    passwordVisibility.setImageResource(R.drawable.show_pwd);
+//                    passwordVisibility.setColorFilter(v.getContext().getResources().getColor(R.color.nux_eye_icon_color_open));
+//                    passwordEditText.setTransformationMethod(null);
+//                } else {
+//                    passwordVisibility.setImageResource(R.drawable.not_show_pwd);
+//                    passwordVisibility.setColorFilter(v.getContext().getResources().getColor(R.color.nux_eye_icon_color_closed));
+//                    passwordEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+//                }
+//                passwordEditText.setSelection(passwordEditText.length());
+//            }
+//        });
     }
 
 

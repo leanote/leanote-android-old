@@ -22,6 +22,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.ui.note.service.NoteUploadService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
@@ -62,6 +63,8 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int VIEW_TYPE_ENDLIST_INDICATOR = 1;
     private static final int VIEW_TYPE_SEARCH = 2;
 
+    private String notebookId = null;
+
     public NoteListAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
 
@@ -80,6 +83,10 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void setOnPostButtonClickListener(OnNotesButtonClickListener listener) {
         mOnNotesButtonClickListener = listener;
+    }
+
+    public void setNotebookId(String notebookId) {
+        this.notebookId = notebookId;
     }
 
     private NoteDetail getItem(int position) {
@@ -404,7 +411,11 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         @Override
         protected Boolean doInBackground(Void... voids) {
 
-            tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+            if (notebookId == null)
+                tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+            else
+                tmpNotes = Leanote.leaDB.getNotesListByNotebookId(notebookId);
+
             // make sure we don't return any hidden posts
 
 

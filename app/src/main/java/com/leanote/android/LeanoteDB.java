@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.leanote.android.datasets.AccountTable;
 import com.leanote.android.model.AccountHelper;
@@ -155,6 +156,24 @@ public class LeanoteDB extends SQLiteOpenHelper {
                     }
 
                     ContentValues values = getContentValuesFromNote(note);
+                    /*ContentValues values = new ContentValues();
+                    values.put("noteId", note.getNoteId());
+                    values.put("notebookId", note.getNoteBookId());
+                    values.put("userId", note.getUserId());
+                    values.put("title", note.getTitle());
+                    values.put("desc", note.getDesc());
+                    values.put("tags", note.getTags());
+                    values.put("note_abstract", note.getNoteAbstract());
+                    values.put("content", note.getContent());
+                    values.put("isMarkdown", note.isMarkDown() ? 1 : 0);
+                    values.put("isBlog", note.isPublicBlog() ? 1 : 0);
+                    values.put("isTrash", note.isTrash() ? 1 : 0);
+                    values.put("usn", note.getUsn());
+                    values.put("updatedTime", note.getUpdatedTime());
+                    values.put("files", note.getFileIds());
+                    values.put("createdTime", note.getCreatedTime());
+                    values.put("updatedTime", note.getUpdatedTime());
+                    values.put("publicTime", note.getPublicTime());*/
 
                     db.insert(NOTES_TABLE, null, values);
                 }
@@ -172,11 +191,26 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
         String[] args = {userId};
         //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "updatedTime DESC");
         try {
             while (c.moveToNext()) {
                 NoteDetail detail = fillNote(c);
                 listPosts.add(detail);
+            }
+            return listPosts;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+    public NoteDetailList getNotesListByNotebookId(String notebookId) {
+        NoteDetailList listPosts = new NoteDetailList();
+
+        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "updatedTime DESC");
+        try {
+            while (c.moveToNext()) {
+                NoteDetail detail = fillNote(c);
+                if (detail.getNoteBookId().equals(notebookId)) listPosts.add(detail);
             }
             return listPosts;
         } finally {
@@ -319,18 +353,23 @@ public class LeanoteDB extends SQLiteOpenHelper {
     }
 
     public long addNote(NoteDetail newNote) {
+        newNote.setIsMarkDown(AccountHelper.getDefaultAccount().isUseMarkdown());
+
         ContentValues values = new ContentValues();
+
 
         values.put("noteId", newNote.getNoteId());
         values.put("notebookId", newNote.getNoteBookId());
         values.put("userId", newNote.getUserId());
         values.put("title", newNote.getTitle());
         values.put("updatedTime", newNote.getUpdatedTime());
+        values.put("isMarkdown", newNote.isMarkDown() ? 1 : 0);
 
         long result = db.insert(NOTES_TABLE, null, values);
         if (result > 0) {
             newNote.setId(result);
         }
+        Log.v("addNote", new Long(result).toString());
         return result;
     }
 
@@ -601,7 +640,40 @@ public class LeanoteDB extends SQLiteOpenHelper {
         } finally {
             SqlUtils.closeCursor(c);
         }
-
+    }
+    public List<NotebookInfo> getRootNotebookList() {
+        Cursor c = db.query(NOTEBOOKS_TABLE, null, "parentNotebookId=?", new String[]{""}, null, null, "");
+        List<NotebookInfo> notebooks = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+                NotebookInfo rootNotebook = new NotebookInfo();
+                rootNotebook.setTitle(c.getString(4));
+                rootNotebook.setNotebookId(c.getString(1));
+                rootNotebook.setUpdateTime(c.getString(10));
+                notebooks.add(rootNotebook);
+            }
+            //Log.e("getRootNotebookList", new Integer(notebooks.size()).toString());
+            return notebooks;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+    public List<NotebookInfo> getChildNotebookList(NotebookInfo notebook) {
+        Cursor c = db.query(NOTEBOOKS_TABLE, null, "parentNotebookId=?", new String[]{notebook.getNotebookId()}, null, null, "");
+        List<NotebookInfo> notebooks = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+                NotebookInfo childNotebook = new NotebookInfo();
+                childNotebook.setTitle(c.getString(4));
+                childNotebook.setNotebookId(c.getString(1));
+                childNotebook.setUpdateTime(c.getString(10));
+                notebooks.add(childNotebook);
+            }
+            //Log.e("getChildNotebookList", new Integer(notebooks.size()).toString());
+            return notebooks;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
     }
 
     public void saveNoteSettings(NoteDetail note) {
@@ -767,8 +839,10 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public int getAccountUsn() {
         Cursor c = db.query(ACCOUNTS_TABLE, null, "local_id=?", new String[]{String.valueOf(0)}, null, null, "");
 
+        Log.v("getAccountUsn", "ahaha");
         try {
             if (c.moveToNext()) {
+                Log.v("getAccountUsn", new Integer(c.getInt(8)).toString());
                 return c.getInt(8);
             }
 

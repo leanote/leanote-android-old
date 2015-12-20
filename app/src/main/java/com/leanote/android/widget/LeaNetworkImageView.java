@@ -314,7 +314,7 @@ public class LeaNetworkImageView extends ImageView {
         if (getContext() == null) return;
         new CircularizeBitmapTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, BitmapFactory.decodeResource(
                 getContext().getResources(),
-                R.drawable.gravatar_placeholder
+                R.drawable.temp_avatar//gravatar_placeholder
         ));
     }
 

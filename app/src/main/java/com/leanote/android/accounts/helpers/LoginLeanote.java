@@ -32,8 +32,7 @@ public class LoginLeanote extends LoginAbstract {
                     boolean isOk = (boolean) response.get("Ok");
                     if (isOk) {
                         Account account = AccountHelper.getDefaultAccount();
-                        String token = response.getString("Token");
-                        account.setmAccessToken(token);
+                        account.setmAccessToken(response.getString("Token"));
                         account.setmUserId(response.getString("UserId"));
                         account.setmUserName(response.getString("Username"));
                         account.setmEmail(response.getString("Email"));

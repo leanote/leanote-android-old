@@ -92,9 +92,11 @@ public class NotebookFragment extends Fragment
         Context context = getActivity();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
 
+        /////////////间隔所在之处
+        mRecyclerView.addItemDecoration(new RecyclerItemDecoration(0, 0));
         int spacingVertical = context.getResources().getDimensionPixelSize(R.dimen.reader_card_gutters);
         int spacingHorizontal = context.getResources().getDimensionPixelSize(R.dimen.content_margin);
-        mRecyclerView.addItemDecoration(new RecyclerItemDecoration(spacingHorizontal, spacingVertical));
+        //mRecyclerView.addItemDecoration(new RecyclerItemDecoration(spacingHorizontal, spacingVertical));
 
         mFabView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -336,7 +338,7 @@ public class NotebookFragment extends Fragment
                 break;
             case PostListButton.BUTTON_VIEW:
             case PostListButton.BUTTON_PREVIEW:
-                //ActivityLauncher.viewPostPreviewForResult(getActivity(), fullPost);
+                //ActivityLauncher.viewNotebookForResult(getActivity(), fullNotebook.getId());
                 break;
             case PostListButton.BUTTON_TRASH:
             case PostListButton.BUTTON_DELETE:

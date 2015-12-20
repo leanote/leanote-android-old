@@ -18,6 +18,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.LeaHtml;
+import com.leanote.android.util.LeaWebViewClient;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.StringUtils;
 
@@ -53,6 +54,9 @@ public class EditNotePreviewFragment extends Fragment {
                 mTextView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
         });
+        LeaWebViewClient client = new LeaWebViewClient();
+        mWebView.setWebViewClient(client);
+        mWebView.getSettings().setJavaScriptEnabled(true);
 
         return rootView;
     }
@@ -130,50 +134,63 @@ public class EditNotePreviewFragment extends Fragment {
 
             NoteDetail note = mActivity.getNote();
 
-            String postTitle = "<h1>" + note.getTitle() + "</h1>";
-            String postContent = postTitle + note.getContent();
+            if( note.isMarkDown() ) {
+                String HTML_Content = "<html><head><link href=\"http://cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"http://leanote.com/public/blog/themes/elegant/style.css\" rel=\"stylesheet\"><style>#content {width: 900px;margin: auto;} img, svg { display: block;  margin: auto;  } </style> <script src=\"markdown-to-html.min.js\"></script> </head> " +
+                        "<body> " + "<h1>" + note.getTitle() + "</h1>" +
+                        "<div id=\"content\"  style=\"word-wrap:break-word\"> hello!~ </div> <script> function f(t) { markdownToHtml(t, document.getElementById('content')) } " +
+                        "f('" + note.getContent().replace("\n", "\\n")
+                        + "')</script> </body> </html>";
+                contentSpannable = new SpannableString(HTML_Content);
 
-            contentSpannable = LeaHtml.fromHtml(
-                    postContent.replaceAll("\uFFFC", ""),
-                    mActivity,
-                    note,
-                    Math.min(mTextView.getWidth(), mTextView.getHeight())
-            );
+                return contentSpannable;
 
+            } else {
 
-            if (note.getUsn() == 0) {
+                String postTitle = "<h1>" + note.getTitle() + "</h1>";
+                String postContent = postTitle + note.getContent();
+
                 contentSpannable = LeaHtml.fromHtml(
                         postContent.replaceAll("\uFFFC", ""),
                         mActivity,
                         note,
                         Math.min(mTextView.getWidth(), mTextView.getHeight())
                 );
-            } else {
+
+
+                if (note.getUsn() == 0) {
+                    contentSpannable = LeaHtml.fromHtml(
+                            postContent.replaceAll("\uFFFC", ""),
+                            mActivity,
+                            note,
+                            Math.min(mTextView.getWidth(), mTextView.getHeight())
+                    );
+                } else {
+                    String htmlText = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"webview.css\" /></head><body><div id=\"container\">%s</div></body></html>";
+                    htmlText = String.format(htmlText, StringUtils.addPTags(postContent));
+                    contentSpannable = new SpannableString(htmlText);
+                }
+
                 String htmlText = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"webview.css\" /></head><body><div id=\"container\">%s</div></body></html>";
                 htmlText = String.format(htmlText, StringUtils.addPTags(postContent));
+                AppLog.i("html:" + htmlText);
+                //把图片url替换成本地url
+
+
+                htmlText = processNoteMedia(htmlText);
                 contentSpannable = new SpannableString(htmlText);
+
+                return contentSpannable;
             }
-
-            String htmlText = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"webview.css\" /></head><body><div id=\"container\">%s</div></body></html>";
-            htmlText = String.format(htmlText, StringUtils.addPTags(postContent));
-            AppLog.i("html:" + htmlText);
-            //把图片url替换成本地url
-
-
-            htmlText = processNoteMedia(htmlText);
-            contentSpannable = new SpannableString(htmlText);
-
-            return contentSpannable;
         }
 
         @Override
         protected void onPostExecute(Spanned spanned) {
             if (mActivity != null && mActivity.getNote() != null && spanned != null) {
-                if (mActivity.getNote().getUsn() == 0) {
-                    mTextView.setVisibility(View.VISIBLE);
-                    mWebView.setVisibility(View.GONE);
-                    mTextView.setText(spanned);
-                } else {
+//                if (mActivity.getNote().getUsn() == 0) {
+//                    mTextView.setVisibility(View.VISIBLE);
+//                    mWebView.setVisibility(View.GONE);
+//                    mTextView.setText(spanned);
+//                } else {
                     mTextView.setVisibility(View.GONE);
                     mWebView.setVisibility(View.VISIBLE);
 
@@ -182,7 +199,7 @@ public class EditNotePreviewFragment extends Fragment {
 //                    mWebView.loadDataWithBaseURL(null, spanned.toString(),
 //                            "text/html", "utf-8", null);
 
-                }
+//                }
             }
 
             mLoadTask = null;

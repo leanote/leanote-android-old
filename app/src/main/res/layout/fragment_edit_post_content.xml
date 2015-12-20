@@ -76,6 +76,26 @@
 
     </LinearLayout>
 
+
+    <LinearLayout
+        android:id="@+id/sliding_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom"
+        android:background="@color/legacy_format_bar_background"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <SeekBar android:id="@+id/cursor_seek_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:max="10"
+            android:progress="5"
+            android:secondaryProgress="5" />
+
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/format_bar"
         android:layout_width="fill_parent"
@@ -137,8 +157,9 @@
                     android:minWidth="@dimen/legacy_format_bar_height"
                     android:background="@drawable/legacy_format_bar_button_link_selector" />
 
-                <Button
+                <ToggleButton
                     android:id="@+id/more"
+                    style="@style/LegacyToggleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:minWidth="@dimen/legacy_format_bar_height"
@@ -153,5 +174,6 @@
             android:minWidth="@dimen/legacy_format_bar_height"
             android:background="@drawable/legacy_format_bar_button_media_selector" />
     </LinearLayout>
+
 
 </LinearLayout>

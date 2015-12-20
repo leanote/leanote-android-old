@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+    <item
+        android:id="@+id/searchBar"
+        android:icon="@drawable/ic_search_white_48dp"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:title="@string/search_note_hint"/>
+
+    <!--<item-->
+        <!--android:id="@+id/addNoteBar"-->
+        <!--android:icon="@drawable/ic_add_white_24dp"-->
+        <!--android:orderInCategory="1"-->
+        <!--app:showAsAction="always"-->
+        <!--android:title="@string/add_new_notebook"/>-->
+</menu>

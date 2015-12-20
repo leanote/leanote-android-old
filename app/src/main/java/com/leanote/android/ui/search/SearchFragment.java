@@ -18,6 +18,8 @@ import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.ui.main.Notebook_ViewNote;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +38,18 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     private List<NoteDetail> mNotes;
     private List<NoteDetail> allNotes;
 
+    private List<NotebookInfo> mNotebooks;
+    private List<NotebookInfo> allNotebooks;
+
+    private long searchType;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+
+        searchType = ((SearchActivity)getActivity()).getSeachType();
 
         return view;
     }
@@ -52,8 +61,14 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mNotes = new ArrayList<>();
-        allNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+        if (searchType == 0) {
+            mNotes = new ArrayList<>();
+            allNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+        }
+        else if (searchType == 2) {
+            mNotebooks = new ArrayList<>();
+            allNotebooks = Leanote.leaDB.getNotebookList();
+        }
 
 
         mAdapter = new SearchAdapter(getActivity(), mNotes);
@@ -92,6 +107,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         }
 
         for (NoteDetail model : models) {
+            if (model.getContent() == null || model.getTitle()==null) continue;  /////////////
             final String content = model.getContent().toLowerCase();
             final String title = model.getTitle().toLowerCase();
 

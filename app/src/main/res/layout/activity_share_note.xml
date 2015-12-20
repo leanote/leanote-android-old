@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/share_note_activity"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="@dimen/margin_medium"
+android:background="@color/white"
+tools:context=".ShareNoteActivity">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:id="@+id/share_note_blog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical" >
+
+        <com.leanote.android.widget.LeaTextView
+            android:id="@+id/share_note_blog_label"
+            style="@style/LeanoteSubHeader"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:singleLine="true"
+            android:text="Publish to Lea++ Blog" />
+
+        <Button
+            android:id="@+id/share_note_blog_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/share_note_blog_label"
+            android:text="Publish"/>
+    </LinearLayout>
+
+    <View style="@style/MeListSectionDividerView" />
+
+    <LinearLayout
+        android:id="@+id/share_note_mail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.leanote.android.widget.LeaTextView
+                android:id="@+id/share_note_mail_label"
+                style="@style/LeanoteSubHeader"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:singleLine="true"
+                android:text="Send to my Mail Box" />
+
+            <Button
+                android:id="@+id/share_note_mail_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@+id/share_note_mail_label"
+                android:text="Send"/>
+        </LinearLayout>
+<!--
+
+            <com.leanote.android.editor.SourceViewEditText
+                android:id="@+id/sourceview_mail_addr"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:inputType="textEmailAddress|textAutoCorrect"
+                android:hint="E-Mail Addr"/>
+
+
+
+            <com.leanote.android.editor.SourceViewEditText
+                android:id="@+id/sourceview_mail_pwd"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:inputType="textPassword|textAutoCorrect"
+                android:hint="Password"/>
+-->
+        <View style="@style/MeListSectionDividerView" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>
+
+
+</ScrollView>

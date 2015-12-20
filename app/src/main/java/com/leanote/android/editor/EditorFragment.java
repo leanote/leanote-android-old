@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,6 +23,7 @@ import android.widget.ToggleButton;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.leanote.android.R;
+import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.StringUtils;
@@ -85,6 +87,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v("msg", "EditorFragment onCreate");
     }
 
     @Override
@@ -98,6 +101,8 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         }
 
         // -- WebView configuration
+
+
 
         mWebView = (EditorWebViewAbstract) view.findViewById(R.id.webview);
 
@@ -150,6 +155,8 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         // -- Format bar configuration
 
         setupFormatBarButtonMap(view);
+
+        Log.v("msg", "WebView configuration");
 
         return view;
     }
@@ -277,7 +284,17 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             return;
         }
 
-        String htmlEditor = Utils.getHtmlFromFile(getActivity(), "android-editor.html");
+        String htmlEditor;
+
+        Log.v("msg", "markdown_editor");
+
+        if( !((EditNoteActivity)getActivity()).getNote().isMarkDown() ) {
+            htmlEditor = Utils.getHtmlFromFile(getActivity(), "android-editor.html");
+        } else {
+
+            htmlEditor = Utils.getHtmlFromFile(getActivity(), "markdown_editor/editor-mobile.min.html");
+        }
+
 
         mWebView.addJavascriptInterface(new JsCallbackReceiver(this), JS_CALLBACK_HANDLER);
 
@@ -289,6 +306,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     @Override
     public void onClick(View v) {
         int id = v.getId();
+
         if (id == R.id.format_bar_button_html) {
             clearFormatBarButtons();
             updateFormatBarEnabledState(true);
@@ -360,6 +378,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             linkDialogFragment.setArguments(dialogBundle);
             linkDialogFragment.show(getFragmentManager(), "LinkDialogFragment");
         } else {
+
             if (v instanceof ToggleButton) {
                 onFormattingButtonClicked((ToggleButton) v);
             }
@@ -722,6 +741,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             }
         }
     }
+
 
     private void onFormattingButtonClicked(ToggleButton toggleButton) {
         String tag = toggleButton.getTag().toString();

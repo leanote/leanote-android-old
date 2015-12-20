@@ -144,6 +144,9 @@ public class NotePreviewActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.menu_edit) {
             ActivityLauncher.editNoteForResult(this, mLocalNoteId);
             return true;
+        } else if (item.getItemId() == R.id.menu_share) {
+            ActivityLauncher.shareNoteForResult(this, mLocalNoteId);
+            return  true;
         } else {
             return super.onOptionsItemSelected(item);
         }

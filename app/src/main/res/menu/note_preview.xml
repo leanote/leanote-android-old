@@ -2,9 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!--<item-->
+        <!--android:id="@+id/menu_edit"-->
+        <!--android:title="@string/button_edit"-->
+        <!--app:showAsAction="always" />-->
+    <item
+        android:id="@+id/menu_share"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:title="Share"/>
+
     <item
         android:id="@+id/menu_edit"
-        android:title="@string/button_edit"
-        app:showAsAction="always" />
+        android:icon="@drawable/noticon_edit2"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:title="@string/button_edit"/>
 
 </menu>

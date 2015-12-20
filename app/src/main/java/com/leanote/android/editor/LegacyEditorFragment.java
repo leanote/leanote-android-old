@@ -57,6 +57,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.leanote.android.R;
 import com.leanote.android.editor.legacy.EditLinkActivity;
 import com.leanote.android.editor.legacy.LeaEditImageSpan;
+import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
 import com.leanote.android.util.DisplayUtils;
@@ -90,13 +91,17 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
     private static final String TAG_FORMAT_BAR_BUTTON_STRIKE = "strike";
     private static final String TAG_FORMAT_BAR_BUTTON_QUOTE = "blockquote";
 
+    private static final String TAG_FORMAT_BAR_BUTTON_CODE = "code";
+
+
     private View mRootView;
     private LeaEditText mContentEditText;
     private EditText mTitleEditText;
     private ToggleButton mBoldToggleButton, mEmToggleButton, mBquoteToggleButton;
-    private ToggleButton mUnderlineToggleButton, mStrikeToggleButton;
-    private LinearLayout mFormatBar, mPostContentLinearLayout, mPostSettingsLinearLayout;
+    private ToggleButton mUnderlineToggleButton, mStrikeToggleButton, moreButton;
+    private LinearLayout mFormatBar, mPostContentLinearLayout, mPostSettingsLinearLayout, mSlidingBar;
     private Button mAddPictureButton;
+    private SeekBar mCursorSeekBar;
     private boolean mIsBackspace;
     private boolean mScrollDetected;
     private boolean mIsLocalDraft;
@@ -164,12 +169,17 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         mIsLocalDraft = isLocalDraft;
     }
 
+    int lastProgress = 5, thisProgress = 5;
+    boolean isStopSeeking = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_edit_post_content, container, false);
 
         Log.i("enter", " legacy editor");
         mFormatBar = (LinearLayout) rootView.findViewById(R.id.format_bar);
+        mSlidingBar = (LinearLayout) rootView.findViewById(R.id.sliding_bar);
+        mCursorSeekBar = (SeekBar) rootView.findViewById(R.id.cursor_seek_bar);
         mTitleEditText = (EditText) rootView.findViewById(R.id.post_title);
         mTitleEditText.setText(mTitle);
         mTitleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -203,7 +213,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         mStrikeToggleButton = (ToggleButton) rootView.findViewById(R.id.strike);
         mAddPictureButton = (Button) rootView.findViewById(R.id.addPictureButton);
         Button linkButton = (Button) rootView.findViewById(R.id.link);
-        Button moreButton = (Button) rootView.findViewById(R.id.more);
+        moreButton = (ToggleButton) rootView.findViewById(R.id.more);
 
         registerForContextMenu(mAddPictureButton);
         mContentEditText = (LeaEditText) rootView.findViewById(R.id.post_content);
@@ -229,7 +239,43 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         mStrikeToggleButton.setOnClickListener(mFormatBarButtonClickListener);
         mBquoteToggleButton.setOnClickListener(mFormatBarButtonClickListener);
         moreButton.setOnClickListener(mFormatBarButtonClickListener);
+
+
+
+        mCursorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            //拖动中
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                lastProgress =  thisProgress;
+                thisProgress =  mCursorSeekBar.getProgress();
+
+                if( isStopSeeking ) {
+                    isStopSeeking = false;
+                    return;
+                }
+
+                int newPos = mContentEditText.getSelectionStart() + ( thisProgress - lastProgress );
+                if ( 0 <= newPos && newPos <= mContentEditText.getText().length() )
+                    mContentEditText.setSelection(newPos);
+            }
+            //开始拖动
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                lastProgress =  thisProgress = 5;
+            }
+            //结束拖动
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                isStopSeeking = true;
+                mCursorSeekBar.setProgress(5);
+            }
+        });
+
+
+
         mEditorFragmentListener.onEditorFragmentInitialized();
+
+
 
         if (savedInstanceState != null) {
             Parcelable[] spans = savedInstanceState.getParcelableArray(KEY_IMAGE_SPANS);
@@ -294,6 +340,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
                 public void onAnimationEnd(Animation animation) {
                     mPostSettingsLinearLayout.setVisibility(View.GONE);
                     mFormatBar.setVisibility(View.VISIBLE);
+                    mSlidingBar.setVisibility(View.VISIBLE);
                 }
 
                 @Override
@@ -308,6 +355,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         } else {
             mTitleEditText.setVisibility(View.VISIBLE);
             mFormatBar.setVisibility(View.GONE);
+            mSlidingBar.setVisibility(View.GONE);
             Animation fadeAnimation = new AlphaAnimation(0, 1);
             fadeAnimation.setDuration(CONTENT_ANIMATION_DURATION);
             fadeAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -428,13 +476,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
             } else if (id == R.id.bquote) {
                 onFormatButtonClick(mBquoteToggleButton, TAG_FORMAT_BAR_BUTTON_QUOTE);
             } else if (id == R.id.more) {
-                mSelectionEnd = mContentEditText.getSelectionEnd();
-                Editable str = mContentEditText.getText();
-                if (str != null) {
-                    if (mSelectionEnd > str.length())
-                        mSelectionEnd = str.length();
-                    str.insert(mSelectionEnd, "\n<!--more-->\n");
-                }
+                onFormatButtonClick(moreButton, TAG_FORMAT_BAR_BUTTON_CODE);
             } else if (id == R.id.link) {
                 mSelectionStart = mContentEditText.getSelectionStart();
                 mStyleStart = mSelectionStart;
@@ -532,7 +574,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
 
         Object[] allSpans = s.getSpans(selectionStart, selectionEnd, styleClass);
         boolean textIsSelected = selectionEnd > selectionStart;
-        if (mIsLocalDraft) {
+        if (mIsLocalDraft && ((EditNoteActivity)getActivity()).getNote().isMarkDown() == false && tag.equals(TAG_FORMAT_BAR_BUTTON_CODE) == false ) {
             // Local drafts can use the rich text editor. Yay!
             boolean shouldAddSpan = true;
             for (Object span : allSpans) {
@@ -577,9 +619,35 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
                 }
             }
         } else {
-            // Add HTML tags when editing an existing post
-            String startTag = "<" + tag + ">";
-            String endTag = "</" + tag + ">";
+            String startTag = "", endTag ="";
+            if( ((EditNoteActivity)getActivity()).getNote().isMarkDown() ) {
+                // Add markdown tags
+                if (tag.equals(TAG_FORMAT_BAR_BUTTON_STRONG)) {
+                    startTag = " **";
+                    endTag = "** ";
+                } else if (tag.equals(TAG_FORMAT_BAR_BUTTON_EM)) {
+                    startTag = " *";
+                    endTag = "* ";
+                } else if (tag.equals(TAG_FORMAT_BAR_BUTTON_UNDERLINE)) {
+                    startTag = "<" + tag + ">";
+                    endTag = "</" + tag + ">";
+                } else if (tag.equals(TAG_FORMAT_BAR_BUTTON_STRIKE)) {
+                    startTag = " ~~";
+                    endTag = "~~ ";
+                } else if (tag.equals(TAG_FORMAT_BAR_BUTTON_QUOTE)) {
+                    startTag = "\n>";
+                    endTag = "";
+                } else if (tag.equals(TAG_FORMAT_BAR_BUTTON_CODE)) {
+                    startTag = " ```";
+                    endTag = "``` ";
+                }
+
+            } else {
+                // Add HTML tags when editing an existing post
+                startTag = "<" + tag + ">";
+                endTag = "</" + tag + ">";
+            }
+
             Editable content = mContentEditText.getText();
             if (textIsSelected) {
                 content.insert(selectionStart, startTag);

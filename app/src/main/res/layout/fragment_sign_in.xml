@@ -31,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
 
+                <!--Leanote lOGO-->
                 <ImageView
                     android:id="@+id/nux_fragment_icon"
                     android:layout_width="50dp"
@@ -41,15 +42,17 @@
 
             </RelativeLayout>
 
+            <!--登录按钮2-->
             <com.leanote.android.widget.LeaTextView
                 android:id="@+id/nux_jetpack_auth_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
+                android:gravity="center_horizontal"
                 android:paddingLeft="@dimen/margin_extra_large"
                 android:paddingRight="@dimen/margin_extra_large"
                 android:paddingBottom="@dimen/margin_extra_large"
-                android:gravity="center_horizontal"
+                android:layout_marginTop="16dp"
                 android:text="@string/sign_in"
                 android:visibility="gone" />
 
@@ -60,28 +63,35 @@
                 android:background="@color/white"
                 android:clickable="true">
 
+                <!--username-->
                 <com.leanote.android.widget.OpenSansEditText
                     android:id="@+id/nux_username"
-                    style="@style/Leanote.NUXEditText"
+                    android:background="@color/white"
+                    android:singleLine="true"
+                    android:textColor="#444444"
+                    android:textColorHint="#AAAAAA"
+                    android:padding="12dp"
+                    android:textSize="15dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/email"
+                    android:gravity="center_horizontal"
                     android:inputType="textEmailAddress"
                     app:persistenceEnabled="true" />
 
-                <ImageView
-                    android:id="@+id/imageView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentRight="false"
-                    android:layout_alignParentStart="false"
-                    android:layout_alignParentLeft="false"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/signin_users"
-                    android:tint="@color/grey_darken_10" />
+                <!--<ImageView-->
+                    <!--android:id="@+id/imageView"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_alignParentEnd="false"-->
+                    <!--android:layout_alignParentRight="false"-->
+                    <!--android:layout_alignParentStart="false"-->
+                    <!--android:layout_alignParentLeft="false"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:src="@drawable/signin_users"-->
+                    <!--android:tint="@color/grey_darken_10" />-->
             </RelativeLayout>
 
             <RelativeLayout
@@ -91,42 +101,49 @@
                 android:background="@color/white"
                 android:clickable="true">
 
+                <!--Password-->
                 <com.leanote.android.widget.OpenSansEditText
                     android:id="@+id/nux_password"
-                    style="@style/Leanote.NUXEditText"
+                    android:background="@color/white"
+                    android:singleLine="true"
+                    android:textColor="#444444"
+                    android:textColorHint="#AAAAAA"
+                    android:padding="12dp"
+                    android:textSize="15dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="38dp"
                     android:hint="@string/password"
+                    android:gravity="center_horizontal"
                     android:inputType="textPassword" />
+                <!--style="@style/Leanote.NUXEditText"-->
 
-                <ImageView
-                    android:id="@+id/imageView4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentRight="false"
-                    android:layout_alignParentStart="false"
-                    android:layout_alignParentLeft="false"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/pwd_lock"
-                    android:tint="@color/grey_darken_10" />
+                <!--<ImageView-->
+                    <!--android:id="@+id/imageView4"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_alignParentEnd="false"-->
+                    <!--android:layout_alignParentRight="false"-->
+                    <!--android:layout_alignParentStart="false"-->
+                    <!--android:layout_alignParentLeft="false"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:src="@drawable/pwd_lock"-->
+                    <!--android:tint="@color/grey_darken_10" />-->
 
-                <ImageView
-                    android:id="@+id/password_visibility"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentStart="false"
-                    android:layout_alignParentLeft="false"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginRight="16dp"
-                    android:src="@drawable/not_show_pwd"
-                    android:tint="@color/nux_eye_icon_color_closed" />
+                <!--<ImageView-->
+                    <!--android:id="@+id/password_visibility"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_alignParentEnd="false"-->
+                    <!--android:layout_alignParentRight="true"-->
+                    <!--android:layout_alignParentStart="false"-->
+                    <!--android:layout_alignParentLeft="false"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:layout_marginRight="16dp"-->
+                    <!--android:src="@drawable/not_show_pwd"-->
+                    <!--android:tint="@color/nux_eye_icon_color_closed" />-->
             </RelativeLayout>
 
             <!--
@@ -161,26 +178,33 @@
 
                 <com.leanote.android.widget.OpenSansEditText
                     android:id="@+id/nux_url"
-                    style="@style/Leanote.NUXEditText"
+                    android:background="@color/white"
+                    android:singleLine="true"
+                    android:textColor="#444444"
+                    android:textColorHint="#AAAAAA"
+                    android:padding="12dp"
+                    android:textSize="15dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/site_address"
+                    android:gravity="center_horizontal"
                     android:inputType="textUri"
                     app:persistenceEnabled="true" />
+                <!--style="@style/Leanote.NUXEditText"-->
 
-                <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentRight="false"
-                    android:layout_alignParentStart="false"
-                    android:layout_alignParentLeft="false"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/self_hosted_site"
-                    android:tint="@color/grey_darken_10" />
+                <!--<ImageView-->
+                    <!--android:id="@+id/imageView2"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_alignParentEnd="false"-->
+                    <!--android:layout_alignParentRight="false"-->
+                    <!--android:layout_alignParentStart="false"-->
+                    <!--android:layout_alignParentLeft="false"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:src="@drawable/self_hosted_site"-->
+                    <!--android:tint="@color/grey_darken_10" />-->
             </RelativeLayout>
 
             <RelativeLayout
@@ -188,8 +212,9 @@
                 android:layout_height="@dimen/nux_main_button_height"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="24dp">
 
+                <!--真登录按钮-->
                 <com.leanote.android.widget.LeaTextView
                     android:id="@+id/nux_sign_in_button"
                     style="@style/Leanote.NUXPrimaryButton"

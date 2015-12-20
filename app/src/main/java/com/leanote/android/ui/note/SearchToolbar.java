@@ -28,20 +28,20 @@ public class SearchToolbar extends LinearLayout {
 
 
     private void initView(final Context context) {
-        View view = inflate(context, R.layout.search_note, this);
-
-        mTextview = (TextView) view.findViewById(R.id.search_note_title);
-        mTextview.setText(title);
-
-        searchButton = (ImageButton) view.findViewById(R.id.search_note_button);
-        searchButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //启动SearchActivity
-                AppLog.i("start to search" + context.getClass());
-                Activity activity = (Activity) context;
-                ActivityLauncher.startSearchForResult(activity);
-            }
-        });
+//        View view = inflate(context, R.layout.search_note, this);
+//
+//        mTextview = (TextView) view.findViewById(R.id.search_note_title);
+//        mTextview.setText(title);
+//
+//        searchButton = (ImageButton) view.findViewById(R.id.search_note_button);
+//        searchButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //启动SearchActivity
+//                AppLog.i("start to search" + context.getClass());
+//                Activity activity = (Activity) context;
+//                ActivityLauncher.startSearchForResult(activity);
+//            }
+//        });
     }
 }

@@ -64,6 +64,7 @@ public class NotePreviewFragment extends Fragment
         client.setImageLoadedListener(this);
 
         mWebView.setWebViewClient(client);
+        mWebView.getSettings().setJavaScriptEnabled(true);
 
         return view;
     }
@@ -90,7 +91,7 @@ public class NotePreviewFragment extends Fragment
 
                         if (htmlContent != null) {
                             mWebView.loadDataWithBaseURL(
-                                    null,
+                                    "file:///android_asset/", //null,
                                     htmlContent,
                                     "text/html",
                                     "utf-8",
@@ -134,21 +135,29 @@ public class NotePreviewFragment extends Fragment
         int contentMargin = getResources().getDimensionPixelSize(R.dimen.content_margin);
         String marginStr = Integer.toString(contentMargin) + "px";
 
-        return "<!DOCTYPE html><html><head><meta charset='UTF-8' />"
-                + "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-                + "<link href='file:///android_asset/merriweather.css' rel='stylesheet' type='text/css'>"
-                + "<style type='text/css'>"
-                + "  html { margin-left: " + marginStr + "; margin-right: " + marginStr + "; }"
-                + "  body { font-family: Merriweather, serif; font-weight: 400; padding: 0px; margin: 0px; width: 100%; color: " + textColorStr + "; }"
-                + "  body, p, div { max-width: 100% !important; word-wrap: break-word; }"
-                + "  p, div { line-height: 1.6em; font-size: 0.95em; }"
-                + "  h1 { font-size: 1.2em; font-family: Merriweather, serif; font-weight: 700; }"
-                + "  img { max-width: 100%; height: auto; }"
-                + "  a { text-decoration: none; color: " + linkColorStr + "; }"
-                + "</style></head><body>"
-                + "<h1>" + title + "</h1>"
-                + StringUtils.addPTags(noteContent)
-                + "</body></html>";
+        if( note.isMarkDown() ) {
+            return "<html><head><link href=\"http://cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"http://leanote.com/public/blog/themes/elegant/style.css\" rel=\"stylesheet\"><style>#content {width: 900px;margin: auto;} img, svg { display: block;  margin: auto;  } </style> <script src=\"markdown-to-html.min.js\"></script> </head> " +
+                    "<body> " + "<h1>" + note.getTitle() + "</h1>" +
+                    "<div id=\"content\"  style=\"word-wrap:break-word\"> hello!~ </div> <script> function f(t) { markdownToHtml(t, document.getElementById('content')) } " +
+                    "f('" + note.getContent().replace("\n", "\\n")
+                    + "')</script> </body> </html>";
+        } else{
+            return "<!DOCTYPE html><html><head><meta charset='UTF-8' />"
+                    + "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+                    + "<link href='file:///android_asset/merriweather.css' rel='stylesheet' type='text/css'>"
+                    + "<style type='text/css'>"
+                    + "  html { margin-left: " + marginStr + "; margin-right: " + marginStr + "; }"
+                    + "  body { font-family: Merriweather, serif; font-weight: 400; padding: 0px; margin: 0px; width: 100%; color: " + textColorStr + "; }"
+                    + "  body, p, div { max-width: 100% !important; word-wrap: break-word; }"
+                    + "  p, div { line-height: 1.6em; font-size: 0.95em; }"
+                    + "  h1 { font-size: 1.2em; font-family: Merriweather, serif; font-weight: 700; }"
+                    + "  img { max-width: 100%; height: auto; }"
+                    + "  a { text-decoration: none; color: " + linkColorStr + "; }"
+                    + "</style></head><body>"
+                    + "<h1>" + title + "</h1>"
+                    + StringUtils.addPTags(noteContent)
+                    + "</body></html>";
+        }
     }
 
     @Override

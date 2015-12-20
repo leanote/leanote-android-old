@@ -9,7 +9,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sign_in">Sign in</string>
-    <string name="email">Email</string>
+    <string name="email">Username</string>
     <string name="password">Password</string>
     <string name="verification_code">Verification code</string>
     <string name="site_address">Your self-hosted address (URL)</string>
@@ -87,7 +87,7 @@
 
     <string name="tabbar_accessibility_label_me">Me</string>
     <string name="tabbar_note">Note</string>
-    <string name="tabbar_post">Post</string>
+    <string name="tabbar_post">Blog</string>
     <string name="tabbar_me">Me</string>
     <string name="tabbar_notebook">Notebook</string>
     <string name="tabbar_category">Category</string>
@@ -148,7 +148,7 @@
     <string name="image_alignment">Alignment</string>
     <string name="horizontal_alignment">Horizontal alignment</string>
     <string name="caption">Caption (optional)</string>
-    <string name="preview_note">preview note</string>
+    <string name="preview_note">Preview</string>
 
     <!-- Edit Media -->
     <string name="media_edit_title_text">Title</string>
@@ -253,4 +253,7 @@
     <string name="validating_user_data">Validating user data</string>
     <string name="title_activity_search">SearchActivity</string>
 
+    <string name="add_new_note">Add Note</string>
+    <string name="title_activity_notebook__view_note">Notebook_ViewNote</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

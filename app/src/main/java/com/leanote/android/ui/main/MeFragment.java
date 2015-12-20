@@ -107,6 +107,7 @@ public class MeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 switch_markdown.toggle();
+                AccountHelper.getDefaultAccount().setUseMarkdown(switch_markdown.isChecked());
             }
         };
 
