@@ -22,7 +22,9 @@ import com.wordpress.rest.RestRequest;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.greenrobot.event.EventBus;
 
@@ -43,6 +45,8 @@ public class Leanote extends Application {
     private static String mUserAgent;
 
     private static boolean isFirstSync = true;
+
+    private static List<String> downloadingFileUrls;
 
     private static final String USER_AGENT_APPNAME = "leanote-android";
 
@@ -80,6 +84,16 @@ public class Leanote extends Application {
 
         leaDB = new LeanoteDB(this);
 
+        if (downloadingFileUrls != null && downloadingFileUrls.size() > 0) {
+            downloadingFileUrls.clear();
+        }
+
+        downloadingFileUrls = new CopyOnWriteArrayList<>();
+    }
+
+
+    public static List<String> getDownloadingFileUrls() {
+        return downloadingFileUrls;
     }
 
     public static void setupVolleyQueue() {

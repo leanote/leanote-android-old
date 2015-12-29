@@ -1,0 +1,15 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/note_settings_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nux_background"
+    android:orientation="vertical"
+    android:baselineAligned="true">
+
+    <fragment
+        android:name="com.leanote.android.ui.note.EditNoteSettingsFragment"
+        android:id="@+id/note_settings_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

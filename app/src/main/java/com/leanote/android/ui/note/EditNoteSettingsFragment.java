@@ -149,11 +149,28 @@ public class EditNoteSettingsFragment extends Fragment
         notebookAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mNotebookSpinner.setAdapter(notebookAdapter);
 
+
+        int notebookIdx = getNotebookIndex(mNotebookInfos, mNote.getNoteBookId());
+        if (notebookIdx >= 0) {
+            mNotebookSpinner.setSelection(notebookIdx);
+        }
+
+
         String tags = mNote.getTags();
 
-        if (StringUtils.isNotEmpty(tags) && "null".equals(tags)) {
+        if (StringUtils.isNotEmpty(tags) && !"null".equals(tags) && "\"\"".equals(tags)) {
             mTagsEditText.setText(tags);
         }
+    }
+
+    private int getNotebookIndex(List<NotebookInfo> mNotebookInfos, String noteBookId) {
+        for (int i = 0; i < mNotebookInfos.size(); i++) {
+            NotebookInfo notebook = mNotebookInfos.get(i);
+            if (notebook.getNotebookId().equals(noteBookId)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 

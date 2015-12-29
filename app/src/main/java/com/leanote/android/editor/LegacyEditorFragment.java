@@ -193,7 +193,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         postSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEditorFragmentListener.onSettingsClicked();
+                //mEditorFragmentListener.onSettingsClicked();
             }
         });
         mBoldToggleButton = (ToggleButton) rootView.findViewById(R.id.bold);

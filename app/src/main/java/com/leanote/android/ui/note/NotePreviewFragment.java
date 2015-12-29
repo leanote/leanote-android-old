@@ -61,7 +61,7 @@ public class NotePreviewFragment extends Fragment
 
         mWebView = (WebView) view.findViewById(R.id.webView);
         LeaWebViewClient client = new LeaWebViewClient();
-        client.setImageLoadedListener(this);
+        client.setImageLoadListener(this);
 
         mWebView.setWebViewClient(client);
 
@@ -83,6 +83,7 @@ public class NotePreviewFragment extends Fragment
                 NoteDetail note = Leanote.leaDB.getLocalNoteById(mLocalNoteId);
                 final String htmlContent = formatPostContentForWebView(getActivity(), note);
                 AppLog.i("html:" + htmlContent);
+                AppLog.i("image callback...");
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -152,6 +153,7 @@ public class NotePreviewFragment extends Fragment
                 + StringUtils.addPTags(noteContent)
                 + "</body></html>";
     }
+
 
     @Override
     public void onImageLoaded(String localFileId) {

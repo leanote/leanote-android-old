@@ -189,7 +189,7 @@
     <string name="note_update_time">update time</string>
     <string name="immediately">Immediately</string>
     <string name="private_note">private note</string>
-    <string name="save_note">save note</string>
+    <string name="save_note">save</string>
     <string name="tags">tags</string>
     <string name="choose_notebook">choose notebook</string>
 
@@ -258,7 +258,7 @@
     <string name="edit_link_activity">edit link</string>
     <string name="alert_html_toggle_uploading">alert_html_toggle_uploading</string>
     <string name="alert_insert_image_html_mode">alert_insert_image_html_mode</string>
-    <string name="image_settings_save_toast">Changes saved</string>
+    <string name="image_settings_save_toast">image Changes saved</string>
     <string name="image_caption">Caption</string>
     <string name="image_alt_text">Alt text</string>
     <string name="image_link_to">Link to</string>
@@ -267,5 +267,8 @@
     <string name="discard">Discard</string>
     <string name="stop_upload_dialog_title">Stop uploading?</string>
     <string name="stop_upload_button">Stop Upload</string>
+    <string name="note_settings">settings</string>
+    <string name="title_activity_note_settings">NoteSettingsActivity</string>
+    <string name="title_activity_notes_in_notebook">NotesInNotebookActivity</string>
 
 </resources>

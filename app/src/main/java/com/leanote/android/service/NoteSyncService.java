@@ -1,5 +1,6 @@
 package com.leanote.android.service;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
@@ -9,7 +10,9 @@ import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.NetworkRequest;
+import com.leanote.android.task.DownloadMediaTask;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.util.MediaFile;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -19,6 +22,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by binnchx on 11/2/15.
@@ -248,6 +253,37 @@ public class NoteSyncService {
     }
 
 
+    private static void processNoteMedia(String content) {
+        //note upload 前需要更新图片链接
+        String imageTagsPattern = "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
+        Pattern pattern = Pattern.compile(imageTagsPattern);
+        Matcher matcher = pattern.matcher(content);
+
+        List<String> imageTags = new ArrayList<>();
+        while (matcher.find()) {
+            imageTags.add(matcher.group());
+        }
+
+        for (String tag : imageTags) {
+            Pattern p = Pattern.compile("src\\s*=\\s*\"([^\"]+)\"");
+            Matcher m = p.matcher(tag);
+            if (m.find()) {
+                String imageUrl = m.group(1);
+                if (!"".equals(imageUrl)) {
+                    String fileId = imageUrl.split("fileId=")[1];
+                    MediaFile mediaFile = Leanote.leaDB.getMediaFileByFileId(fileId);
+
+                    if (mediaFile == null) {
+                        DownloadMediaTask downloadMediaTask = new DownloadMediaTask(imageUrl, null);
+                        downloadMediaTask.execute(Uri.parse(imageUrl));
+                    }
+                }
+            }
+        }
+
+    }
+
+
     private static void updateNoteToLocal(JSONArray jsonArray, List<String> localNoteIds) throws Exception {
         NoteDetailList syncNotes = new NoteDetailList();
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -286,10 +322,10 @@ public class NoteSyncService {
 
         String tags = item.getString("Tags");
         if (!TextUtils.isEmpty(tags) && !"null".equalsIgnoreCase(tags)
-                && !"\"\"".equals(tags)) {
+                && !"\"\"".equals(tags) && !"[\"\"]".equals(tags)) {
 
             AppLog.i("server tags:" + item.getString("Tags"));
-            serverNote.setTags(item.getString("Tags").toString().replaceAll("[\\[\\]]", ""));
+            serverNote.setTags(item.getString("Tags").replaceAll("[\\[\\]]", ""));
         } else {
             serverNote.setTags("");
         }
@@ -307,9 +343,13 @@ public class NoteSyncService {
                 AccountHelper.getDefaultAccount().getmAccessToken(), noteId);
 
         String contentRes = NetworkRequest.syncGetRequest(noteContentApi);
+
+        AppLog.i("get note content:" + contentRes);
         JSONObject json = new JSONObject(contentRes);
 
-        serverNote.setContent(json.getString("Content"));
+        String noteContent = json.getString("Content");
+        serverNote.setContent(noteContent);
+        processNoteMedia(noteContent);
         serverNote.setUsn(item.getInt("Usn"));
 
 
@@ -333,10 +373,12 @@ public class NoteSyncService {
             //本地新增笔记
             AppLog.i("add server note :" + noteId);
             //syncNotes.add(serverNote);
+            serverNote.setIsDeleted(false);
             return serverNote;
         }
         return null;
     }
+
 
 
 

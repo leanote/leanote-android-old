@@ -340,7 +340,7 @@ public class NotebookFragment extends Fragment
                 break;
             case PostListButton.BUTTON_VIEW:
             case PostListButton.BUTTON_PREVIEW:
-                //ActivityLauncher.viewPostPreviewForResult(getActivity(), fullPost);
+                ActivityLauncher.viewNotebookForResult(getActivity(), fullNotebook.getNotebookId());
                 break;
             case PostListButton.BUTTON_TRASH:
             case PostListButton.BUTTON_DELETE:

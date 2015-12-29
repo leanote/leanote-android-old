@@ -18,6 +18,7 @@ import com.leanote.android.ui.lea.LeaActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NotePreviewActivity;
+import com.leanote.android.ui.note.NotesInNotebookActivity;
 import com.leanote.android.ui.post.BlogHomeActivity;
 import com.leanote.android.ui.search.SearchActivity;
 import com.leanote.android.util.AppLog;
@@ -85,11 +86,10 @@ public class ActivityLauncher {
         activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 
-    public static void viewNotebookForResult(Activity activity, long localNotebookId) {
-        Intent intent = new Intent(activity.getApplicationContext(), EditNotebookActivity.class);
-        intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, localNotebookId);
-        intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, false);
-        activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
+    public static void viewNotebookForResult(Activity activity, String notebookId) {
+        Intent intent = new Intent(activity.getApplicationContext(), NotesInNotebookActivity.class);
+        intent.putExtra(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID, notebookId);
+        activity.startActivityForResult(intent, RequestCodes.VIEW_NOTEBOOK);
     }
 
 
@@ -141,8 +141,9 @@ public class ActivityLauncher {
         activity.startActivity(intent);
     }
 
-    public static void startSearchForResult(Activity context) {
+    public static void startSearchForResult(Activity context, Integer type) {
         Intent intent = new Intent(context, SearchActivity.class);
+        intent.putExtra("type", type);
         context.startActivityForResult(intent, RequestCodes.SEARCH_NOTE);
     }
 
@@ -151,4 +152,5 @@ public class ActivityLauncher {
         intent.putExtra("url", "http://lea.leanote.com");
         context.startActivityForResult(intent, RequestCodes.START_LEA);
     }
+
 }

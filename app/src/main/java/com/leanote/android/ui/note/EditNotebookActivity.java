@@ -39,6 +39,7 @@ public class EditNotebookActivity extends AppCompatActivity {
 
     public static final String EXTRA_IS_NEW_NOTEBOOK = "new_notebook";
     public static final String EXTRA_NEW_NOTEBOOK_ID = "new_notebook_id";
+    public static final String EXTRA_SERVER_NOTEBOOK_ID = "server_notebook_id";
 
     private boolean mIsNewNotebook;
     private NotebookInfo mNotebook;

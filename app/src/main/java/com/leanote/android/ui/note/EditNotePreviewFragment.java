@@ -46,7 +46,8 @@ public class EditNotePreviewFragment extends Fragment {
         mWebView = (WebView) rootView.findViewById(R.id.post_preview_webview);
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
 
-        mWebView.setWebViewClient(new LeaWebViewClient());
+        LeaWebViewClient webViewClient = new LeaWebViewClient();
+        mWebView.setWebViewClient(webViewClient);
 
         mTextView = (TextView) rootView.findViewById(R.id.post_preview_textview);
         mTextView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -121,7 +122,6 @@ public class EditNotePreviewFragment extends Fragment {
         }
         return content;
     }
-
 
     // Load post content in the background
     private class LoadNotePreviewTask extends AsyncTask<Void, Void, Spanned> {

@@ -62,7 +62,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class EditNoteActivity extends AppCompatActivity implements EditorFragmentAbstract.EditorFragmentListener {
+public class EditNoteActivity extends AppCompatActivity
+        implements EditorFragmentAbstract.EditorFragmentListener {
 
     public static final String EXTRA_NOTEID = "noteId";
     public static final String EXTRA_IS_NEW_NOTE = "isNewNote";
@@ -76,14 +77,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     // Context menu positioning
     private static final int SELECT_PHOTO_MENU_POSITION = 0;
     private static final int CAPTURE_PHOTO_MENU_POSITION = 1;
-//    private static final int SELECT_VIDEO_MENU_POSITION = 2;
-//    private static final int CAPTURE_VIDEO_MENU_POSITION = 3;
-//    private static final int ADD_GALLERY_MENU_POSITION = 4;
-//    private static final int SELECT_LIBRARY_MENU_POSITION = 5;
-//    private static final int NEW_PICKER_MENU_POSITION = 6;
-
-//    private static final String ANALYTIC_PROP_NUM_LOCAL_PHOTOS_ADDED = "number_of_local_photos_added";
-//    private static final String ANALYTIC_PROP_NUM_WP_PHOTOS_ADDED = "number_of_wp_library_photos_added";
 
     private static int PAGE_CONTENT = 0;
     private static int PAGE_SETTINGS = 1;
@@ -194,9 +187,10 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
                 invalidateOptionsMenu();
                 if (position == PAGE_CONTENT) {
-                    setTitle(AccountHelper.getDefaultAccount().getmUserName());
+                    //setTitle(AccountHelper.getDefaultAccount().getmUserName());
+                    setTitle("leanote");
                 } else if (position == PAGE_SETTINGS) {
-                    setTitle(R.string.post_settings);
+                    setTitle(R.string.note_settings);
                 } else if (position == PAGE_PREVIEW) {
                     setTitle(R.string.preview_note);
                     saveNote(true);
@@ -223,16 +217,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     public void onAddMediaClicked() {
 
     }
-
-//    @Override
-//    public void onMediaRetryClicked(String mediaId) {
-//
-//    }
-
-//    @Override
-//    public void onMediaUploadCancelClicked(String mediaId, boolean delete) {
-//
-//    }
 
     @Override
     public void onFeaturedImageChanged(int mediaId) {
@@ -296,10 +280,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             mMaxThumbWidth = ImageUtils.getMaximumThumbnailWidthForEditor(this);
         }
         return mMaxThumbWidth;
-    }
-
-    public void reloadNote() {
-        mNote = Leanote.leaDB.getLocalNoteByNoteId(mNote.getNoteId());
     }
 
 
@@ -387,7 +367,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
 
     private void fetchMedia(Uri mediaUri) {
-        AppLog.i("image uri:" + mediaUri);
         if (URLUtil.isNetworkUrl(mediaUri.toString())) {
             // Create an AsyncTask to download the file
             new DownloadMediaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mediaUri);
@@ -438,12 +417,17 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         //only support image
         mediaTitle = ImageUtils.getTitleForWPImageSpan(this, imageUri.getEncodedPath());
 
+        //
         MediaFile mediaFile = new MediaFile();
         mediaFile.setId(new ObjectId().toString());
         mediaFile.setNoteID(getNote().getNoteId());
         mediaFile.setTitle(mediaTitle);
 
-        mediaFile.setFilePath(Utils.getImageRealPath(imageUri));
+        String filePath = Utils.getImageRealPath(imageUri);
+        if (filePath != null && filePath.startsWith("file://")) {
+            filePath = filePath.replace("file://", "");
+        }
+        mediaFile.setFilePath(filePath);
 
         String leanoteImageUrl = String.format("%s/api/file/getImage?fileId=%s",
                 AccountHelper.getDefaultAccount().getHost(),
@@ -536,6 +520,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                 default:
                     return new EditNotePreviewFragment();
             }
+
         }
 
         @Override
@@ -544,7 +529,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
             switch (position) {
                 case 0:
-                    //mEditorFragment = (EditorFragmentAbstract) fragment;
                     mEditorFragment = (EditorFragment) fragment;
                     break;
                 case 1:
@@ -554,6 +538,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                     mEditNotePreviewFragment = (EditNotePreviewFragment) fragment;
                     break;
             }
+
             return fragment;
         }
 
@@ -611,6 +596,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
     @Override
     public void onBackPressed() {
 
+        AppLog.i("onback pressed");
         if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
             mViewPager.setCurrentItem(PAGE_CONTENT);
             invalidateOptionsMenu();
@@ -730,8 +716,6 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
         }
         setNoteFileIds(content);
 
-
-        AppLog.i("note content:" + content);
         note.setTitle(title);
         note.setContent(content);
 
@@ -763,10 +747,14 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                 String imageUri = m.group(1);
                 if (!"".equals(imageUri)) {
                     MediaFile mediaFile = Leanote.leaDB.getMediaFile(imageUri);
+                    if (mediaFile == null) {
+                        continue;
+                    }
+
                     String fileId = mNote.getFileIds();
                     if (TextUtils.isEmpty(fileId)) {
                         fileId = mediaFile.getId();
-                    } else {
+                    } else if (!fileId.contains(mediaFile.getId())){
                         fileId = fileId + "," + mediaFile.getId();
                     }
                     mNote.setFileIds(fileId);
@@ -817,6 +805,7 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
                     return false;
                 }
 
+                mNote = Leanote.leaDB.getLocalNoteById(mNote.getId());
                 NoteUploadService.addNoteToUpload(mNote);
                 startService(new Intent(this, NoteUploadService.class));
             }
@@ -824,14 +813,26 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
             setResult(RESULT_OK);
             finish();
             return true;
-        } else if (itemId == R.id.menu_preview_post) {
-            mViewPager.setCurrentItem(PAGE_PREVIEW);
+        }
+//        else if (itemId == R.id.menu_preview_post) {
+//            mViewPager.setCurrentItem(PAGE_PREVIEW);
+//        }
+        else if (itemId == R.id.menu_settings_post) {
+            mViewPager.setCurrentItem(PAGE_SETTINGS);
+            //finish();
+            return true;
         } else if (itemId == android.R.id.home) {
             if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
                 mViewPager.setCurrentItem(PAGE_CONTENT);
-                invalidateOptionsMenu();
+                //invalidateOptionsMenu();
             } else {
-                saveAndFinish();
+                updateNoteObject(false);
+                if (mNote.hasChanges(mOriginalNote)) {
+                    saveAndFinish();
+                }
+
+                setResult(RESULT_OK);
+                finish();
             }
             return true;
         }
@@ -840,19 +841,19 @@ public class EditNoteActivity extends AppCompatActivity implements EditorFragmen
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem previewMenuItem = menu.findItem(R.id.menu_preview_post);
-        if (mViewPager != null && mViewPager.getCurrentItem() > PAGE_CONTENT) {
-            previewMenuItem.setVisible(false);
-        } else {
-            previewMenuItem.setVisible(true);
-        }
-
+//        MenuItem previewMenuItem = menu.findItem(R.id.menu_preview_post);
+//        if (mViewPager != null && mViewPager.getCurrentItem() > PAGE_CONTENT) {
+//            previewMenuItem.setVisible(false);
+//        } else {
+//            previewMenuItem.setVisible(true);
+//        }
 
         return super.onPrepareOptionsMenu(menu);
     }
 
 
     private void saveAndFinish() {
+
         saveNote(true);
         if (mEditorFragment != null && hasEmptyContentFields()) {
             // new and empty post? delete it

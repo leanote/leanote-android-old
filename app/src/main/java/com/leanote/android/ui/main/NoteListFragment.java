@@ -34,6 +34,7 @@ import com.leanote.android.service.NoteSyncService;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
 import com.leanote.android.ui.RequestCodes;
+import com.leanote.android.ui.note.EditNotebookActivity;
 import com.leanote.android.ui.note.NoteListAdapter;
 import com.leanote.android.ui.note.service.NoteEvents;
 import com.leanote.android.ui.note.service.NoteUpdateService;
@@ -100,7 +101,8 @@ public class NoteListFragment extends Fragment
 
         int spacingVertical = context.getResources().getDimensionPixelSize(R.dimen.reader_card_gutters);
         int spacingHorizontal = context.getResources().getDimensionPixelSize(R.dimen.content_margin);
-        mRecyclerView.addItemDecoration(new RecyclerItemDecoration(spacingHorizontal, spacingVertical));
+        mRecyclerView.addItemDecoration(
+                new RecyclerItemDecoration(spacingHorizontal, spacingVertical));
 
         mFabView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,13 +153,21 @@ public class NoteListFragment extends Fragment
         return (mNoteListAdapter != null && mNoteListAdapter.getItemCount() == 0);
     }
 
-    private void loadNotes() {
-        getNoteListAdapter().loadNotes();
+    private void loadNotes(String notebookId) {
+        getNoteListAdapter().loadNotes(notebookId);
     }
 
     @Override
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
+
+        Bundle extras = getActivity().getIntent().getExtras();
+
+        if (extras != null) {
+            String notebookId = extras.getString(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID);
+            loadNotes(notebookId);
+            return;
+        }
 
         initSwipeToRefreshHelper();
 
@@ -182,7 +192,7 @@ public class NoteListFragment extends Fragment
         }
 
         // always (re)load when resumed to reflect changes made elsewhere
-        loadNotes();
+        loadNotes(null);
 
         // scale in the fab after a brief delay if it's not already showing
         if (mFabView.getVisibility() != View.VISIBLE) {
@@ -209,7 +219,7 @@ public class NoteListFragment extends Fragment
     @SuppressWarnings("unused")
     public void onEventMainThread(NoteEvents.PostUploadStarted event) {
         if (isAdded()) {
-            loadNotes();
+            loadNotes(null);
         }
     }
 
@@ -220,7 +230,7 @@ public class NoteListFragment extends Fragment
     public void onEventMainThread(NoteEvents.PostUploadEnded event) {
         NoteSyncResultEnum result = event.result;
         if (isAdded() && result.getCode() == NoteSyncResultEnum.SUCCESS.getCode()) {
-            loadNotes();
+            loadNotes(null);
 
             ToastUtils.showToast(getActivity(), "upload successfully");
         } else {
@@ -264,7 +274,7 @@ public class NoteListFragment extends Fragment
             hideLoadMoreProgress();
             Log.i("is fail:", String.valueOf(event.getFailed()));
             if (!event.getFailed()) {
-                loadNotes();
+                loadNotes(null);
                 //请求笔记结束后更新本地syncstate
                 new Thread(new Runnable() {
                     @Override

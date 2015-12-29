@@ -27,6 +27,13 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <meta-data
+        android:name="UMENG_CHANNEL"
+        android:value="${UMENG_CHANNEL_VALUE}" />
+    <meta-data
+        android:name="io.fabric.ApiKey"
+        android:value="fdsfkjl;k4234f8989fsdf" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -63,8 +70,8 @@
         </activity>
         <activity android:name=".ui.LeaMainActivity" >
         </activity>
-        <activity android:name=".ui.LeaMainActivity2" >
-        </activity>
+        <!-- <activity android:name=".ui.LeaMainActivity2" > -->
+        <!-- </activity> -->
         <activity
             android:name=".ui.SignInActivity"
             android:label="@string/title_activity_sign_in"
@@ -119,7 +126,6 @@
             android:name=".editor.legacy.EditLinkActivity"
             android:label="@string/edit_link_activity" >
         </activity>
-
         <activity
             android:name=".ui.note.NotePreviewActivity"
             android:label="@string/title_activity_note_preview"
@@ -143,7 +149,10 @@
             android:label="@string/title_activity_lea"
             android:theme="@style/LeanoteNoActionBarTheme" >
         </activity>
-
+        <activity
+            android:name=".ui.note.NotesInNotebookActivity"
+            android:label="@string/title_activity_notes_in_notebook" >
+        </activity>
     </application>
 
 </manifest>

@@ -215,9 +215,9 @@ public class MediaUtils {
         } catch (FileNotFoundException e) {
             AppLog.e(T.UTILS, e);
         } catch (MalformedURLException e) {
-            AppLog.e(T.UTILS, e);
+            e.printStackTrace();
         } catch (IOException e) {
-            AppLog.e(T.UTILS, e);
+            e.printStackTrace();
         }
 
         return null;

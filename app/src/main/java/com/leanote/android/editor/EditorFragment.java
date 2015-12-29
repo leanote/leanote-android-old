@@ -21,9 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.ConsoleMessage;
 import android.webkit.URLUtil;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ToggleButton;
 
@@ -49,7 +47,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class EditorFragment extends EditorFragmentAbstract implements View.OnClickListener, View.OnTouchListener,
-        OnJsEditorStateChangedListener, OnImeBackListener
+        OnJsEditorStateChangedListener, OnImeBackListener, LeaWebViewClient.OnImageLoadListener
 //        , EditorMediaUploadListener
     {
     private static final String ARG_PARAM_TITLE = "param_title";
@@ -137,18 +135,12 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
         mWebView.setOnTouchListener(this);
         mWebView.setOnImeBackListener(this);
-        mWebView.setWebViewClient(new LeaWebViewClient());
 
-        mWebView.setWebChromeClient(new WebChromeClient(){
-            @Override
-            public boolean onConsoleMessage(ConsoleMessage cm)
-            {
-                Log.i("js console:", String.format("%s @ %d: %s",
-                        cm.message(), cm.lineNumber(), cm.sourceId()));
-                return true;
-            }
+        LeaWebViewClient webViewClient = new LeaWebViewClient();
+        webViewClient.setImageLoadListener(this);
+        //mWebView.setWebViewClient(webViewClient);
 
-        });
+
 
         // Ensure that the content field is always filling the remaining screen space
         mWebView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -158,6 +150,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 mWebView.post(new Runnable() {
                     @Override
                     public void run() {
+                        mWebView.execJavaScriptFromString("ZSSEditor.init();");
                         mWebView.execJavaScriptFromString("ZSSEditor.refreshVisibleViewportSize();");
                     }
                 });
@@ -881,83 +874,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     }
 
     public void onMediaTapped(final String mediaId, String url, final JSONObject meta, String uploadStatus) {
-//        switch (uploadStatus) {
-//            case "uploading":
-//                // Display 'cancel upload' dialog
-//                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//                builder.setTitle(getString(R.string.stop_upload_dialog_title));
-//                builder.setPositiveButton(R.string.stop_upload_button, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//                        mEditorFragmentListener.onMediaUploadCancelClicked(mediaId, true);
-//
-//                        mWebView.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                mWebView.execJavaScriptFromString("ZSSEditor.removeImage(" + mediaId + ");");
-//                                mUploadingMediaIds.remove(mediaId);
-//                            }
-//                        });
-//                        dialog.dismiss();
-//                    }
-//                });
-//
-//                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//                        dialog.dismiss();
-//                    }
-//                });
-//
-//                AlertDialog dialog = builder.create();
-//                dialog.show();
-//                break;
-//            case "failed":
-//                // Retry media upload
-//                mEditorFragmentListener.onMediaRetryClicked(mediaId);
-//
-//                mWebView.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mWebView.execJavaScriptFromString("ZSSEditor.unmarkImageUploadFailed(" + mediaId + ");");
-//                        mWebView.execJavaScriptFromString("ZSSEditor.setProgressOnImage(" + mediaId + ", " + 0 + ");");
-//                        mFailedMediaIds.remove(mediaId);
-//                        mUploadingMediaIds.add(mediaId);
-//                    }
-//                });
-//                break;
-//            default:
-//                // Show media options fragment
-//                FragmentManager fragmentManager = getFragmentManager();
-//
-//                if (fragmentManager.findFragmentByTag(ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_TAG) != null) {
-//                    return;
-//                }
-//
-//                ImageSettingsDialogFragment imageSettingsDialogFragment = new ImageSettingsDialogFragment();
-//                imageSettingsDialogFragment.setTargetFragment(this,
-//                        ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_REQUEST_CODE);
-//
-//                Bundle dialogBundle = new Bundle();
-//
-//                dialogBundle.putString("imageMeta", meta.toString());
-//                dialogBundle.putString("maxWidth", mBlogSettingMaxImageWidth);
-//                dialogBundle.putBoolean("featuredImageSupported", mFeaturedImageSupported);
-//
-//                String imageId = JSONUtils.getString(meta, "attachment_id");
-//                if (!imageId.isEmpty()) {
-//                    dialogBundle.putBoolean("isFeatured", mFeaturedImageId == Integer.parseInt(imageId));
-//                }
-//
-//                imageSettingsDialogFragment.setArguments(dialogBundle);
-//
-//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//
-//                fragmentTransaction.add(android.R.id.content, imageSettingsDialogFragment,
-//                        ImageSettingsDialogFragment.IMAGE_SETTINGS_DIALOG_TAG)
-//                        .addToBackStack(null)
-//                        .commit();
-//                break;
-//        }
+
     }
 
     public void onLinkTapped(String url, String title) {
@@ -1145,4 +1062,10 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
             mSourceViewContent.setSelection(selectionEnd + endTag.length());
         }
     }
-}
+
+        @Override
+        public void onImageLoaded(String localFileId) {
+            AppLog.i("download, reload webview...");
+            mWebView.reload();
+        }
+    }

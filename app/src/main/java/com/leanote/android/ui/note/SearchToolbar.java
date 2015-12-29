@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.leanote.android.R;
 import com.leanote.android.ui.ActivityLauncher;
-import com.leanote.android.util.AppLog;
 
 /**
  * Created by binnchx on 11/7/15.
@@ -19,10 +18,12 @@ public class SearchToolbar extends LinearLayout {
     private TextView mTextview;
     private ImageButton searchButton;
     private String title;
+    private Integer type;
 
-    public SearchToolbar(Context context, String title) {
+    public SearchToolbar(Context context, String title, Integer type) {
         super(context);
         this.title = title;
+        this.type = type;
         initView(context);
     }
 
@@ -38,9 +39,8 @@ public class SearchToolbar extends LinearLayout {
             @Override
             public void onClick(View v) {
                 //启动SearchActivity
-                AppLog.i("start to search" + context.getClass());
                 Activity activity = (Activity) context;
-                ActivityLauncher.startSearchForResult(activity);
+                ActivityLauncher.startSearchForResult(activity, type);
             }
         });
     }

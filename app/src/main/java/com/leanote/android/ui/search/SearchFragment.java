@@ -18,6 +18,8 @@ import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NotebookInfo;
+import com.leanote.android.util.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +35,8 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
     private RecyclerView mRecyclerView;
     private SearchAdapter mAdapter;
-    private List<NoteDetail> mNotes;
-    private List<NoteDetail> allNotes;
+    private List mdatas;
+    private List allDatas;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,11 +54,23 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mNotes = new ArrayList<>();
-        allNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+        mdatas = new ArrayList<>();
+        Bundle extras = getActivity().getIntent().getExtras();
+        if (extras != null) {
+            int type = extras.getInt("type");
+            if (type == Constant.NOTEBOOK_SEARCH) {
+                allDatas = Leanote.leaDB.getNotebookList();
+            } else if (type == Constant.BLOG_SEARCH) {
+                allDatas = Leanote.leaDB.getNoteisBlogList(AccountHelper.getDefaultAccount().getmUserId());
+            } else {
+                allDatas = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+            }
+        } else {
+            allDatas = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+        }
 
 
-        mAdapter = new SearchAdapter(getActivity(), mNotes);
+        mAdapter = new SearchAdapter(getActivity(), mdatas);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -66,13 +80,17 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
         final MenuItem item = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+
+        searchView.setIconifiedByDefault(false);
+
         searchView.setOnQueryTextListener(this);
     }
+
 
     @Override
     public boolean onQueryTextChange(String query) {
 
-        final List<NoteDetail> filteredModelList = filter(allNotes, query);
+        final List<NoteDetail> filteredModelList = filter(allDatas, query);
         mAdapter.animateTo(filteredModelList);
         mRecyclerView.scrollToPosition(0);
         return true;
@@ -83,23 +101,33 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         return false;
     }
 
-    private List<NoteDetail> filter(List<NoteDetail> models, String query) {
+    private List filter(List models, String query) {
         query = query.toLowerCase();
 
-        final List<NoteDetail> filteredModelList = new ArrayList<>();
+        final List filteredModelList = new ArrayList<>();
         if (TextUtils.isEmpty(query)) {
             return filteredModelList;
         }
 
-        for (NoteDetail model : models) {
-            final String content = model.getContent().toLowerCase();
-            final String title = model.getTitle().toLowerCase();
+        for (Object model : models) {
+            if (model instanceof NotebookInfo) {
+                NotebookInfo notebook = (NotebookInfo) model;
+                final String title = notebook.getTitle();
+                if (!TextUtils.isEmpty(title) && title.contains(query)) {
+                    filteredModelList.add(model);
+                }
+            } else {
+                NoteDetail note = (NoteDetail) model;
+                final String content = note.getContent().toLowerCase();
+                final String title = note.getTitle().toLowerCase();
 
-            if ((!TextUtils.isEmpty(title) && title.contains(query))
-                    || (!TextUtils.isEmpty(content) && content.contains(query))) {
+                if ((!TextUtils.isEmpty(title) && title.contains(query))
+                        || (!TextUtils.isEmpty(content) && content.contains(query))) {
 
-                filteredModelList.add(model);
+                    filteredModelList.add(model);
+                }
             }
+
 
         }
         return filteredModelList;

@@ -16,4 +16,6 @@ public class RequestCodes {
     public static final int TAKE_PHOTO = 2100;
 
 
+    public static final int START_NOTE_SETTINGS = 500;
+    public static final int VIEW_NOTEBOOK = 501;
 }

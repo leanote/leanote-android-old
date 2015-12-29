@@ -25,6 +25,8 @@ import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.ui.note.service.NoteUploadService;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.util.Constant;
+import com.leanote.android.util.DateUtils;
 import com.leanote.android.util.DisplayUtils;
 import com.leanote.android.widget.PostListButton;
 
@@ -123,7 +125,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Note"));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Note", Constant.NOTE_SEARCH));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NoteViewHolder(view);
@@ -158,9 +160,9 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 noteHolder.txtTitle.setText("(" + context.getResources().getText(R.string.untitled) + ")");
             }
 
+            String updateTime = note.getUpdatedTime();
 
-
-            noteHolder.txtDate.setText(note.getUpdatedTime());
+            noteHolder.txtDate.setText(DateUtils.formatDate(updateTime));
             noteHolder.txtDate.setVisibility(View.VISIBLE);
             noteHolder.btnTrash.setButtonType(PostListButton.BUTTON_TRASH);
 
@@ -264,12 +266,13 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         animOut.start();
     }
 
-    public void loadNotes() {
+    public void loadNotes(String notebookId) {
         if (mIsLoadingNotes) {
             AppLog.d(AppLog.T.POSTS, "post adapter > already loading posts");
         } else {
             //load note
-            new LoadNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new LoadNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, notebookId);
+
         }
     }
 
@@ -295,7 +298,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void unhidePost(NoteDetail note) {
         if (mHiddenNotes.remove(note)) {
-            loadNotes();
+            loadNotes(null);
         }
     }
 
@@ -389,7 +392,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
 
-    private class LoadNotesTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoadNotesTask extends AsyncTask<String, Void, Boolean> {
         private NoteDetailList tmpNotes;
 
         @Override
@@ -405,9 +408,14 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected Boolean doInBackground(String... params) {
 
-            tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+            if (params.length != 0 && !TextUtils.isEmpty(params[0])) {
+                tmpNotes = Leanote.leaDB.getNotesListInNotebook(params[0]);
+            } else {
+                tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+            }
+
             // make sure we don't return any hidden posts
 
 

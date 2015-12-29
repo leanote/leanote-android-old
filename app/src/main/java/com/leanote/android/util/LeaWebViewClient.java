@@ -14,10 +14,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.leanote.android.Leanote;
-import com.leanote.android.model.AccountHelper;
 import com.leanote.android.networking.SelfSignedSSLCertsManager;
-
-import org.bson.types.ObjectId;
+import com.leanote.android.task.DownloadMediaTask;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,17 +29,15 @@ import java.security.GeneralSecurityException;
 public class LeaWebViewClient extends WebViewClient {
 
 
-    private OnImageLoadListener imageLoadedListener;
-
-    public void setImageLoadedListener(OnImageLoadListener imageLoadedListener) {
-        this.imageLoadedListener = imageLoadedListener;
-    }
+    private OnImageLoadListener imageLoadListener;
 
     public LeaWebViewClient() {
         super();
     }
 
-
+    public void setImageLoadListener(OnImageLoadListener imageLoadListener) {
+        this.imageLoadListener = imageLoadListener;
+    }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -107,8 +103,11 @@ public class LeaWebViewClient extends WebViewClient {
         AppLog.i("intercept url:" + url);
         WebResourceResponse response = null;
         if (url.indexOf("api/file/getImage") > 0 || url.indexOf("file/outputImage") > 0) {
-            //处理图片逻辑
-            MediaFile mf = Leanote.leaDB.getMediaFileByUrl(url);
+            //处理图片逻辑, 笔记上传后，图片本地url被替换成服务端url,用文件id去取
+            String fileId = url.split("fileId=")[1];
+            //MediaFile mf = Leanote.leaDB.getMediaFileByUrl(url);
+            MediaFile mf = Leanote.leaDB.getMediaFileByFileId(fileId);
+
             if (mf != null && !TextUtils.isEmpty(mf.getFilePath())) {
                 AppLog.i("image from cache");
                 if (mf.getFilePath().contains("content://media/external/images")) {
@@ -129,7 +128,7 @@ public class LeaWebViewClient extends WebViewClient {
                 return response;
             } else {
                 //本地不存在，从api中下载图片
-                new DownloadMediaTask(url).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Uri.parse(url));
+                new DownloadMediaTask(url, imageLoadListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Uri.parse(url));
             }
 
         }
@@ -154,53 +153,7 @@ public class LeaWebViewClient extends WebViewClient {
         }
     }
 
-    private class DownloadMediaTask extends AsyncTask<Uri, Integer, Uri> {
 
-        private String url;
-
-        public DownloadMediaTask(String url) {
-            this.url = url;
-        }
-
-        @Override
-        protected Uri doInBackground(Uri... uris) {
-            Uri imageUri = uris[0];
-
-            if (imageUri.toString().indexOf("file/outputImage") > 0) {
-                //换成api地址下载
-                String imageApi = imageUri.toString().replace("file/outputImage", "api/file/getImage");
-                imageUri = Uri.parse(imageApi);
-            }
-
-            //下载图片带上token
-            if (imageUri.toString().indexOf("token=") < 0) {
-                imageUri = Uri.parse(imageUri.toString() + "&token=" + AccountHelper.getDefaultAccount().getmAccessToken());
-            }
-            AppLog.i("download image:" + imageUri);
-            return MediaUtils.downloadExternalMedia(Leanote.getContext(), imageUri);
-        }
-
-        @Override
-        protected void onPostExecute(Uri uri) {
-            if (uri == null) {
-                AppLog.e(AppLog.T.API, "download image uri is null");
-                return;
-            }
-
-            super.onPostExecute(uri);
-            MediaFile mf = new MediaFile();
-            mf.setId(new ObjectId().toString());
-            String filePath = uri.toString().replace("file://", "");
-            mf.setFilePath(filePath);
-            mf.setFileURL(url);
-            Leanote.leaDB.saveMediaFile(mf);
-
-            if (imageLoadedListener != null) {
-                imageLoadedListener.onImageLoaded(mf.getId());
-            }
-
-        }
-    }
 
     public interface OnImageLoadListener {
 

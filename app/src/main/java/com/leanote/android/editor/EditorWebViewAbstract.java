@@ -44,18 +44,24 @@ public abstract class EditorWebViewAbstract extends WebView {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 AppLog.e(AppLog.T.EDITOR, description);
             }
+
+//            public void onPageFinished(WebView view, String url){
+//                loadUrl("javascript:ZSSEditor.init();");
+//                loadUrl("javascript:ZSSEditor.domLoadedCallback();");
+//            }
+
         });
 
         this.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onConsoleMessage(@NonNull ConsoleMessage cm) {
-                AppLog.d(AppLog.T.EDITOR, cm.message() + " -- From line " + cm.lineNumber() + " of " + cm.sourceId());
+                AppLog.i("js alert:" + cm.message() + " -- From line " + cm.lineNumber() + " of " + cm.sourceId());
                 return true;
             }
 
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                AppLog.d(AppLog.T.EDITOR, message);
+                AppLog.i("js info:" + message);
                 return true;
             }
         });

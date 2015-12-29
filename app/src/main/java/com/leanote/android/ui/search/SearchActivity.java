@@ -21,6 +21,7 @@ public class SearchActivity extends AppCompatActivity {
             actionBar.setHomeButtonEnabled(true);
         }
 
+        setTitle("");
         if(savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, SearchFragment.newInstance())

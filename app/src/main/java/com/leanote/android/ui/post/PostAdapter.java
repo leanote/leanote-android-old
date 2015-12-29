@@ -19,6 +19,7 @@ import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.note.NoteListAdapter;
 import com.leanote.android.ui.note.SearchToolbar;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.util.Constant;
 import com.leanote.android.util.DisplayUtils;
 import com.leanote.android.widget.PostListButton;
 
@@ -89,7 +90,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Post"));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Post", Constant.BLOG_SEARCH));
         } else if (viewType == VIEW_TYPE_HOME_PAGE) {
             View view = mLayoutInflater.inflate(R.layout.blog_home_page, parent, false);
             //view.getLayoutParams().height = mEndlistIndicatorHeight;

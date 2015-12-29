@@ -1,5 +1,6 @@
 package com.leanote.android.model;
 
+import com.leanote.android.util.AppLog;
 import com.leanote.android.util.StringUtils;
 
 import java.io.Serializable;
@@ -161,6 +162,13 @@ public class NoteDetail implements Serializable {
 
 
     public boolean hasChanges(NoteDetail otherNote) {
+
+        AppLog.i("title equals:" + !StringUtils.equals(title, otherNote.title));
+        AppLog.i("content equals:" + !StringUtils.equals(content, otherNote.content));
+        AppLog.i("notebookid equals:" + !StringUtils.equals(noteBookId, otherNote.noteBookId));
+        AppLog.i("isMarkDown equal:" + (isMarkDown != otherNote.isMarkDown));
+        AppLog.i("tags equals:" + !StringUtils.equals(tags, otherNote.tags));
+        AppLog.i("isblog equals:" + (isPublicBlog != otherNote.isPublicBlog));
 
         return otherNote == null || !StringUtils.equals(title, otherNote.title)
             || !StringUtils.equals(content, otherNote.content)

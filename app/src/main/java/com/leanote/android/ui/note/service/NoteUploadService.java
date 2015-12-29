@@ -42,8 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
 
@@ -172,8 +170,6 @@ public class NoteUploadService extends Service {
 
             //processNoteMedia(mNote.getContent());
 
-            Leanote.leaDB.updateNote(mNote);
-
             //1.pull
             NoteSyncService.syncPullNote();
             //2.push
@@ -185,7 +181,7 @@ public class NoteUploadService extends Service {
                     getString(R.string.note).toLowerCase()
             );
 
-            mNote.setIsDirty(false);
+            //mNote.setIsDirty(false);
 
             Map<String, Object> contentStruct = getContentStruct(mNote);
 
@@ -193,8 +189,10 @@ public class NoteUploadService extends Service {
                 EventBus.getDefault().post(new NoteEvents.PostUploadStarted());
 
                 // request the new/updated post from the server to ensure local copy matches server
+                //push
                 JSONObject response = uploadNoteToServer(mNote, contentStruct);
 
+                //handle push response
                 return processResponse(response, mNote);
 
             } catch (final Exception e) {
@@ -203,48 +201,6 @@ public class NoteUploadService extends Service {
             return NoteSyncResultEnum.FAIL;
         }
 
-
-        private void processNoteMedia(String content) {
-            //note upload 前需要更新图片链接
-            String imageTagsPattern = "<img[^>]+android-uri\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
-            Pattern pattern = Pattern.compile(imageTagsPattern);
-            Matcher matcher = pattern.matcher(content);
-
-            List<String> imageTags = new ArrayList<>();
-            while (matcher.find()) {
-                imageTags.add(matcher.group());
-            }
-
-            for (String tag : imageTags) {
-                Pattern p = Pattern.compile("android-uri=\"([^\"]+)\"");
-                Matcher m = p.matcher(tag);
-                if (m.find()) {
-                    String imageUri = m.group(1);
-                    if (!"".equals(imageUri)) {
-                        MediaFile mediaFile = Leanote.leaDB.getMediaFile(imageUri);
-
-                        //本地草稿笔记无法查到
-                        if (mediaFile != null) {
-                            String leanoteImageUrl = String.format("%s/api/file/getImage?fileId=%s",
-                                    AccountHelper.getDefaultAccount().getHost(),
-                                    mediaFile.getId());
-
-
-                            if (leanoteImageUrl != null) {
-                                mediaFile.setFileURL(leanoteImageUrl);
-                                Leanote.leaDB.saveMediaFile(mediaFile);
-                                content = content.replace(tag, String.format("<img src=\"%s\"' />", leanoteImageUrl));
-                            } else {
-                                content = content.replace(tag, "");
-                            }
-                        }
-                    }
-                }
-            }
-
-            mNote.setContent(content);
-
-        }
 
     }
 
@@ -312,7 +268,6 @@ public class NoteUploadService extends Service {
             api = String.format("%s/api/note/updateNote", host);
 
             contentStruct.put("usn", mNote.getUsn());
-            AppLog.i("local usn:" + mNote.getUsn());
         }
 
         contentStruct.put("token", token);
@@ -341,7 +296,7 @@ public class NoteUploadService extends Service {
         contentStruct.put("NoteId", mNote.getNoteId());
         contentStruct.put("IsBlog", mNote.isPublicBlog());
         contentStruct.put("IsMarkdown", mNote.isMarkDown());
-        content = content.replaceAll("\uFFFC", "");
+        //content = content.replaceAll("\uFFFC", "");
         contentStruct.put("Content", content);
         contentStruct.put("NotebookId", mNote.getNoteBookId());
         contentStruct.put("CreatedTime", mNote.getCreatedTime());
@@ -441,81 +396,59 @@ public class NoteUploadService extends Service {
 
         boolean shouldUploadResizedVersion = true;
         // If it's not a gif and blog don't keep original size, there is a chance we need to resize
-        if (!mimeType.equals("image/gif")) {
-            //check the picture settings
+        if (mimeType.equals("image/gif")) {
             return mf;
-//            int pictureSettingWidth = mf.getWidth();
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            options.inJustDecodeBounds = true;
-//            BitmapFactory.decodeFile(path, options);
-//            int imageHeight = options.outHeight;
-//            int imageWidth = options.outWidth;
-//            int[] dimensions = {imageWidth, imageHeight};
-//            if (dimensions[0] != 0 && dimensions[0] != pictureSettingWidth) {
-//                shouldUploadResizedVersion = true;
-//            }
         }
 
         Bitmap.CompressFormat fmt;
-        if (fileExtension != null && fileExtension.equalsIgnoreCase("png")) {
+        if (fileExtension.equalsIgnoreCase("png")) {
             fmt = Bitmap.CompressFormat.PNG;
         } else {
             fmt = Bitmap.CompressFormat.JPEG;
         }
 
-
-        if (shouldUploadResizedVersion) {
-            MediaFile resizedMediaFile = new MediaFile(mf);
-            // Create resized image
+        MediaFile resizedMediaFile = new MediaFile(mf);
+        // Create resized image
 //            byte[] bytes = ImageUtils.createThumbnailFromUri(mContext, imageUri, resizedMediaFile.getWidth(),
 //                    fileExtension, orientation);
 
-            Bitmap bitmap = getSmallBitmap(resizedMediaFile.getFilePath(), fmt);
-            if (bitmap == null) {
-                // We weren't able to resize the image, so we will upload the full size image with css to resize it
-                AppLog.i("unable to compress image...");
-                shouldUploadResizedVersion = false;
-            } else {
-                // Save temp image
-                String tempFilePath;
-                File resizedImageFile;
-                try {
-                    resizedImageFile = File.createTempFile("lea-image-", fileExtension);
-                    FileOutputStream out = new FileOutputStream(resizedImageFile);
+        Bitmap bitmap = getSmallBitmap(resizedMediaFile.getFilePath(), fmt);
+        if (bitmap == null) {
+            // We weren't able to resize the image, so we will upload the full size image with css to resize it
+            AppLog.i("unable to compress image...");
+            return mf;
+        } else {
+            // Save temp image
+            String tempFilePath;
+            File resizedImageFile;
+            try {
+                resizedImageFile = File.createTempFile("lea-image-", fileExtension);
+                FileOutputStream out = new FileOutputStream(resizedImageFile);
 
-
-                    bitmap.compress(fmt, 100, out);
+                bitmap.compress(fmt, 100, out);
 //                    out.write(bytes);
-                    out.flush();
-                    out.close();
-                    tempFilePath = resizedImageFile.getPath();
-                } catch (IOException e) {
-                    AppLog.w(AppLog.T.POSTS, "failed to create image temp file");
-                    //mErrorMessage = mContext.getString(R.string.error_media_upload);
-                    return null;
-                }
+                out.flush();
+                out.close();
+                tempFilePath = resizedImageFile.getPath();
+            } catch (IOException e) {
+                AppLog.w(AppLog.T.POSTS, "failed to create image temp file");
+                //mErrorMessage = mContext.getString(R.string.error_media_upload);
+                return mf;
+            }
 
-                // upload resized picture
-                if (!TextUtils.isEmpty(tempFilePath)) {
-                    resizedMediaFile.setFileName(fileName);
-                    resizedMediaFile.setFilePath(tempFilePath);
-                    //resizedImageFile.delete();
-                    return resizedMediaFile;
-                } else {
-                    AppLog.w(AppLog.T.POSTS, "failed to create resized picture");
-                    //mErrorMessage = mContext.getString(R.string.out_of_memory);
-                    return null;
-                }
+            // upload resized picture
+            if (!TextUtils.isEmpty(tempFilePath)) {
+                resizedMediaFile.setFileName(fileName);
+                resizedMediaFile.setFilePath(tempFilePath);
+                //resizedImageFile.delete();
+                return resizedMediaFile;
+            } else {
+                AppLog.w(AppLog.T.POSTS, "failed to create resized picture");
+                //mErrorMessage = mContext.getString(R.string.out_of_memory);
+                return mf;
             }
         }
 
-
-        if (!shouldUploadResizedVersion) {
-            //无法压缩
-            return mf;
-        }
-
-        return mf;
     }
 
 
@@ -652,6 +585,7 @@ public class NoteUploadService extends Service {
 
     private void updateNoteToLocal(String noteId) throws JSONException {
         NoteDetail serverNote = NoteSyncService.getServerNote(noteId);
+        serverNote.setIsDirty(false);
         Leanote.leaDB.updateNoteByNoteId(serverNote);
     }
 

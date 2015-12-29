@@ -627,7 +627,12 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("notebookId", note.getNoteBookId());
         values.put("tags", note.getTags());
 
-        db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+        if (TextUtils.isEmpty(note.getNoteId())) {
+            db.update(NOTES_TABLE, values, "id=?", new String[]{String.valueOf(note.getId())});
+        } else {
+            db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+        }
+
     }
 
 
@@ -738,7 +743,6 @@ public class LeanoteDB extends SQLiteOpenHelper {
         mf.setWidth(c.getInt(12));
         mf.setHeight(c.getInt(13));
         mf.setMimeType(c.getString(14));
-
         return mf;
     }
 
@@ -793,13 +797,11 @@ public class LeanoteDB extends SQLiteOpenHelper {
     public MediaFile getMediaFileByUrl(String url) {
 
         Cursor c = db.query(MEDIA_TABLE, null, "fileURL=?",
-                new String[]{String.valueOf(url)}, null, null, null);
+                new String[]{url}, null, null, null);
 
         try {
-            if (c.moveToFirst()) {
-                MediaFile mf = getMediaFileFromCursor(c);
-
-                return mf;
+            if (c.moveToNext()) {
+                return getMediaFileFromCursor(c);
             } else {
                 return null;
             }
@@ -818,5 +820,37 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put(COLUMN_NAME_MEDIA_ID, serverFileId);
 
         db.update(MEDIA_TABLE, values, "id=?", new String[]{localFileId});
+    }
+
+    public MediaFile getMediaFileByFileId(String fileId) {
+        Cursor c = db.query(MEDIA_TABLE, null, "id=? or mediaId=?",
+                new String[]{fileId, fileId}, null, null, null);
+
+        try {
+            if (c.moveToNext()) {
+                return getMediaFileFromCursor(c);
+            } else {
+                return null;
+            }
+        } finally {
+            c.close();
+        }
+    }
+
+    public NoteDetailList getNotesListInNotebook(String notebookId) {
+        NoteDetailList listPosts = new NoteDetailList();
+
+        String[] args = {notebookId};
+        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = db.query(NOTES_TABLE, null, "notebookId=?", args, null, null, "");
+        try {
+            while (c.moveToNext()) {
+                NoteDetail detail = fillNote(c);
+                listPosts.add(detail);
+            }
+            return listPosts;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
     }
 }
