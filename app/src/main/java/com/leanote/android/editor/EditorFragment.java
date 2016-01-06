@@ -150,7 +150,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
                 mWebView.post(new Runnable() {
                     @Override
                     public void run() {
-                        mWebView.execJavaScriptFromString("ZSSEditor.init();");
+                        //mWebView.execJavaScriptFromString("ZSSEditor.init()");
                         mWebView.execJavaScriptFromString("ZSSEditor.refreshVisibleViewportSize();");
                     }
                 });

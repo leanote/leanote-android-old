@@ -1,0 +1,275 @@
+<resources>
+    <string name="app_name">Leanote</string>
+    <string name="title_activity_lea_launch">Leanote</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">设置</string>
+    <string name="title_activity_sign_in">登录</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="save">保存</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sign_in">登录</string>
+    <string name="email">邮箱</string>
+    <string name="password">密码</string>
+    <string name="verification_code">验证码</string>
+    <string name="site_address">你的服务器地址 (URL)</string>
+    <string name="two_step_footer_label">输入您验证器应用程中的代码.</string>
+    <string name="two_step_footer_button">通过短信发送代码</string>
+    <string name="forgot_password">忘记密码?</string>
+    <string name="nux_add_selfhosted_blog">添加一个自己的站点</string>
+    <string name="nux_welcome_create_account">注册</string>
+    <string name="reader_btn_share">分享</string>
+    <string name="reader_toast_err_share_intent">无法分享</string>
+    <string name="logs_copied_to_clipboard">应用日志被复制到剪切板</string>
+    <string name="error_copy_to_clipboard">复制文本到剪贴板时出错</string>
+    <string name="nux_tap_continue">继续</string>
+    <string name="username_email">用户名或邮箱</string>
+    <string name="connecting_wpcom">连接到 leanote.com</string>
+    <string name="username_only_lowercase_letters_and_numbers">用户名只能包含小写字母和数字</string>
+    <string name="username_required">输入用户名</string>
+    <string name="username_not_allowed">用户名不合法</string>
+    <string name="email_cant_be_used_to_signup">邮箱不合法</string>
+    <string name="username_must_be_at_least_four_characters">用户名至少6个字符</string>
+    <string name="username_contains_invalid_characters">用户名不能包含 _ </string>
+    <string name="username_must_include_letters">用户名至少包含一个字母</string>
+    <string name="email_invalid">输入合法邮箱地址</string>
+    <string name="email_not_allowed">邮箱不合法</string>
+    <string name="username_exists">用户名已存在</string>
+    <string name="email_exists">邮箱已注册</string>
+    <string name="username_reserved_but_may_be_available">That username is currently reserved but may be available in a couple of days</string>
+    <string name="email_reserved">That email address has already been used. Check your inbox for an activation email. If you don\'t activate you can try again in a few days.</string>
+    <string name="username_invalid">Invalid username</string>
+    <string name="password_invalid">密码不合法</string>
+    <string name="blog_name_required">Enter a site address</string>
+    <string name="blog_name_not_allowed">That site address isn\'t allowed</string>
+    <string name="blog_name_must_be_at_least_four_characters">Site address must be at least 4 characters</string>
+    <string name="blog_name_must_be_less_than_sixty_four_characters">The site address must be shorter than 64 characters</string>
+    <string name="blog_name_contains_invalid_characters">Site address may not contain the character “_”</string>
+    <string name="blog_name_cant_be_used">You may not use that site address</string>
+    <string name="blog_name_only_lowercase_letters_and_numbers">Site address can only contain lowercase letters (a-z) and numbers</string>
+    <string name="blog_name_must_include_letters">Site address must have at least 1 letter (a-z)</string>
+    <string name="blog_name_exists">That site already exists</string>
+    <string name="blog_name_reserved">That site is reserved</string>
+    <string name="blog_name_reserved_but_may_be_available">That site is currently reserved but may be available in a couple days</string>
+    <string name="blog_name_invalid">Invalid site address</string>
+    <string name="blog_title_invalid">Invalid site title</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="limit_reached">登录失败超过限制，一分钟后再试</string>
+    <string name="error">错误</string>
+    <string name="nux_oops_not_selfhosted_blog">登录到 Leanote.com</string>
+    <string name="two_step_sms_sent">Check your text messages for the verification code.</string>
+    <string name="verify">Verify</string>
+    <string name="no_network_message">没有可用网络</string>
+    <string name="signing_in">登录...</string>
+    <string name="no_network_title">没有可用网络</string>
+    <string name="cancel">取消</string>
+    <string name="title_activity_new_account">注册</string>
+    <string name="required_field">必填字段</string>
+    <string name="faq_button">常见问题</string>
+    <string name="nux_tutorial_get_started_title">开始体验</string>
+    <string name="invalid_url_message">Check that the blog URL entered is valid</string>
+
+    <string name="ssl_certificate_details">Details</string>
+    <string name="ssl_certificate_error">Invalid SSL certificate</string>
+    <string name="ssl_certificate_ask_trust">If you usually connect to this site without problems, this error could mean that someone is trying to impersonate the site, and you shouldn\'t continue. Would you like to trust the certificate anyway?</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="view_in_browser">View in browser</string>
+    <string name="share_link">Share link</string>
+    <string name="refresh">刷新</string>
+    <string name="account_two_step_auth_enabled">This account has two step authentication enabled. Visit your security settings on WordPress.com and generate an application-specific password.</string>
+    <string name="nux_cannot_log_in">无法登录</string>
+    <string name="username_or_password_incorrect">用户名或邮箱错误</string>
+    <string name="invalid_verification_code">Invalid verification code</string>
+    <string name="reader_timespan_now">现在</string>
+    <string name="reader_title_applog">Application log</string>
+
+
+    <string name="tabbar_accessibility_label_me">我</string>
+    <string name="tabbar_note">笔记</string>
+    <string name="tabbar_post">博客</string>
+    <string name="tabbar_me">我</string>
+    <string name="tabbar_notebook">笔记本</string>
+    <string name="tabbar_category">类别</string>
+    <string name="connectionbar_no_connection">没有网络链接</string>
+    <string name="title_activity_note_detail">笔记详情</string>
+    <string name="note_actionbar">笔记</string>
+    <string name="empty_list_default">没有笔记</string>
+    <string name="notes_fetching">获取笔记中...</string>
+    <string name="error_refresh_notes">获取笔记失败</string>
+    <string name="note_not_found">笔记未找到</string>
+    <string name="note_trashed">删除笔记</string>
+    <string name="undo">撤销</string>
+
+    <!-- buttons on post cards -->
+    <string name="button_edit">编辑</string>
+    <string name="button_publish">发布</string>
+    <string name="button_view">查看</string>
+    <string name="button_preview">预览</string>
+    <string name="button_stats">Stats</string>
+    <string name="button_trash">删除</string>
+    <string name="button_delete">删除</string>
+    <string name="button_more">More</string>
+    <string name="button_back">Back</string>
+    <string name="button_revert">撤销</string>
+    <string name="title_activity_edit_note">EditNoteActivity</string>
+    <string name="untitled">未命名</string>
+    <string name="new_note">新建笔记</string>
+    <string name="button_visit_blog">访问博客</string>
+
+
+    <!-- editor-->
+    <string name="post_settings">设置</string>
+    <string name="post_content">内容</string>
+    <string name="post_title">标题</string>
+
+    <string name="ok">OK</string>
+    <string name="delete">删除</string>
+
+    <string name="format_bar_tag_bold" translatable="false">bold</string>
+    <string name="format_bar_tag_italic" translatable="false">italic</string>
+    <string name="format_bar_tag_blockquote" translatable="false">blockquote</string>
+    <string name="format_bar_tag_unorderedList" translatable="false">unorderedList</string>
+    <string name="format_bar_tag_orderedList" translatable="false">orderedList</string>
+    <string name="format_bar_tag_strikethrough" translatable="false">strikeThrough</string>
+    <string name="format_bar_tag_link" translatable="false">link</string>
+
+    <!-- link view -->
+    <string name="link_enter_url">URL</string>
+    <string name="link_enter_url_text">Link text (optional)</string>
+    <string name="create_a_link">创建链接</string>
+
+    <!-- image settings -->
+    <string name="image_settings">图片设置</string>
+    <string name="title">标题</string>
+    <string name="width">宽度</string>
+    <string name="featured">Use as featured image</string>
+    <string name="featured_in_post">Include image in post content</string>
+    <string name="image_alignment">Alignment</string>
+    <string name="horizontal_alignment">Horizontal alignment</string>
+    <string name="caption">Caption (optional)</string>
+    <string name="preview_note">预览笔记</string>
+
+    <!-- Edit Media -->
+    <string name="media_edit_title_text">Title</string>
+    <string name="media_edit_caption_text">Caption</string>
+    <string name="media_edit_description_text">Description</string>
+    <string name="media_edit_title_hint">Enter a title here</string>
+    <string name="media_edit_caption_hint">Enter a caption here</string>
+    <string name="media_edit_description_hint">Enter a description here</string>
+    <string name="media_edit_success">Updated</string>
+    <string name="media_edit_failure">Failed to update</string>
+    <string name="saving">Saving…</string>
+
+    <!-- Delete Media -->
+    <string name="confirm_delete_media">Delete selected item?</string>
+    <string name="confirm_delete_multi_media">Delete selected items?</string>
+    <string name="wait_until_upload_completes">Wait until upload completes</string>
+    <string name="cannot_delete_multi_media_items">Some media can\'t be deleted at this time. Try again later.</string>
+    <string name="media_empty_list">No media</string>
+    <string name="media_empty_list_custom_date">No media in this time interval</string>
+
+    <!-- Media details -->
+    <string name="media_details_added_on">Added on:</string>
+    <string name="media_details_uploaded_on">Uploaded on:</string>
+    <string name="media_details_file_name">File name:</string>
+    <string name="media_details_file_type">File type:</string>
+    <string name="media_details_file_url">File URL:</string>
+    <string name="media_details_dimensions">Dimensions:</string>
+
+    <string name="publish_note">公开笔记</string>
+    <string name="preview">预览</string>
+
+    <string name="note_book">笔记本</string>
+
+    <string name="editor_toast_changes_saved">保存修改</string>
+
+    <string name="status">状态</string>
+    <string name="note_update_time">更新时间</string>
+    <string name="immediately">立刻</string>
+    <string name="private_note">私有笔记</string>
+    <string name="save_note">保存</string>
+    <string name="tags">标签</string>
+    <string name="choose_notebook">选择笔记本</string>
+
+
+    <string name="pwd_size_alert">密码太短</string>
+    <string name="fetch_note_content_fail">获取笔记内容失败</string>
+
+    <string name="tags_separate_with_commas">标签以英文逗号分隔</string>
+    <string name="me_disconnect_from_leanote_com">登出</string>
+    <string name="me_connect_to_leanote_com">登录到 leanote.com</string>
+    <string name="sign_out_leacom_confirm">登出</string>
+    <string name="signout">登出</string>
+    <string name="signing_out">登出…</string>
+
+    <string name="search_note_hint">搜索</string>
+    <string name="action_search">搜索</string>
+    <string name="default_editor">默认编辑器</string>
+    <string name="me_btn_login_logout">登出</string>
+    <string name="markdown_editor">markdown 编辑器</string>
+    <string name="notebook_not_found">笔记本未找到</string>
+    <string name="new_notebook_hint">输入笔记本名称</string>
+    <string name="save_notebook">保存</string>
+    <string name="save_notebook_fail">保存笔记本失败</string>
+    <string name="title_activity_edit_notebook">EditNotebookActivity</string>
+    <string name="empty_notebook_title">笔记本标题为空</string>
+    <string name="save_notebook_succ">同步笔记成功</string>
+    <string name="add_new_notebook">新增笔记本</string>
+    <string name="edit_notebook_title">编辑笔记本标题</string>
+    <string-array name="alignment_array">
+        <item>None</item>
+        <item>Left</item>
+        <item>Center</item>
+        <item>Right</item>
+    </string-array>
+    <string name="title_activity_note_list">NoteListActivity</string>
+    <string name="title_activity_note_preview">NotePreviewActivity</string>
+    <string name="fragment_tag_note_preview">fragment_note_preview</string>
+    <string name="local_changes_explainer">This note has local changes which haven\\\'t been published to server</string>
+    <string name="select_photo">选择本地照片</string>
+    <string name="media_add_popup_capture_photo">拍摄照片</string>
+    <string name="pick_photo">Select photo</string>
+    <string name="sdcard_title">SD Card Required</string>
+    <string name="sdcard_message">A mounted SD card is required to upload media</string>
+    <string name="download">下载</string>
+    <string name="gallery_error">The media item couldn\\\'t be retrieved</string>
+    <string name="error_downloading_image">fail to download image</string>
+    <string name="local_changes">本地修改</string>
+    <string name="note_uploading">上传中</string>
+    <string name="uploading_note">上传</string>
+    <string name="note">笔记</string>
+    <string name="file_not_found">file not found</string>
+    <string name="error_media_upload">upload fail</string>
+    <string name="out_of_memory">out of memory</string>
+    <string name="local_draft">本地草稿</string>
+    <string name="delete_note_fail">删除笔记失败</string>
+    <string name="delete_note_succ">delete note successful</string>
+    <string name="local_draft_explainer">本地草稿笔记还未上传到服务器</string>
+    <string name="invalid_username_too_short">username is too short</string>
+    <string name="invalid_username_too_long">username is too long</string>
+    <string name="username">用户名</string>
+    <string name="create_account_wpcom">创建leanote帐户</string>
+    <string name="validating_user_data">Validating user data</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="Lea">Lea++</string>
+    <string name="title_activity_lea">LeaActivity</string>
+    <string name="edit_link_activity">编辑链接</string>
+    <string name="alert_html_toggle_uploading">alert_html_toggle_uploading</string>
+    <string name="alert_insert_image_html_mode">alert_insert_image_html_mode</string>
+    <string name="image_settings_save_toast">image Changes saved</string>
+    <string name="image_caption">Caption</string>
+    <string name="image_alt_text">Alt text</string>
+    <string name="image_link_to">Link to</string>
+    <string name="image_width">Width</string>
+    <string name="image_settings_dismiss_dialog_title">Discard unsaved changes?</string>
+    <string name="discard">Discard</string>
+    <string name="stop_upload_dialog_title">Stop uploading?</string>
+    <string name="stop_upload_button">Stop Upload</string>
+    <string name="note_settings">设置</string>
+    <string name="title_activity_note_settings">NoteSettingsActivity</string>
+    <string name="title_activity_notes_in_notebook">NotesInNotebookActivity</string>
+    <string name="post">博客</string>
+
+</resources>

@@ -86,9 +86,9 @@ public class ActivityLauncher {
         activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
     }
 
-    public static void viewNotebookForResult(Activity activity, String notebookId) {
+    public static void viewNotebookForResult(Activity activity, String serverNotebookId) {
         Intent intent = new Intent(activity.getApplicationContext(), NotesInNotebookActivity.class);
-        intent.putExtra(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID, notebookId);
+        intent.putExtra(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID, serverNotebookId);
         activity.startActivityForResult(intent, RequestCodes.VIEW_NOTEBOOK);
     }
 

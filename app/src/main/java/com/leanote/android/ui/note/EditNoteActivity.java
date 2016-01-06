@@ -798,7 +798,7 @@ public class EditNoteActivity extends AppCompatActivity
 //                return false;
 //            }
 
-            if (mNote.hasChanges(mOriginalNote)) {
+            if (mNote.isDirty() || mNote.hasChanges(mOriginalNote)) {
                 saveNote(false, false);
                 if (!NetworkUtils.isNetworkAvailable(this)) {
                     ToastUtils.showToast(this, R.string.no_network_message, ToastUtils.Duration.SHORT);

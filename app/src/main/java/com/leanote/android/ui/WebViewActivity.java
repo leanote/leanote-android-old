@@ -14,7 +14,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leanote.android.R;
-import com.leanote.android.util.AppLog;
 import com.leanote.android.util.BlogWebViewClient;
 
 public abstract class WebViewActivity extends AppCompatActivity {
@@ -51,7 +50,7 @@ public abstract class WebViewActivity extends AppCompatActivity {
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int progress) {
-                AppLog.i("progress:" + progress);
+
                 if (progress < 100 && progressBar.getVisibility() == ProgressBar.GONE) {
                     progressBar.setVisibility(ProgressBar.VISIBLE);
                     progressTv.setVisibility(View.VISIBLE);

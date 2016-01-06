@@ -125,7 +125,9 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Note", Constant.NOTE_SEARCH));
+
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(), parent.getContext().getString(R.string.note),
+                    Constant.NOTE_SEARCH));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NoteViewHolder(view);

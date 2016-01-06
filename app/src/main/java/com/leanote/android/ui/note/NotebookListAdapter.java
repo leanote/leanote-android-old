@@ -19,6 +19,7 @@ import com.leanote.android.R;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.Constant;
+import com.leanote.android.util.DateUtils;
 import com.leanote.android.util.DisplayUtils;
 import com.leanote.android.widget.PostListButton;
 
@@ -114,7 +115,8 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_MENU) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Notebook", Constant.NOTEBOOK_SEARCH));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(),
+                    parent.getContext().getString(R.string.note_book), Constant.NOTEBOOK_SEARCH));
         } else{
             View view = mLayoutInflater.inflate(R.layout.post_cardview, parent, false);
             return new NotebookViewHolder(view);
@@ -145,7 +147,8 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 postHolder.txtTitle.setText("(" + context.getResources().getText(R.string.untitled) + ")");
             }
 
-            postHolder.txtDate.setText(notebook.getUpdateTime());
+            String updateTime = notebook.getUpdateTime();
+            postHolder.txtDate.setText(DateUtils.formatDate(updateTime));
             postHolder.txtDate.setVisibility(View.VISIBLE);
             postHolder.btnTrash.setButtonType(PostListButton.BUTTON_TRASH);
 

@@ -27,7 +27,6 @@ import com.leanote.android.R;
 import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.ui.ActivityLauncher;
-import com.leanote.android.util.AppLog;
 import com.leanote.android.util.GravatarUtils;
 import com.leanote.android.util.ToggleListener;
 import com.leanote.android.widget.LeaNetworkImageView;
@@ -126,7 +125,7 @@ public class MeFragment extends Fragment {
 
     private void initSettingsFields() {
         boolean isMarkdown = AccountHelper.getDefaultAccount().isUseMarkdown();
-        AppLog.i("ismarkdown:" + isMarkdown);
+
         switch_markdown.setChecked(isMarkdown);
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) switch_markdown_button
                 .getLayoutParams();

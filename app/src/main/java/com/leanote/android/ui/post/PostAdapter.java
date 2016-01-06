@@ -3,7 +3,6 @@ package com.leanote.android.ui.post;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -85,12 +84,16 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == VIEW_TYPE_ENDLIST_INDICATOR) {
+        AppLog.i("post size:" + getItemCount());
+
+        if (getItemCount() == 0 || viewType == VIEW_TYPE_ENDLIST_INDICATOR) {
             View view = mLayoutInflater.inflate(R.layout.endlist_indicator, parent, false);
             view.getLayoutParams().height = mEndlistIndicatorHeight;
             return new EndListViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEARCH) {
-            return new SearchViewHolder(new SearchToolbar(parent.getContext(), "Post", Constant.BLOG_SEARCH));
+            return new SearchViewHolder(new SearchToolbar(parent.getContext(),
+                    parent.getContext().getString(R.string.post), Constant.BLOG_SEARCH));
+
         } else if (viewType == VIEW_TYPE_HOME_PAGE) {
             View view = mLayoutInflater.inflate(R.layout.blog_home_page, parent, false);
             //view.getLayoutParams().height = mEndlistIndicatorHeight;
@@ -139,6 +142,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
         int posType = getItemViewType(position);
+
         if (posType == VIEW_TYPE_ENDLIST_INDICATOR) {
             return;
         }
@@ -152,7 +156,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         final NoteDetail note = mPosts.get(position - 2);  //not clear
-        Log.i("note", note.toString());
+
         Context context = holder.itemView.getContext();
 
         if (holder instanceof NoteViewHolder) {
@@ -163,10 +167,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             } else {
                 postHolder.txtTitle.setText("(" + context.getResources().getText(R.string.untitled) + ")");
             }
-
-
-            //postHolder.txtDate.setText(note.getUpdatedTime());
-            //postHolder.txtDate.setVisibility(View.VISIBLE);
 
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -180,8 +180,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         });
     }
-
-
 
 
     public void loadPosts() {
@@ -212,14 +210,13 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected Boolean doInBackground(Void... voids) {
 
             tmpNotes = Leanote.leaDB.getNoteisBlogList(AccountHelper.getDefaultAccount().getmUserId());
-            Log.i("load notes from local:", String.valueOf(tmpNotes.size()));
+
             // make sure we don't return any hidden posts
-            Log.i("hidden note size:", String.valueOf(mHiddenPosts.size()));
             for (NoteDetail hiddenNote : mHiddenPosts) {
                 int index = tmpNotes.indexOfPost(hiddenNote);
                 tmpNotes.remove(index);
             }
-            Log.i("after remove, size:", String.valueOf(tmpNotes.size()));
+
             return true;
 
         }

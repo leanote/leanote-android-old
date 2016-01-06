@@ -93,8 +93,13 @@ public class NoteListFragment extends Fragment
         mProgressBar.setVisibility(ProgressBar.GONE);
 
         mEmptyView = view.findViewById(R.id.empty_view);
+
         mEmptyViewTitle = (TextView) mEmptyView.findViewById(R.id.title_empty);
+        mEmptyViewTitle.setText(getText(R.string.notes_fetching));
         mEmptyViewImage = (ImageView) mEmptyView.findViewById(R.id.image_empty);
+        //temp add
+//        mEmptyView.setVisibility(View.VISIBLE);
+//        mEmptyViewTitle.setVisibility(View.VISIBLE);
 
         Context context = getActivity();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -125,7 +130,7 @@ public class NoteListFragment extends Fragment
                         if (!isAdded()) {
                             return;
                         }
-                        AppLog.i("begin to refresh...");
+
                         if (!NetworkUtils.checkConnection(getActivity())) {
                             setRefreshing(false);
                             updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
@@ -174,6 +179,7 @@ public class NoteListFragment extends Fragment
         // since setRetainInstance(true) is used, we only need to request latest
         // posts the first time this is called (ie: not after device rotation)
         if (bundle == null && NetworkUtils.checkConnection(getActivity())) {
+            updateEmptyView(EmptyViewMessageType.LOADING);
             requestNotes();
         }
     }
@@ -272,6 +278,7 @@ public class NoteListFragment extends Fragment
         if (isAdded()) {
             setRefreshing(false);
             hideLoadMoreProgress();
+
             Log.i("is fail:", String.valueOf(event.getFailed()));
             if (!event.getFailed()) {
                 loadNotes(null);
@@ -306,6 +313,9 @@ public class NoteListFragment extends Fragment
         }
 
         mEmptyViewTitle.setText(getText(stringId));
+        mEmptyView.setVisibility(View.VISIBLE);
+        mEmptyViewTitle.setVisibility(View.VISIBLE);
+
         mEmptyViewImage.setVisibility(emptyViewMessageType == EmptyViewMessageType.NO_CONTENT ? View.VISIBLE : View.GONE);
         mEmptyView.setVisibility(isNoteAdapterEmpty() ? View.VISIBLE : View.GONE);
     }

@@ -17,11 +17,11 @@ import java.util.List;
  */
 public class SearchAdapter extends RecyclerView.Adapter<SearchViewHolder> {
     private final LayoutInflater mInflater;
-    private final List<NoteDetail> mNote;
+    private final List mList;
 
-    public SearchAdapter(Context context, List<NoteDetail> models) {
+    public SearchAdapter(Context context, List models) {
         mInflater = LayoutInflater.from(context);
-        mNote = new ArrayList<>(models);
+        mList = new ArrayList(models);
     }
 
     @Override
@@ -33,14 +33,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchViewHolder> {
 
     @Override
     public void onBindViewHolder(SearchViewHolder holder, int position) {
-        final NoteDetail model = mNote.get(position);
+        final Object model = mList.get(position);
 
         holder.bind(model);
     }
 
     @Override
     public int getItemCount() {
-        return mNote.size();
+        return mList.size();
     }
 
     public void animateTo(List<NoteDetail> models) {
@@ -49,48 +49,48 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchViewHolder> {
         applyAndAnimateMovedItems(models);
     }
 
-    private void applyAndAnimateRemovals(List<NoteDetail> newModels) {
-        for (int i = mNote.size() - 1; i >= 0; i--) {
-            final NoteDetail model = mNote.get(i);
+    private void applyAndAnimateRemovals(List newModels) {
+        for (int i = mList.size() - 1; i >= 0; i--) {
+            final Object model = mList.get(i);
             if (!newModels.contains(model)) {
                 removeItem(i);
             }
         }
     }
 
-    private void applyAndAnimateAdditions(List<NoteDetail> newModels) {
+    private void applyAndAnimateAdditions(List newModels) {
         for (int i = 0, count = newModels.size(); i < count; i++) {
-            final NoteDetail model = newModels.get(i);
-            if (!mNote.contains(model)) {
+            final Object model = newModels.get(i);
+            if (!mList.contains(model)) {
                 addItem(i, model);
             }
         }
     }
 
-    private void applyAndAnimateMovedItems(List<NoteDetail> newModels) {
+    private void applyAndAnimateMovedItems(List newModels) {
         for (int toPosition = newModels.size() - 1; toPosition >= 0; toPosition--) {
-            final NoteDetail model = newModels.get(toPosition);
-            final int fromPosition = mNote.indexOf(model);
+            final Object model = newModels.get(toPosition);
+            final int fromPosition = mList.indexOf(model);
             if (fromPosition >= 0 && fromPosition != toPosition) {
                 moveItem(fromPosition, toPosition);
             }
         }
     }
 
-    public NoteDetail removeItem(int position) {
-        final NoteDetail model = mNote.remove(position);
+    public Object removeItem(int position) {
+        final Object model = mList.remove(position);
         notifyItemRemoved(position);
         return model;
     }
 
-    public void addItem(int position, NoteDetail model) {
-        mNote.add(position, model);
+    public void addItem(int position, Object model) {
+        mList.add(position, model);
         notifyItemInserted(position);
     }
 
     public void moveItem(int fromPosition, int toPosition) {
-        final NoteDetail model = mNote.remove(fromPosition);
-        mNote.add(toPosition, model);
+        final Object model = mList.remove(fromPosition);
+        mList.add(toPosition, model);
         notifyItemMoved(fromPosition, toPosition);
     }
 }
