@@ -20,6 +20,7 @@ import com.leanote.android.Constants;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.model.AccountHelper;
+import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
@@ -282,6 +283,12 @@ public class NotebookFragment extends Fragment
 
         //final Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(note.getNoteId());
 
+        //non null notebook couldn't be deleted
+        NoteDetailList noteLists = Leanote.leaDB.getNotesListInNotebook(notebook.getNotebookId(), AccountHelper.getDefaultAccount().getmUserId());
+        if (noteLists.size() > 0) {
+            ToastUtils.showToast(getActivity(), getString(R.string.NOT_NULL_NOTEBOOK_DELETED));
+            return;
+        }
         // remove post from the list and add it to the list of trashed posts
         getNotebookListAdapter().hideNotebook(notebook);
         mTrashedNotes.add(notebook);
@@ -417,7 +424,7 @@ public class NotebookFragment extends Fragment
             }
 
             if (ok) {
-                ToastUtils.showToast(getActivity(), "success");
+                ToastUtils.showToast(getActivity(), getString(R.string.delete_note_succ));
             } else {
                 ToastUtils.showToast(getActivity(), msg);
             }

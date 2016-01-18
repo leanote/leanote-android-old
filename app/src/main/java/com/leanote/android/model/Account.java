@@ -32,7 +32,8 @@ public class Account extends AccountModel {
 
 
     public void signout() {
-        init();
+        //init();
+        clearToken();
         save();
     }
 

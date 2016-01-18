@@ -59,7 +59,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         if (extras != null) {
             int type = extras.getInt("type");
             if (type == Constant.NOTEBOOK_SEARCH) {
-                allDatas = Leanote.leaDB.getNotebookList();
+                allDatas = Leanote.leaDB.getNotebookList(AccountHelper.getDefaultAccount().getmUserId());
             } else if (type == Constant.BLOG_SEARCH) {
                 allDatas = Leanote.leaDB.getNoteisBlogList(AccountHelper.getDefaultAccount().getmUserId());
             } else {

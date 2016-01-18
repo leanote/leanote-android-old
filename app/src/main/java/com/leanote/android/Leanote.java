@@ -172,8 +172,9 @@ public class Leanote extends Application {
 
         // delete wpcom blogs
 
-        // reset default account
+        // reset default account, just clear access token
         AccountHelper.getDefaultAccount().signout();
+
 
         // reset all reader-related prefs & data
         AppPrefs.reset();
@@ -199,7 +200,7 @@ public class Leanote extends Application {
 
 
         // dangerously delete all content!
-        leaDB.dangerouslyDeleteAllContent();
+        //leaDB.dangerouslyDeleteAllContent();
     }
 
     public static void LeanoteComSignOut(Context context) {

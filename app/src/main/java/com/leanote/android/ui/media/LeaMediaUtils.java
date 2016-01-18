@@ -96,7 +96,7 @@ public class LeaMediaUtils {
     private static Intent getLaunchCameraIntent(LaunchCameraCallback callback) {
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
 
-        String mediaCapturePath = path + File.separator + "Camera" + File.separator + "wp-" + System.currentTimeMillis() + ".jpg";
+        String mediaCapturePath = path + File.separator + "Camera" + File.separator + "lea-" + System.currentTimeMillis() + ".jpg";
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(mediaCapturePath)));
 

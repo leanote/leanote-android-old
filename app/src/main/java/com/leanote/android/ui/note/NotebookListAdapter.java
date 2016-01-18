@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.Constant;
@@ -26,6 +27,8 @@ import com.leanote.android.widget.PostListButton;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -344,7 +347,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         @Override
         protected Boolean doInBackground(Void... voids) {
 
-            tmpNotebooks = Leanote.leaDB.getNotebookList();
+            tmpNotebooks = Leanote.leaDB.getNotebookList(AccountHelper.getDefaultAccount().getmUserId());
             AppLog.i("loading notebooks:" + tmpNotebooks);
             for (NotebookInfo hiddenNote : mHiddenNotebooks) {
                 int index = -1;
@@ -367,6 +370,13 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             if (result) {
                 mNotebooks.clear();
                 mNotebooks.addAll(tmpNotebooks);
+
+                Collections.sort(mNotebooks, new Comparator<NotebookInfo>() {
+                    @Override
+                    public int compare(NotebookInfo lhs, NotebookInfo rhs) {
+                        return lhs.getUpdateTime().compareToIgnoreCase(rhs.getUpdateTime()) >= 0 ? -1 : 1;
+                    }
+                });
                 notifyDataSetChanged();
             }
 

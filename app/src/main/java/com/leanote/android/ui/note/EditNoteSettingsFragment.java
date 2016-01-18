@@ -20,6 +20,7 @@ import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
@@ -65,10 +66,11 @@ public class EditNoteSettingsFragment extends Fragment
         togglePublicBlog = (ToggleButton) mRootView.findViewById(R.id.toggle_public_blog);
         toggleButtonPublicBlog = (ImageButton) mRootView.findViewById(R.id.toggleButton_public_blog);
 
-        mNotebooks = Leanote.leaDB.getNotebookTitles();
-        mNotebookInfos = Leanote.leaDB.getNotebookList();
+        String userId = AccountHelper.getDefaultAccount().getmUserId();
+        mNotebooks = Leanote.leaDB.getNotebookTitles(userId);
+        mNotebookInfos = Leanote.leaDB.getNotebookList(userId);
 
-        Leanote.leaDB.getNotebookList();
+        Leanote.leaDB.getNotebookList(userId);
         mNotebookSpinner = (Spinner) mRootView.findViewById(R.id.notebook);
         mNotebookSpinner.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {

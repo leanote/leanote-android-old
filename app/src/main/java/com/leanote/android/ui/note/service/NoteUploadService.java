@@ -247,7 +247,7 @@ public class NoteUploadService extends Service {
                 //push成功后更新usn
                 int serverUsn = NoteSyncService.getServerSyncState();
                 AppLog.i("last serverUsn:" + serverUsn);
-                Leanote.leaDB.updateAccountUsn(serverUsn);
+                Leanote.leaDB.updateAccountUsn(serverUsn, AccountHelper.getDefaultAccount().getmUserId());
 
                 return NoteSyncResultEnum.SUCCESS;
             }

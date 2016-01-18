@@ -59,7 +59,7 @@ public class NoteSyncService {
 
             if (Leanote.isFirstSync()) {
                 //第一次全量pull笔记时才更新user usn
-                Leanote.leaDB.updateAccountUsn(serverUsn);
+                Leanote.leaDB.updateAccountUsn(serverUsn, AccountHelper.getDefaultAccount().getmUserId());
                 Leanote.setIsFirstSync(false);
             }
         }
@@ -76,7 +76,7 @@ public class NoteSyncService {
         }
 
 
-        List<String> localNotebookIds = Leanote.leaDB.getLocalNotebookIds();
+        List<String> localNotebookIds = Leanote.leaDB.getLocalNotebookIds(AccountHelper.getDefaultAccount().getmUserId());
         try {
             for (int m = 0; m < Integer.MAX_VALUE; m++) {
 

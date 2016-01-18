@@ -2,7 +2,6 @@
     <string name="app_name">Leanote</string>
     <string name="title_activity_lea_launch">Leanote</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">设置</string>
     <string name="title_activity_sign_in">登录</string>
 
@@ -37,24 +36,7 @@
     <string name="email_not_allowed">邮箱不合法</string>
     <string name="username_exists">用户名已存在</string>
     <string name="email_exists">邮箱已注册</string>
-    <string name="username_reserved_but_may_be_available">That username is currently reserved but may be available in a couple of days</string>
-    <string name="email_reserved">That email address has already been used. Check your inbox for an activation email. If you don\'t activate you can try again in a few days.</string>
-    <string name="username_invalid">Invalid username</string>
     <string name="password_invalid">密码不合法</string>
-    <string name="blog_name_required">Enter a site address</string>
-    <string name="blog_name_not_allowed">That site address isn\'t allowed</string>
-    <string name="blog_name_must_be_at_least_four_characters">Site address must be at least 4 characters</string>
-    <string name="blog_name_must_be_less_than_sixty_four_characters">The site address must be shorter than 64 characters</string>
-    <string name="blog_name_contains_invalid_characters">Site address may not contain the character “_”</string>
-    <string name="blog_name_cant_be_used">You may not use that site address</string>
-    <string name="blog_name_only_lowercase_letters_and_numbers">Site address can only contain lowercase letters (a-z) and numbers</string>
-    <string name="blog_name_must_include_letters">Site address must have at least 1 letter (a-z)</string>
-    <string name="blog_name_exists">That site already exists</string>
-    <string name="blog_name_reserved">That site is reserved</string>
-    <string name="blog_name_reserved_but_may_be_available">That site is currently reserved but may be available in a couple days</string>
-    <string name="blog_name_invalid">Invalid site address</string>
-    <string name="blog_title_invalid">Invalid site title</string>
-    <string name="error_generic">An error occurred</string>
     <string name="limit_reached">登录失败超过限制，一分钟后再试</string>
     <string name="error">错误</string>
     <string name="nux_oops_not_selfhosted_blog">登录到 Leanote.com</string>
@@ -68,23 +50,15 @@
     <string name="required_field">必填字段</string>
     <string name="faq_button">常见问题</string>
     <string name="nux_tutorial_get_started_title">开始体验</string>
-    <string name="invalid_url_message">Check that the blog URL entered is valid</string>
 
-    <string name="ssl_certificate_details">Details</string>
-    <string name="ssl_certificate_error">Invalid SSL certificate</string>
-    <string name="ssl_certificate_ask_trust">If you usually connect to this site without problems, this error could mean that someone is trying to impersonate the site, and you shouldn\'t continue. Would you like to trust the certificate anyway?</string>
     <string name="yes">是</string>
     <string name="no">否</string>
-    <string name="view_in_browser">View in browser</string>
     <string name="share_link">Share link</string>
     <string name="refresh">刷新</string>
-    <string name="account_two_step_auth_enabled">This account has two step authentication enabled. Visit your security settings on WordPress.com and generate an application-specific password.</string>
     <string name="nux_cannot_log_in">无法登录</string>
     <string name="username_or_password_incorrect">用户名或邮箱错误</string>
     <string name="invalid_verification_code">Invalid verification code</string>
     <string name="reader_timespan_now">现在</string>
-    <string name="reader_title_applog">Application log</string>
-
 
     <string name="tabbar_accessibility_label_me">我</string>
     <string name="tabbar_note">笔记</string>
@@ -127,14 +101,6 @@
     <string name="ok">OK</string>
     <string name="delete">删除</string>
 
-    <string name="format_bar_tag_bold" translatable="false">bold</string>
-    <string name="format_bar_tag_italic" translatable="false">italic</string>
-    <string name="format_bar_tag_blockquote" translatable="false">blockquote</string>
-    <string name="format_bar_tag_unorderedList" translatable="false">unorderedList</string>
-    <string name="format_bar_tag_orderedList" translatable="false">orderedList</string>
-    <string name="format_bar_tag_strikethrough" translatable="false">strikeThrough</string>
-    <string name="format_bar_tag_link" translatable="false">link</string>
-
     <!-- link view -->
     <string name="link_enter_url">URL</string>
     <string name="link_enter_url_text">Link text (optional)</string>
@@ -144,23 +110,7 @@
     <string name="image_settings">图片设置</string>
     <string name="title">标题</string>
     <string name="width">宽度</string>
-    <string name="featured">Use as featured image</string>
-    <string name="featured_in_post">Include image in post content</string>
-    <string name="image_alignment">Alignment</string>
-    <string name="horizontal_alignment">Horizontal alignment</string>
-    <string name="caption">Caption (optional)</string>
     <string name="preview_note">预览笔记</string>
-
-    <!-- Edit Media -->
-    <string name="media_edit_title_text">Title</string>
-    <string name="media_edit_caption_text">Caption</string>
-    <string name="media_edit_description_text">Description</string>
-    <string name="media_edit_title_hint">Enter a title here</string>
-    <string name="media_edit_caption_hint">Enter a caption here</string>
-    <string name="media_edit_description_hint">Enter a description here</string>
-    <string name="media_edit_success">Updated</string>
-    <string name="media_edit_failure">Failed to update</string>
-    <string name="saving">Saving…</string>
 
     <!-- Delete Media -->
     <string name="confirm_delete_media">Delete selected item?</string>
@@ -227,10 +177,11 @@
     <string name="title_activity_note_list">NoteListActivity</string>
     <string name="title_activity_note_preview">NotePreviewActivity</string>
     <string name="fragment_tag_note_preview">fragment_note_preview</string>
-    <string name="local_changes_explainer">This note has local changes which haven\\\'t been published to server</string>
+    <string name="local_changes_explainer">这篇笔记有修改内容未同步到服务器</string>
     <string name="select_photo">选择本地照片</string>
     <string name="media_add_popup_capture_photo">拍摄照片</string>
-    <string name="pick_photo">Select photo</string>
+    <string name="pick_photo">选择照片</string>
+    <string name="delete_notebook_succ">删除笔记本成功</string>
     <string name="sdcard_title">SD Card Required</string>
     <string name="sdcard_message">A mounted SD card is required to upload media</string>
     <string name="download">下载</string>
@@ -245,7 +196,7 @@
     <string name="out_of_memory">out of memory</string>
     <string name="local_draft">本地草稿</string>
     <string name="delete_note_fail">删除笔记失败</string>
-    <string name="delete_note_succ">delete note successful</string>
+    <string name="delete_note_succ">删除笔记成功</string>
     <string name="local_draft_explainer">本地草稿笔记还未上传到服务器</string>
     <string name="invalid_username_too_short">username is too short</string>
     <string name="invalid_username_too_long">username is too long</string>
@@ -271,5 +222,7 @@
     <string name="title_activity_note_settings">NoteSettingsActivity</string>
     <string name="title_activity_notes_in_notebook">NotesInNotebookActivity</string>
     <string name="post">博客</string>
+    <string name="no_notes">没有笔记</string>
+    <string name="NOT_NULL_NOTEBOOK_DELETED">非空笔记本不能删除</string>
 
 </resources>

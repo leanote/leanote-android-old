@@ -11,6 +11,7 @@ import android.widget.ToggleButton;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.model.AccountHelper;
 
 /**
  * Created by binnchx on 11/10/15.
@@ -36,9 +37,6 @@ public class ToggleListener implements OnCheckedChangeListener {
         //更新toggle button 值
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) toggle_Button
                 .getLayoutParams();
-        AppLog.i("ischecked:" + isChecked);
-        AppLog.i("setting name:" + settingName);
-        AppLog.i("noteId:" + param);
         if (isChecked) {
 
             params.addRule(RelativeLayout.ALIGN_RIGHT, -1);
@@ -47,8 +45,8 @@ public class ToggleListener implements OnCheckedChangeListener {
                 String noteId = (String) param;
                 Leanote.leaDB.publicNote(noteId, true);
             } else if ("use_markdown".equals(settingName)) {
-                params.addRule(RelativeLayout.ALIGN_LEFT, R.id.switch_markdown);
-                Leanote.leaDB.updateMarkdown(true);
+//                params.addRule(RelativeLayout.ALIGN_LEFT, R.id.switch_markdown);
+                Leanote.leaDB.updateMarkdown(true, AccountHelper.getDefaultAccount().getmUserId());
             }
 
 
@@ -66,8 +64,8 @@ public class ToggleListener implements OnCheckedChangeListener {
                 String noteId = (String) param;
                 Leanote.leaDB.publicNote(noteId, false);
             } else if ("use_markdown".equals(settingName)) {
-                params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.switch_markdown);
-                Leanote.leaDB.updateMarkdown(false);
+//                params.addRule(RelativeLayout.ALIGN_RIGHT, R.id.switch_markdown);
+                Leanote.leaDB.updateMarkdown(false, AccountHelper.getDefaultAccount().getmUserId());
             }
 
             params.addRule(RelativeLayout.ALIGN_LEFT, -1);

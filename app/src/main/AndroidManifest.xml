@@ -34,9 +34,9 @@
         android:name="io.fabric.ApiKey"
         android:value="fdsfkjl;k4234f8989fsdf" />
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
     <uses-feature
         android:name="android.hardware.location"
         android:required="false" />
@@ -50,10 +50,11 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <!--android:icon="@drawable/leanote_launch_screen" -->
     <application
         android:name=".Leanote"
         android:allowBackup="true"
-        android:icon="@drawable/leanote_launch_screen"
+        android:icon="@drawable/leanote_appicon"
         android:label="@string/app_name"
         android:theme="@style/Leanote"
         tools:replace="android:icon, android:allowBackup" >
@@ -97,7 +98,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_edit_note"
             android:theme="@style/CalypsoTheme"
-            android:windowSoftInputMode="stateHidden|adjustResize" >
+            android:windowSoftInputMode="stateHidden|adjustResize|adjustPan"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.note.NoteListActivity" />

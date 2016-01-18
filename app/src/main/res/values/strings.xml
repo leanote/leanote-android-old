@@ -103,6 +103,7 @@
     <string name="undo">撤销</string>
 
     <!-- buttons on post cards -->
+    <string name="upload_successfully">上传成功</string>
     <string name="button_edit">编辑</string>
     <string name="button_publish">发布</string>
     <string name="button_view">查看</string>
@@ -227,7 +228,7 @@
     <string name="title_activity_note_list">NoteListActivity</string>
     <string name="title_activity_note_preview">NotePreviewActivity</string>
     <string name="fragment_tag_note_preview">fragment_note_preview</string>
-    <string name="local_changes_explainer">This note has local changes which haven\\\'t been published to server</string>
+    <string name="local_changes_explainer">这篇笔记有修改内容未同步到服务器</string>
     <string name="select_photo">选择本地照片</string>
     <string name="media_add_popup_capture_photo">拍摄照片</string>
     <string name="pick_photo">Select photo</string>
@@ -245,7 +246,8 @@
     <string name="out_of_memory">out of memory</string>
     <string name="local_draft">本地草稿</string>
     <string name="delete_note_fail">删除笔记失败</string>
-    <string name="delete_note_succ">delete note successful</string>
+    <string name="delete_note_succ">删除笔记成功</string>
+    <string name="delete_notebook_succ">删除笔记本成功</string>
     <string name="local_draft_explainer">本地草稿笔记还未上传到服务器</string>
     <string name="invalid_username_too_short">username is too short</string>
     <string name="invalid_username_too_long">username is too long</string>
@@ -271,5 +273,7 @@
     <string name="title_activity_note_settings">NoteSettingsActivity</string>
     <string name="title_activity_notes_in_notebook">NotesInNotebookActivity</string>
     <string name="post">博客</string>
+    <string name="no_notes">没有笔记</string>
+    <string name="NOT_NULL_NOTEBOOK_DELETED">非空笔记本不能删除</string>
 
 </resources>

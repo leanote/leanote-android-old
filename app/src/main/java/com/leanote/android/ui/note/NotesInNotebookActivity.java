@@ -21,7 +21,7 @@ public class NotesInNotebookActivity extends AppCompatActivity {
             actionBar.setHomeButtonEnabled(true);
         }
 
-        setTitle("Notes");
+        setTitle("");
 
     }
 

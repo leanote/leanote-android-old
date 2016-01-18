@@ -31,6 +31,10 @@ public class AccountModel {
         lastSyncUsn = 0;
     }
 
+    public void clearToken() {
+        mAccessToken = "";
+    }
+
     public long getLocalUserId() {
         return localUserId;
     }
@@ -88,7 +92,7 @@ public class AccountModel {
     }
 
     public int getLastSyncUsn() {
-        return Leanote.leaDB.getAccountUsn();
+        return Leanote.leaDB.getAccountUsn(mUserId);
     }
 
     public void setLastSyncUsn(int lastSyncUsn) {

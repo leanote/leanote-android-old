@@ -413,7 +413,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         protected Boolean doInBackground(String... params) {
 
             if (params.length != 0 && !TextUtils.isEmpty(params[0])) {
-                tmpNotes = Leanote.leaDB.getNotesListInNotebook(params[0]);
+                tmpNotes = Leanote.leaDB.getNotesListInNotebook(params[0], AccountHelper.getDefaultAccount().getmUserId());
             } else {
                 tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
             }

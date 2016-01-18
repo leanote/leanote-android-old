@@ -168,14 +168,16 @@ public class NoteListFragment extends Fragment
 
         Bundle extras = getActivity().getIntent().getExtras();
 
+
         if (extras != null) {
             String notebookId = extras.getString(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID);
+            CustomSwipeRefreshLayout refreshLayout = (CustomSwipeRefreshLayout) getView().findViewById(R.id.ptr_layout);
+            refreshLayout.setEnabled(false);
             loadNotes(notebookId);
             return;
         }
 
         initSwipeToRefreshHelper();
-
         // since setRetainInstance(true) is used, we only need to request latest
         // posts the first time this is called (ie: not after device rotation)
         if (bundle == null && NetworkUtils.checkConnection(getActivity())) {
@@ -238,7 +240,7 @@ public class NoteListFragment extends Fragment
         if (isAdded() && result.getCode() == NoteSyncResultEnum.SUCCESS.getCode()) {
             loadNotes(null);
 
-            ToastUtils.showToast(getActivity(), "upload successfully");
+            ToastUtils.showToast(getActivity(), getString(R.string.upload_successfully));
         } else {
             ToastUtils.showToast(getActivity(), result.getMsg());
         }
@@ -286,7 +288,7 @@ public class NoteListFragment extends Fragment
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Leanote.leaDB.updateAccountUsn(NoteSyncService.getServerSyncState());
+                        Leanote.leaDB.updateAccountUsn(NoteSyncService.getServerSyncState(), AccountHelper.getDefaultAccount().getmUserId());
                     }
                 }).start();
 
@@ -307,6 +309,9 @@ public class NoteListFragment extends Fragment
                 break;
             case GENERIC_ERROR:
                 stringId = R.string.error_refresh_notes;
+                break;
+            case NO_CONTENT:
+                stringId = R.string.no_notes;
                 break;
             default:
                 return;

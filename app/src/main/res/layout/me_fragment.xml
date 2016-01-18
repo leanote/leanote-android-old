@@ -54,51 +54,51 @@
             tools:text="username" />
 
 
-        <LinearLayout
-            android:id="@+id/markdown_editor_setting"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical" >
+        <!--<LinearLayout-->
+            <!--android:id="@+id/markdown_editor_setting"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:gravity="center_vertical" >-->
 
-            <com.leanote.android.widget.LeaTextView
-                android:id="@+id/markdown_label"
-                style="@style/LeanoteSubHeader"
-                android:layout_width="0dp"
-                android:layout_height="34dp"
-                android:layout_weight="1"
-                android:focusable="false"
-                android:singleLine="true"
-                android:text="@string/markdown_editor" />
+            <!--<com.leanote.android.widget.LeaTextView-->
+                <!--android:id="@+id/markdown_label"-->
+                <!--style="@style/LeanoteSubHeader"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="34dp"-->
+                <!--android:layout_weight="1"-->
+                <!--android:focusable="false"-->
+                <!--android:singleLine="true"-->
+                <!--android:text="@string/markdown_editor" />-->
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginRight="10dp" >
+            <!--<RelativeLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="35dp"-->
+                <!--android:layout_marginRight="10dp" >-->
 
-                <ToggleButton
-                    android:id="@+id/switch_markdown"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/toggle_selector"
-                    android:gravity="left|center_vertical"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"
-                    android:textColor="#ffffff"
-                    android:textOff="OFF"
-                    android:textOn="ON"
-                    android:layout_alignParentTop="true" />
+                <!--<ToggleButton-->
+                    <!--android:id="@+id/switch_markdown"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:background="@drawable/toggle_selector"-->
+                    <!--android:gravity="left|center_vertical"-->
+                    <!--android:paddingLeft="14dp"-->
+                    <!--android:paddingRight="14dp"-->
+                    <!--android:textColor="#ffffff"-->
+                    <!--android:textOff="OFF"-->
+                    <!--android:textOn="ON"-->
+                    <!--android:layout_alignParentTop="true" />-->
 
-                <ImageButton
-                    android:id="@+id/switch_markdown_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignRight="@+id/toggle_public_blog"
-                    android:background="#00000000"
-                    android:src="@drawable/progress_thumb_selector" />
+                <!--<ImageButton-->
+                    <!--android:id="@+id/switch_markdown_button"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_alignRight="@+id/toggle_public_blog"-->
+                    <!--android:background="#00000000"-->
+                    <!--android:src="@drawable/progress_thumb_selector" />-->
 
-            </RelativeLayout>
-        </LinearLayout>
+            <!--</RelativeLayout>-->
+        <!--</LinearLayout>-->
 
         <View style="@style/MeListSectionDividerView" />
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -95,6 +96,9 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     private CountDownLatch mGetContentCountDownLatch;
     private CountDownLatch mGetSelectedTextCountDownLatch;
 
+    private int lastFocussedPosition = -1;
+    private Handler handler = new Handler();
+
     private final Map<String, ToggleButton> mTagToggleButtonMap = new HashMap<>();
 
     public static EditorFragment newInstance(String title, String content) {
@@ -171,6 +175,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         mSourceView = view.findViewById(R.id.sourceview);
         mSourceViewTitle = (SourceViewEditText) view.findViewById(R.id.sourceview_title);
         mSourceViewContent = (SourceViewEditText) view.findViewById(R.id.sourceview_content);
+
 
         // Toggle format bar on/off as user changes focus between title and content in HTML mode
         mSourceViewTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -357,10 +362,15 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         }
 
         String htmlEditor = Utils.getHtmlFromFile(getActivity(), "android-editor.html");
+        //htmlEditor = Utils.getHtmlFromFile(getActivity(), "editor-mobile.min.html");
 
         mWebView.addJavascriptInterface(new JsCallbackReceiver(this), JS_CALLBACK_HANDLER);
 
         mWebView.loadDataWithBaseURL("file:///android_asset/", htmlEditor, "text/html", "utf-8", "");
+
+//        if (isMarddown) {
+//            mWebView.execJavaScriptFromString("LEAMD.init();LEAMD.togglePreview();");
+//        }
 
         if (mDebugModeEnabled) {
             enableWebDebugging(true);
