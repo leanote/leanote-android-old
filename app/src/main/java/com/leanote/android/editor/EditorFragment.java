@@ -47,6 +47,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static android.view.View.SCROLLBARS_OUTSIDE_OVERLAY;
+
 public class EditorFragment extends EditorFragmentAbstract implements View.OnClickListener, View.OnTouchListener,
         OnJsEditorStateChangedListener, OnImeBackListener, LeaWebViewClient.OnImageLoadListener
 //        , EditorMediaUploadListener
@@ -137,9 +139,11 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
         mWebView = (EditorWebViewAbstract) view.findViewById(R.id.webview);
 
+
         mWebView.setOnTouchListener(this);
         mWebView.setOnImeBackListener(this);
 
+        mWebView.setScrollBarStyle(SCROLLBARS_OUTSIDE_OVERLAY);
         LeaWebViewClient webViewClient = new LeaWebViewClient();
         webViewClient.setImageLoadListener(this);
         //mWebView.setWebViewClient(webViewClient);

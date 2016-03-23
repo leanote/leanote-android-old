@@ -26,7 +26,8 @@
             android:layout_width="112dp"
             android:layout_height="86dp"
             android:layout_marginBottom="@dimen/margin_medium"
-            android:src="@drawable/penandink" />
+            android:src="@drawable/penandink"
+            android:contentDescription="@string/empty_list_default" />
 
         <com.leanote.android.widget.LeaTextView
             android:id="@+id/title_empty"

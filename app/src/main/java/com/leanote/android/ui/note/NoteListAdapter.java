@@ -75,15 +75,15 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
 
-    public void setOnPostsLoadedListener(OnNotesLoadedListener listener) {
+    public void setOnNotesLoadedListener(OnNotesLoadedListener listener) {
         mOnNotesLoadedListener = listener;
     }
 
-    public void setOnPostSelectedListener(OnNotesSelectedListener listener) {
+    public void setOnNoteSelectedListener(OnNotesSelectedListener listener) {
         mOnNotesSelectedListener = listener;
     }
 
-    public void setOnPostButtonClickListener(OnNotesButtonClickListener listener) {
+    public void setOnNoteButtonClickListener(OnNotesButtonClickListener listener) {
         mOnNotesButtonClickListener = listener;
     }
 
@@ -268,12 +268,12 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         animOut.start();
     }
 
-    public void loadNotes(String notebookId) {
+    public void loadNotes(Long localNotebookId) {
         if (mIsLoadingNotes) {
             AppLog.d(AppLog.T.POSTS, "post adapter > already loading posts");
         } else {
             //load note
-            new LoadNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, notebookId);
+            new LoadNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, localNotebookId);
 
         }
     }
@@ -394,7 +394,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
 
-    private class LoadNotesTask extends AsyncTask<String, Void, Boolean> {
+    private class LoadNotesTask extends AsyncTask<Long, Void, Boolean> {
         private NoteDetailList tmpNotes;
 
         @Override
@@ -410,9 +410,9 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Boolean doInBackground(Long... params) {
 
-            if (params.length != 0 && !TextUtils.isEmpty(params[0])) {
+            if (params.length != 0 && params[0] != null) {
                 tmpNotes = Leanote.leaDB.getNotesListInNotebook(params[0], AccountHelper.getDefaultAccount().getmUserId());
             } else {
                 tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());

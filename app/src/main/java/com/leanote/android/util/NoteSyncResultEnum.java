@@ -1,12 +1,16 @@
 package com.leanote.android.util;
 
+import com.leanote.android.Leanote;
+import com.leanote.android.R;
+
 /**
  * Created by binnchx on 12/3/15.
  */
 public enum NoteSyncResultEnum {
-    FAIL(0, "fail"),
-    SUCCESS(1, "success"),
-    CONFLICT(2, "conflict");
+
+    FAIL(0, Leanote.getContext().getString(R.string.upload_fail)),
+    SUCCESS(1, Leanote.getContext().getString(R.string.upload_successfully)),
+    CONFLICT(2, Leanote.getContext().getString(R.string.upload_conflict));
 
     private int code;
     private String msg;

@@ -40,6 +40,7 @@
 
 
 
+
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
     <style name="Theme.Leanote.Widget" parent="Theme.AppCompat">
         <item name="android:popupMenuStyle">@style/PopupMenu.Leanote</item>

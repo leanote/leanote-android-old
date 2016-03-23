@@ -83,6 +83,7 @@ public class NoteListFragment extends Fragment
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        AppLog.i("notelist oncreateview...");
         View view = inflater.inflate(R.layout.note_list, container, false);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
@@ -94,12 +95,16 @@ public class NoteListFragment extends Fragment
 
         mEmptyView = view.findViewById(R.id.empty_view);
 
+        mEmptyView.setVisibility(View.VISIBLE);
         mEmptyViewTitle = (TextView) mEmptyView.findViewById(R.id.title_empty);
-        mEmptyViewTitle.setText(getText(R.string.notes_fetching));
+        mEmptyViewTitle.setVisibility(View.VISIBLE);
+        CharSequence initMsg = getText(R.string.notes_fetching);
+        mEmptyViewTitle.setText(initMsg);
         mEmptyViewImage = (ImageView) mEmptyView.findViewById(R.id.image_empty);
+        mEmptyViewImage.setVisibility(View.VISIBLE);
         //temp add
-//        mEmptyView.setVisibility(View.VISIBLE);
-//        mEmptyViewTitle.setVisibility(View.VISIBLE);
+        mEmptyView.setVisibility(View.VISIBLE);
+        mEmptyViewTitle.setVisibility(View.VISIBLE);
 
         Context context = getActivity();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -145,9 +150,9 @@ public class NoteListFragment extends Fragment
     public NoteListAdapter getNoteListAdapter() {
         if (mNoteListAdapter == null) {
             mNoteListAdapter = new NoteListAdapter(getActivity());
-            mNoteListAdapter.setOnPostsLoadedListener(this);
-            mNoteListAdapter.setOnPostSelectedListener(this);
-            mNoteListAdapter.setOnPostButtonClickListener(this);
+            mNoteListAdapter.setOnNotesLoadedListener(this);
+            mNoteListAdapter.setOnNoteSelectedListener(this);
+            mNoteListAdapter.setOnNoteButtonClickListener(this);
 
         }
 
@@ -158,8 +163,8 @@ public class NoteListFragment extends Fragment
         return (mNoteListAdapter != null && mNoteListAdapter.getItemCount() == 0);
     }
 
-    private void loadNotes(String notebookId) {
-        getNoteListAdapter().loadNotes(notebookId);
+    private void loadNotes(Long localNotebookId) {
+        getNoteListAdapter().loadNotes(localNotebookId);
     }
 
     @Override
@@ -168,12 +173,11 @@ public class NoteListFragment extends Fragment
 
         Bundle extras = getActivity().getIntent().getExtras();
 
-
         if (extras != null) {
-            String notebookId = extras.getString(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID);
+            Long localNotebookId = extras.getLong(EditNotebookActivity.EXTRA_LOCAL_NOTEBOOK_ID);
             CustomSwipeRefreshLayout refreshLayout = (CustomSwipeRefreshLayout) getView().findViewById(R.id.ptr_layout);
             refreshLayout.setEnabled(false);
-            loadNotes(notebookId);
+            loadNotes(localNotebookId);
             return;
         }
 
@@ -197,6 +201,16 @@ public class NoteListFragment extends Fragment
 
         if (mRecyclerView.getAdapter() == null) {
             mRecyclerView.setAdapter(getNoteListAdapter());
+        }
+
+        Bundle extras = getActivity().getIntent().getExtras();
+
+        if (extras != null) {
+            Long localNotebookId = extras.getLong(EditNotebookActivity.EXTRA_LOCAL_NOTEBOOK_ID);
+            CustomSwipeRefreshLayout refreshLayout = (CustomSwipeRefreshLayout) getView().findViewById(R.id.ptr_layout);
+            refreshLayout.setEnabled(false);
+            loadNotes(localNotebookId);
+            return;
         }
 
         // always (re)load when resumed to reflect changes made elsewhere
@@ -242,6 +256,7 @@ public class NoteListFragment extends Fragment
 
             ToastUtils.showToast(getActivity(), getString(R.string.upload_successfully));
         } else {
+
             ToastUtils.showToast(getActivity(), result.getMsg());
         }
     }
@@ -281,8 +296,8 @@ public class NoteListFragment extends Fragment
             setRefreshing(false);
             hideLoadMoreProgress();
 
-            Log.i("is fail:", String.valueOf(event.getFailed()));
-            if (!event.getFailed()) {
+            Log.i("is fail:", String.valueOf(event.ismFailed()));
+            if (!event.ismFailed()) {
                 loadNotes(null);
                 //请求笔记结束后更新本地syncstate
                 new Thread(new Runnable() {
@@ -293,7 +308,8 @@ public class NoteListFragment extends Fragment
                 }).start();
 
             } else {
-                updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
+                loadNotes(null);
+                ToastUtils.showToast(getActivity(), getString(R.string.note_sync_fail));
             }
         }
     }
@@ -317,12 +333,13 @@ public class NoteListFragment extends Fragment
                 return;
         }
 
-        mEmptyViewTitle.setText(getText(stringId));
+        CharSequence errorMsg = getText(stringId);
+        mEmptyViewTitle.setText(errorMsg);
         mEmptyView.setVisibility(View.VISIBLE);
         mEmptyViewTitle.setVisibility(View.VISIBLE);
 
         mEmptyViewImage.setVisibility(emptyViewMessageType == EmptyViewMessageType.NO_CONTENT ? View.VISIBLE : View.GONE);
-        mEmptyView.setVisibility(isNoteAdapterEmpty() ? View.VISIBLE : View.GONE);
+        mEmptyView.setVisibility(TextUtils.isEmpty(errorMsg) ? View.GONE : View.VISIBLE);
     }
 
     @Override

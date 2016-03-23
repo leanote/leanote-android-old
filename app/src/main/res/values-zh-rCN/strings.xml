@@ -154,7 +154,7 @@
     <string name="signout">登出</string>
     <string name="signing_out">登出…</string>
 
-    <string name="search_note_hint">搜索</string>
+    <string name="search_note_hint">搜索笔记</string>
     <string name="action_search">搜索</string>
     <string name="default_editor">默认编辑器</string>
     <string name="me_btn_login_logout">登出</string>
@@ -224,5 +224,11 @@
     <string name="post">博客</string>
     <string name="no_notes">没有笔记</string>
     <string name="NOT_NULL_NOTEBOOK_DELETED">非空笔记本不能删除</string>
+    <string name="no_post">没有公开的博客</string>
+    <string name="upload_fail">上传失败</string>
+    <string name="upload_conflict">冲突</string>
+    <string name="note_sync_fail">笔记同步失败</string>
+    <string name="search_notebook_hint">搜索笔记本</string>
+    <string name="search_blog_hint">搜索博客</string>
 
 </resources>

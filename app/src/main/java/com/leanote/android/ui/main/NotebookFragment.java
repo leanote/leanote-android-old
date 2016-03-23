@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.leanote.android.ui.note.service.NoteEvents;
 import com.leanote.android.ui.note.service.NoteUpdateService;
 import com.leanote.android.util.AniUtils;
 import com.leanote.android.util.AppLog;
+import com.leanote.android.util.NoteSyncResultEnum;
 import com.leanote.android.util.SwipeToRefreshHelper;
 import com.leanote.android.util.ToastUtils;
 import com.leanote.android.widget.CustomSwipeRefreshLayout;
@@ -130,6 +132,7 @@ public class NotebookFragment extends Fragment
                         }
                         //该方法拉取笔记后存在本地的db中，然后通过EventBus通知AsyncTask加载到页面中
                         requestNotes();
+
                     }
                 });
     }
@@ -160,11 +163,33 @@ public class NotebookFragment extends Fragment
         initSwipeToRefreshHelper();
     }
 
+
     private void newNotebook() {
         if (!isAdded()) return;
 
         ActivityLauncher.addNewNotebookForResult(getActivity());
     }
+
+
+    @SuppressWarnings("unused")
+    public void onEventMainThread(NoteEvents.NotebookUploadStarted event) {
+        if (isAdded()) {
+            loadNotebooks();
+        }
+    }
+
+
+    @SuppressWarnings("unused")
+    public void onEventMainThread(NoteEvents.NotebookUploadEnded event) {
+        NoteSyncResultEnum result = event.result;
+        if (isAdded() && result.getCode() == NoteSyncResultEnum.SUCCESS.getCode()) {
+            loadNotebooks();
+            ToastUtils.showToast(getActivity(), getString(R.string.upload_successfully));
+        } else {
+            ToastUtils.showToast(getActivity(), result.getMsg());
+        }
+    }
+
 
     public void onResume() {
         super.onResume();
@@ -229,8 +254,8 @@ public class NotebookFragment extends Fragment
         if (isAdded()) {
             setRefreshing(false);
             hideLoadMoreProgress();
-            Log.i("is fail:", String.valueOf(event.getFailed()));
-            if (!event.getFailed()) {
+            Log.i("is fail:", String.valueOf(event.ismFailed()));
+            if (!event.ismFailed()) {
                 loadNotebooks();
             } else {
                 updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
@@ -284,7 +309,7 @@ public class NotebookFragment extends Fragment
         //final Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(note.getNoteId());
 
         //non null notebook couldn't be deleted
-        NoteDetailList noteLists = Leanote.leaDB.getNotesListInNotebook(notebook.getNotebookId(), AccountHelper.getDefaultAccount().getmUserId());
+        NoteDetailList noteLists = Leanote.leaDB.getNotesListInNotebook(notebook.getId(), AccountHelper.getDefaultAccount().getmUserId());
         if (noteLists.size() > 0) {
             ToastUtils.showToast(getActivity(), getString(R.string.NOT_NULL_NOTEBOOK_DELETED));
             return;
@@ -323,7 +348,7 @@ public class NotebookFragment extends Fragment
                 //delete note in local
                 Leanote.leaDB.deletenotebookInLocal(notebook.getId());
                 //delete note in server
-                new DeleteNotebookTask(notebook.getNotebookId(), notebook.getUsn()).execute();
+                new DeleteNotebookTask(notebook.getNotebookId(), notebook.getId(), notebook.getUsn()).execute();
             }
         }, Constants.SNACKBAR_LONG_DURATION_MS);
     }
@@ -347,7 +372,7 @@ public class NotebookFragment extends Fragment
                 break;
             case PostListButton.BUTTON_VIEW:
             case PostListButton.BUTTON_PREVIEW:
-                ActivityLauncher.viewNotebookForResult(getActivity(), fullNotebook.getNotebookId());
+                ActivityLauncher.viewNotebookForResult(getActivity(), fullNotebook.getId());
                 break;
             case PostListButton.BUTTON_TRASH:
             case PostListButton.BUTTON_DELETE:
@@ -396,16 +421,22 @@ public class NotebookFragment extends Fragment
     private class DeleteNotebookTask extends AsyncTask<Void, Void, String> {
 
         private String notebookId;
+        private long localNotebookId;
         private int usn;
 
-        public DeleteNotebookTask(String notebookId, int usn) {
+        public DeleteNotebookTask(String notebookId, long localNotebookId, int usn) {
             this.notebookId = notebookId;
+            this.localNotebookId = localNotebookId;
             this.usn = usn;
         }
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+
+            if (TextUtils.isEmpty(result)) {
+                return;
+            }
 
             boolean ok = false;
             String msg = "";
@@ -421,10 +452,11 @@ public class NotebookFragment extends Fragment
 
             } catch (JSONException e) {
                 e.printStackTrace();
+                ok = false;
             }
 
             if (ok) {
-                ToastUtils.showToast(getActivity(), getString(R.string.delete_note_succ));
+                ToastUtils.showToast(getActivity(), getString(R.string.delete_notebook_succ));
             } else {
                 ToastUtils.showToast(getActivity(), msg);
             }
@@ -434,14 +466,19 @@ public class NotebookFragment extends Fragment
         @Override
         protected String doInBackground(Void... params) {
 
+            Leanote.leaDB.deletenotebookInLocal(this.localNotebookId);
+
+            if (TextUtils.isEmpty(this.notebookId)) {
+                return null;
+            }
+
             String api = String.format("%s/api/notebook/deleteNotebook?token=%s&notebookId=%s&usn=%s",
                     AccountHelper.getDefaultAccount().getHost(),
                     AccountHelper.getDefaultAccount().getmAccessToken(),
                     this.notebookId, this.usn);
 
             try {
-                String response = NetworkRequest.syncGetRequest(api);
-                return response;
+                return NetworkRequest.syncGetRequest(api);
             } catch (Exception e) {
                 e.printStackTrace();
             }

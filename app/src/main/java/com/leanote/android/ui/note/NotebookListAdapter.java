@@ -36,6 +36,10 @@ import java.util.List;
  */
 public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
+    public void refresh() {
+        notifyDataSetChanged();
+    }
+
     public interface OnNotebookButtonClickListener {
         void onNotebookButtonClicked(int buttonId, NotebookInfo notebook);
     }
@@ -131,9 +135,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         // nothing to do if this is the static endlist indicator
         int posType = getItemViewType(position);
-        if (posType == VIEW_TYPE_ENDLIST_INDICATOR) {
-            return;
-        } else if (posType == VIEW_TYPE_MENU) {
+        if (posType == VIEW_TYPE_ENDLIST_INDICATOR || posType == VIEW_TYPE_MENU) {
             return;
         }
 

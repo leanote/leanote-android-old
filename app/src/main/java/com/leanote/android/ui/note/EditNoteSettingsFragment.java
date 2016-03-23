@@ -27,8 +27,6 @@ import com.leanote.android.util.AppLog;
 import com.leanote.android.util.EditTextUtils;
 import com.leanote.android.util.ToggleListener;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.util.List;
 
 /**
@@ -55,6 +53,8 @@ public class EditNoteSettingsFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        AppLog.i("settting fragment init...");
         mNote = ((EditNoteActivity) getActivity()).getNote();
         mRootView = (ViewGroup) inflater.inflate(R.layout.edit_note_settings_fragment, container, false);
 
@@ -77,6 +77,7 @@ public class EditNoteSettingsFragment extends Fragment
 
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        AppLog.i("call... onItemSelected");
                         saveSettingsAndSaveButton();
                     }
 
@@ -159,10 +160,11 @@ public class EditNoteSettingsFragment extends Fragment
 
 
         String tags = mNote.getTags();
-
-        if (StringUtils.isNotEmpty(tags) && !"null".equals(tags) && "\"\"".equals(tags)) {
-            mTagsEditText.setText(tags);
-        }
+        AppLog.i("init tags:" + tags);
+//        if (StringUtils.isNotEmpty(tags) && !"null".equals(tags) && "\"\"".equals(tags)) {
+//            mTagsEditText.setText(tags);
+//        }
+        mTagsEditText.setText(tags);
     }
 
     private int getNotebookIndex(List<NotebookInfo> mNotebookInfos, String noteBookId) {
@@ -222,7 +224,6 @@ public class EditNoteSettingsFragment extends Fragment
 
 
         String tags = EditTextUtils.getText(mTagsEditText);
-        AppLog.i("setting tags:" + tags);
 
         mNote.setIsPublicBlog(togglePublicBlog.isChecked());
         mNote.setTags(tags);

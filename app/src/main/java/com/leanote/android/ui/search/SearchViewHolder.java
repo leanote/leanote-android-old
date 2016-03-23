@@ -44,7 +44,7 @@ public class SearchViewHolder extends RecyclerView.ViewHolder {
                 Activity activity = (Activity) context;
                 if (obj instanceof NotebookInfo) {
                     NotebookInfo notebook = (NotebookInfo) obj;
-                    ActivityLauncher.viewNotebookForResult(activity, notebook.getNotebookId());
+                    ActivityLauncher.viewNotebookForResult(activity, notebook.getId());
                 } else {
                     NoteDetail note = (NoteDetail) obj;
                     ActivityLauncher.previewNoteForResult(activity, note.getId());

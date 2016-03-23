@@ -83,12 +83,12 @@ public class ActivityLauncher {
         Intent intent = new Intent(activity.getApplicationContext(), EditNotebookActivity.class);
         intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, localNotebookId);
         intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, false);
-        activity.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
+        activity.startActivityForResult(intent, RequestCodes.EDIT_NOTEBOOK);
     }
 
-    public static void viewNotebookForResult(Activity activity, String serverNotebookId) {
+    public static void viewNotebookForResult(Activity activity, Long localNotebookId) {
         Intent intent = new Intent(activity.getApplicationContext(), NotesInNotebookActivity.class);
-        intent.putExtra(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID, serverNotebookId);
+        intent.putExtra(EditNotebookActivity.EXTRA_LOCAL_NOTEBOOK_ID, localNotebookId);
         activity.startActivityForResult(intent, RequestCodes.VIEW_NOTEBOOK);
     }
 
@@ -104,12 +104,13 @@ public class ActivityLauncher {
 
     public static void addNewNotebookForResult(Activity context) {
         NotebookInfo newNotebook = new NotebookInfo();
+        newNotebook.setUserId(AccountHelper.getDefaultAccount().getmUserId());
         //WordPress.wpDB.savePost(newPost);
         Leanote.leaDB.addNotebook(newNotebook);
         Intent intent = new Intent(context, EditNotebookActivity.class);
         intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, newNotebook.getId());
         intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, true);
-        context.startActivityForResult(intent, RequestCodes.EDIT_NOTE);
+        context.startActivityForResult(intent, RequestCodes.NEW_NOTEBOOK);
     }
 
     public static void previewNoteForResult(Activity activity, Long id) {

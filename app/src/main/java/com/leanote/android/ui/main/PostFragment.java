@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +35,7 @@ import de.greenrobot.event.EventBus;
 public class PostFragment extends Fragment
             implements LeaMainActivity.OnScrollToTopListener,
             PostAdapter.OnVisitBlogClickListener,
+            PostAdapter.OnPostLoadedListener,
             NoteListAdapter.OnNotesSelectedListener {
 
 
@@ -71,6 +73,7 @@ public class PostFragment extends Fragment
             mPostAdapter = new PostAdapter(getActivity());
             mPostAdapter.setOnVisitBlogClickListener(this);
             mPostAdapter.setmOnNotesSelectedListener(this);
+            mPostAdapter.setmOnPostLoadedListener(this);
         }
         return mPostAdapter;
     }
@@ -214,7 +217,7 @@ public class PostFragment extends Fragment
             setRefreshing(false);
             hideLoadMoreProgress();
 
-            if (!event.getFailed()) {
+            if (!event.ismFailed()) {
                 loadPosts();
             } else {
                 updateEmptyView(EmptyViewMessageType.GENERIC_ERROR);
@@ -223,7 +226,8 @@ public class PostFragment extends Fragment
     }
 
     private boolean isPostAdapterEmpty() {
-        return false;
+        return mPostAdapter == null;
+        //return false;
     }
 
     private void updateEmptyView(EmptyViewMessageType emptyViewMessageType) {
@@ -238,13 +242,18 @@ public class PostFragment extends Fragment
             case GENERIC_ERROR:
                 stringId = R.string.error_refresh_notes;
                 break;
+            case NO_CONTENT:
+                stringId = R.string.no_post;
+                break;
             default:
                 return;
         }
 
-        mEmptyViewTitle.setText(getText(stringId));
+        CharSequence msg = getText(stringId);
+        mEmptyViewTitle.setText(msg);
         mEmptyViewImage.setVisibility(emptyViewMessageType == EmptyViewMessageType.NO_CONTENT ? View.VISIBLE : View.GONE);
-        mEmptyView.setVisibility(isPostAdapterEmpty() ? View.VISIBLE : View.GONE);
+        //mEmptyView.setVisibility(isPostAdapterEmpty() ? View.VISIBLE : View.GONE);
+        mEmptyView.setVisibility(TextUtils.isEmpty(msg) ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -264,4 +273,21 @@ public class PostFragment extends Fragment
         ActivityLauncher.previewNoteForResult(getActivity(), note.getId());
     }
 
+    @Override
+    public void onPostLoaded(int postCount) {
+        if (!isAdded()) {
+            return;
+        }
+
+        if (postCount == 0 && !mIsFetchingPosts) {
+            if (NetworkUtils.isNetworkAvailable(getActivity())) {
+                updateEmptyView(EmptyViewMessageType.NO_CONTENT);
+            } else {
+                updateEmptyView(EmptyViewMessageType.NETWORK_ERROR);
+            }
+        } else if (postCount > 0) {
+            mEmptyView.setVisibility(View.GONE);
+
+        }
+    }
 }

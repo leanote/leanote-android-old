@@ -18,4 +18,6 @@ public class RequestCodes {
 
     public static final int START_NOTE_SETTINGS = 500;
     public static final int VIEW_NOTEBOOK = 501;
+    public static final int NEW_NOTEBOOK = 502;
+    public static final int EDIT_NOTEBOOK = 503;
 }

@@ -9,6 +9,7 @@ public class CoreEvents {
     public static class RestApiUnauthorized {}
     public static class UserSignedOutWordPressCom {}
     public static class UserSignedOutCompletely {}
+    public static class NotebookChanged {}
     public static class InvalidCredentialsDetected {}
     public static class InvalidSslCertificateDetected {}
     public static class LoginLimitDetected {}

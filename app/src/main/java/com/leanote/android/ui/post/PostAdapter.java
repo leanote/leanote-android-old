@@ -37,6 +37,10 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void onVisitBlogButtonClicked();
     }
 
+    public interface OnPostLoadedListener {
+        void onPostLoaded(int postCount);
+    }
+
     private OnVisitBlogClickListener mOnVisitBlogClickListener;
 
 
@@ -59,7 +63,11 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_SEARCH = 2;
     private static final int VIEW_TYPE_HOME_PAGE = 3;
 
-    private NoteListAdapter.OnNotesLoadedListener mOnNotesLoadedListener;
+    private PostAdapter.OnPostLoadedListener mOnPostLoadedListener;
+
+    public void setmOnPostLoadedListener(OnPostLoadedListener mOnPostLoadedListener) {
+        this.mOnPostLoadedListener = mOnPostLoadedListener;
+    }
 
     public PostAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
@@ -230,8 +238,8 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             mIsLoadingPosts = false;
-            if (mOnNotesLoadedListener != null) {
-                mOnNotesLoadedListener.onNotesLoaded(mPosts.size());
+            if (mOnPostLoadedListener != null) {
+                mOnPostLoadedListener.onPostLoaded(mPosts.size());
             }
         }
     }

@@ -37,6 +37,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     private SearchAdapter mAdapter;
     private List mdatas;
     private List allDatas;
+    private int type = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +58,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         mdatas = new ArrayList<>();
         Bundle extras = getActivity().getIntent().getExtras();
         if (extras != null) {
-            int type = extras.getInt("type");
+            type = extras.getInt("type");
             if (type == Constant.NOTEBOOK_SEARCH) {
                 allDatas = Leanote.leaDB.getNotebookList(AccountHelper.getDefaultAccount().getmUserId());
             } else if (type == Constant.BLOG_SEARCH) {
@@ -80,6 +81,14 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
         final MenuItem item = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+
+        if (type == Constant.NOTEBOOK_SEARCH) {
+            searchView.setQueryHint(getString(R.string.search_notebook_hint));
+        } else if (type == Constant.BLOG_SEARCH) {
+            searchView.setQueryHint(getString(R.string.search_blog_hint));
+        } else {
+            searchView.setQueryHint(getString(R.string.search_note_hint));
+        }
 
         searchView.setIconifiedByDefault(false);
 

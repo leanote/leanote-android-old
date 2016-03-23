@@ -1,6 +1,7 @@
 package com.leanote.android.networking;
 
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class NetworkRequest {
 
-    public static String syncGetRequest(String api) throws ExecutionException, InterruptedException {
+    public static String singleSyncGetRequest(String api) throws ExecutionException, InterruptedException {
 
         RequestFuture<String> future = RequestFuture.newFuture();
 
@@ -31,12 +32,20 @@ public class NetworkRequest {
         Leanote.requestQueue.add(request);
 
         try {
-            String response = future.get(15, TimeUnit.SECONDS);
-            return response;
+            return future.get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
-            Log.e("network error", "", e);
+            Log.e("network error,api:", api, e);
             return null;
         }
+    }
+
+    public static String syncGetRequest(String api) throws ExecutionException, InterruptedException {
+        int i = 0;
+        String response = null;
+        while (i++ < 3 && TextUtils.isEmpty(response)) {
+            response = singleSyncGetRequest(api);
+        }
+        return response;
     }
 
 

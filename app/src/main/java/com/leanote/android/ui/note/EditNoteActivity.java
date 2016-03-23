@@ -193,6 +193,7 @@ public class EditNoteActivity extends AppCompatActivity
                     setTitle(R.string.note_settings);
                 } else if (position == PAGE_PREVIEW) {
                     setTitle(R.string.preview_note);
+                    AppLog.i("call... save note");
                     saveNote(true);
                     if (mEditNotePreviewFragment != null) {
                         mEditNotePreviewFragment.loadNote();
@@ -569,6 +570,7 @@ public class EditNoteActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Saves both post objects so we can restore them in onCreate()
+        AppLog.i("call--- onSaveInstanceState");
         saveNote(true);
         outState.putSerializable(STATE_KEY_CURRENT_NOTE, mNote);
         outState.putSerializable(STATE_KEY_ORIGINAL_NOTE, mOriginalNote);
@@ -596,7 +598,6 @@ public class EditNoteActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
 
-        AppLog.i("onback pressed");
         if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
             mViewPager.setCurrentItem(PAGE_CONTENT);
             invalidateOptionsMenu();
@@ -616,6 +617,14 @@ public class EditNoteActivity extends AppCompatActivity
             return;
         }
         String title = StringUtils.notNullStr((String) mEditorFragment.getTitle());
+        note.setTitle(title);
+
+        AppLog.i("orginal content:" + note.getContent() + "---end");
+        AppLog.i("new content:" + mEditorFragment.getSpannedContent() + "---end");
+        if (note.getContent().equals(mEditorFragment.getContent())) {
+            AppLog.i("note content has no any change.");
+            return;
+        }
         SpannableStringBuilder noteContent;
         if (mEditorFragment.getSpannedContent() != null) {
             // needed by the legacy editor to save local drafts
@@ -715,8 +724,6 @@ public class EditNoteActivity extends AppCompatActivity
             content = noteContent.toString();
         }
         setNoteFileIds(content);
-
-        note.setTitle(title);
         note.setContent(content);
 
     }
@@ -790,15 +797,21 @@ public class EditNoteActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
-        if (itemId == R.id.menu_save_post) {
+        if (itemId == R.id.menu_save_post || itemId == android.R.id.home) {
             // If the post is new and there are no changes, don't publish
             updateNoteObject(false);
+
+            if (mViewPager.getCurrentItem() == PAGE_SETTINGS) {
+                mViewPager.setCurrentItem(PAGE_CONTENT);
+                return true;
+            }
+
 //            if (!mPost.isPublishable()) {
 //                ToastUtils.showToast(this, R.string.error_publish_empty_post, Duration.SHORT);
 //                return false;
 //            }
 
-            if (mNote.isDirty() || mNote.hasChanges(mOriginalNote)) {
+            if (mNote.isDirty() || mNote.hasChanges(mOriginalNote) || !mNote.isUploadSucc()) {
                 saveNote(false, false);
                 if (!NetworkUtils.isNetworkAvailable(this)) {
                     ToastUtils.showToast(this, R.string.no_network_message, ToastUtils.Duration.SHORT);
@@ -811,6 +824,9 @@ public class EditNoteActivity extends AppCompatActivity
             }
 
             setResult(RESULT_OK);
+            Intent intent = new Intent();
+            intent.putExtra(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID, mNote.getNoteBookId());
+            setIntent(intent);
             finish();
             return true;
         }
@@ -821,23 +837,25 @@ public class EditNoteActivity extends AppCompatActivity
             mViewPager.setCurrentItem(PAGE_SETTINGS);
             //finish();
             return true;
-        } else if (itemId == android.R.id.home) {
-            if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
-                mViewPager.setCurrentItem(PAGE_CONTENT);
-                //invalidateOptionsMenu();
-            } else {
-                updateNoteObject(false);
-                if (mNote.hasChanges(mOriginalNote)) {
-                    saveAndFinish();
-                }
-
-                setResult(RESULT_OK);
-                finish();
-            }
-            return true;
         }
+//        else if (itemId == android.R.id.home) {
+//            if (mViewPager.getCurrentItem() > PAGE_CONTENT) {
+//                mViewPager.setCurrentItem(PAGE_CONTENT);
+//                //invalidateOptionsMenu();
+//            } else {
+//                updateNoteObject(false);
+//                if (mNote.hasChanges(mOriginalNote)) {
+//                    saveAndFinish();
+//                }
+//
+//                setResult(RESULT_OK);
+//                finish();
+//            }
+//            return true;
+//        }
         return false;
     }
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -854,6 +872,7 @@ public class EditNoteActivity extends AppCompatActivity
 
     private void saveAndFinish() {
 
+        AppLog.i("call... saveAndFinish");
         saveNote(true);
         if (mEditorFragment != null && hasEmptyContentFields()) {
             // new and empty post? delete it

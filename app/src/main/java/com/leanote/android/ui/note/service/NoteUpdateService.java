@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.service.NoteSyncService;
@@ -57,8 +58,13 @@ public class NoteUpdateService extends Service {
     private void fetchNotes() {
 
         NoteEvents.RequestNotes event = new NoteEvents.RequestNotes();
-        NoteSyncService.syncPullNote();
-
+        event.setmFailed(false);
+        try {
+            NoteSyncService.syncPullNote();
+        } catch (Exception e) {
+            Log.e("note", "fetch note fail", e);
+            event.setmFailed(true);
+        }
 
         EventBus.getDefault().post(event);
     }

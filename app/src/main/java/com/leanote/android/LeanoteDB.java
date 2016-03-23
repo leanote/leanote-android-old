@@ -458,12 +458,12 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("usn", serverNotebook.getUsn());
         values.put("is_dirty", serverNotebook.isDirty() ? 1 : 0);
 
-        if (TextUtils.isEmpty(serverNotebook.getNotebookId())) {
-            db.update(NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
-        } else {
-            db.update(NOTEBOOKS_TABLE, values, "notebookId=?", new String[]{serverNotebook.getNotebookId()});
-        }
-
+//        if (serverNotebook.getId() != 0l) {
+//            db.update(NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
+//        } else {
+//            db.update(NOTEBOOKS_TABLE, values, "notebookId=?", new String[]{serverNotebook.getNotebookId()});
+//        }
+        db.update(NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
 
     }
 
@@ -684,6 +684,7 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
         values.put("notebookId", newNotebook.getNotebookId());
         values.put("is_dirty", 0);
+        values.put("userId", newNotebook.getUserId());
         long result = db.insert(NOTEBOOKS_TABLE, null, values);
         if (result > 0) {
             newNotebook.setId(result);
@@ -836,21 +837,39 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public NoteDetailList getNotesListInNotebook(String notebookId, String userId) {
-        NoteDetailList listPosts = new NoteDetailList();
+    public NoteDetailList getNotesListInNotebook(Long localNotebookId, String userId) {
+        NoteDetailList notelist = new NoteDetailList();
 
-        String[] args = {notebookId, userId};
+        String notebookId = getNotebookIdByLocalId(localNotebookId);
+        String[] args = {String.valueOf(notebookId), userId};
+        if (localNotebookId == null) {
+            return notelist;
+        }
+
         //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
         Cursor c = db.query(NOTES_TABLE, null, "notebookId=? and userId=?", args, null, null, "");
         try {
             while (c.moveToNext()) {
                 NoteDetail detail = fillNote(c);
-                listPosts.add(detail);
+                notelist.add(detail);
             }
-            return listPosts;
+            return notelist;
         } finally {
             SqlUtils.closeCursor(c);
         }
+    }
+
+    private String getNotebookIdByLocalId(Long localNotebookId) {
+        String[] args = {String.valueOf(localNotebookId)};
+        Cursor c = db.query(NOTEBOOKS_TABLE, null, "id=?", args, null, null, "");
+        try {
+            if (c.moveToNext()) {
+                return c.getString(1);
+            }
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+        return null;
     }
 
 }

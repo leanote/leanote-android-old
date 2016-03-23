@@ -2463,12 +2463,12 @@ ZSSField.prototype.wrapCaretInParagraphIfNecessary = function()
 
             if (range.startContainer == range.endContainer) {
                 var paragraph = document.createElement("p");
-                var textNode = document.createTextNode("&#x200b;");
+                //var textNode = document.createTextNode("&#x200b;");
 
                 paragraph.appendChild(textNode);
 
                 range.insertNode(paragraph);
-                range.selectNode(textNode);
+                //range.selectNode(textNode);
 
                 selection.removeAllRanges();
                 selection.addRange(range);
@@ -2506,12 +2506,51 @@ ZSSField.prototype.getHTML = function() {
     return html;
 };
 
+var HTML_DECODE = {
+        "&lt;"  : "<",
+        "&gt;"  : ">",
+        "&amp;" : "&",
+        "&nbsp;": " ",
+        "&quot;": "\"",
+        "&copy;": "©"
+   };
+
+var REGX_HTML_DECODE = /&\w+;|&#(\d+);/g;
+
+ZSSField.prototype.decodeHtml = function(s){
+
+      return (typeof s != "string") ? s :
+          s.replace(REGX_HTML_DECODE,
+                    function($0,$1){
+                        var c = HTML_DECODE[$0]; // 尝试查表
+                        console.log("query:" + c);
+                        if(c === undefined){
+                            // Maybe is Entity Number
+                            if(!isNaN($1)){
+                                c = String.fromCharCode(($1 == 160) ? 32 : $1);
+                            }else{
+                                // Not Entity Number
+                                c = $0;
+                            }
+                        }
+                        return c;
+                    });
+};
+
+
+
 ZSSField.prototype.getHTMLForCallback = function() {
     var functionArgument = "function=getHTMLForCallback";
     var idArgument = "id=" + this.getNodeId();
+
     var contentsArgument = "contents=" + this.getHTML();
+    if (idArgument === 'id=zss_field_title') {
+        contentsArgument = this.decodeHtml(contentsArgument);
+    }
+
     var joinedArguments = functionArgument + defaultCallbackSeparator + idArgument + defaultCallbackSeparator +
         contentsArgument;
+    console.log("joinedArguments:" + joinedArguments);
     ZSSEditor.callback('callback-response-string', joinedArguments);
 };
 

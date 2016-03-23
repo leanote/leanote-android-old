@@ -66,7 +66,7 @@ public class NoteUploadService extends Service {
      */
     public static boolean isNoteUploading(long localNoteId) {
         // first check the currently uploading NoteDetail
-        if (mCurrentUploadingNote != null && mCurrentUploadingNote.getId().longValue() == localNoteId) {
+        if (mCurrentUploadingNote != null && mCurrentUploadingNote.getId() == localNoteId) {
             return true;
         }
 
@@ -154,6 +154,13 @@ public class NoteUploadService extends Service {
         protected void onPostExecute(NoteSyncResultEnum result) {
             super.onPostExecute(result);
             noteUploaded();
+            if (result == NoteSyncResultEnum.FAIL) {
+                mNote.setIsDirty(true);
+                mNote.setUploadSucc(false);
+            } else {
+                mNote.setIsDirty(false);
+                mNote.setUploadSucc(true);
+            }
 
             AppLog.i("upload result:" + result);
             EventBus.getDefault().post(new NoteEvents.PostUploadEnded(result));
@@ -226,7 +233,6 @@ public class NoteUploadService extends Service {
         }
 
 
-        mNote.setIsDirty(false);
         Leanote.leaDB.updateNote(mNote);
 
         if ("conflict".equals(msg)) {

@@ -1,7 +1,7 @@
 package com.leanote.android.ui.note;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -20,17 +20,11 @@ import android.widget.Toast;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
-import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NotebookInfo;
-import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
-import com.leanote.android.service.NoteSyncService;
-import com.leanote.android.util.NoteSyncResultEnum;
+import com.leanote.android.ui.note.service.NotebookUploadService;
 import com.leanote.android.util.StringUtils;
 import com.leanote.android.util.ToastUtils;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * Created by binnchx on 11/12/15.
@@ -40,6 +34,7 @@ public class EditNotebookActivity extends AppCompatActivity {
     public static final String EXTRA_IS_NEW_NOTEBOOK = "new_notebook";
     public static final String EXTRA_NEW_NOTEBOOK_ID = "new_notebook_id";
     public static final String EXTRA_SERVER_NOTEBOOK_ID = "server_notebook_id";
+    public static final String EXTRA_LOCAL_NOTEBOOK_ID = "local_notebook_id";
 
     private boolean mIsNewNotebook;
     private NotebookInfo mNotebook;
@@ -136,8 +131,8 @@ public class EditNotebookActivity extends AppCompatActivity {
                     mNotebook.setIsDirty(true);
                     Leanote.leaDB.updateNotebook(mNotebook);
 
-                    NotebookUploadTask uploadTask = new NotebookUploadTask();
-                    uploadTask.execute(mNotebook);
+                    NotebookUploadService.addNotebookToUpload(mNotebook);
+                    startService(new Intent(this, NotebookUploadService.class));
                 }
 
 
@@ -153,103 +148,7 @@ public class EditNotebookActivity extends AppCompatActivity {
         return false;
     }
 
-    private class NotebookUploadTask extends AsyncTask<NotebookInfo, Void, NoteSyncResultEnum> {
 
-        @Override
-        protected NoteSyncResultEnum doInBackground(NotebookInfo... params) {
-            if (params.length == 0) {
-                return NoteSyncResultEnum.FAIL;
-            }
-
-            NotebookInfo notebook = params[0];
-            /*
-            1.pull, 2.push. 3.update usn
-             */
-
-            //1.pull
-            NoteSyncService.syncPullNote();
-
-            //2. push
-            String api = null;
-            if (!TextUtils.isEmpty(notebook.getNotebookId())) {
-                api = String.format("%s/api/notebook/updateNotebook?notebookId=%s&title=%s&parentNotebookid=%s&seq=%s&usn=%s&token=%s",
-                    AccountHelper.getDefaultAccount().getHost(),
-                    notebook.getNotebookId(),
-                    notebook.getTitle(),
-                    notebook.getParentNotebookId(),
-                    notebook.getSeq(), notebook.getUsn(),
-                    AccountHelper.getDefaultAccount().getmAccessToken());
-
-            } else {
-                api = String.format("%s/api/notebook/addNotebook?title=%s&parentNotebookid=%s&seq=%s&token=%s",
-                        AccountHelper.getDefaultAccount().getHost(),
-                        notebook.getTitle(),
-                        notebook.getParentNotebookId(),
-                        notebook.getSeq(),
-                        AccountHelper.getDefaultAccount().getmAccessToken());
-
-            }
-
-            try {
-                String response = NetworkRequest.syncGetRequest(api);
-                return processResponse(response);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    private NoteSyncResultEnum processResponse(String response) throws Exception {
-        JSONObject json = new JSONObject(response);
-        boolean ok = false;
-        if (json.has("Ok")) {
-            ok = json.getBoolean("Ok");
-        }
-        String notebookId = null;
-        if (json.has("NotebookId")) {
-            notebookId = json.getString("NotebookId");
-        }
-
-        String msg = null;
-        if (json.has("msg")) {
-            msg = json.getString("msg");
-        }
-
-        if (!TextUtils.isEmpty(notebookId)) {
-            NotebookInfo notebook = NoteSyncService.parseServerNotebook(json);
-            //加上本地id
-            Leanote.leaDB.updateNotebook(notebook);
-            return NoteSyncResultEnum.SUCCESS;
-        } else if (!ok && "conflict".equals(msg)){
-            //更新server端笔记本到本地
-            handleConflictNotebook(mNotebook.getNotebookId());
-            return NoteSyncResultEnum.CONFLICT;
-        }
-
-
-        return NoteSyncResultEnum.FAIL;
-    }
-
-    private void handleConflictNotebook(String notebookId) throws Exception {
-        String notebookApi = String.format("%s/api/notebook/getNotebooks?token=%s",
-                AccountHelper.getDefaultAccount().getHost(),
-                AccountHelper.getDefaultAccount().getmAccessToken());
-
-        String notebookRes = NetworkRequest.syncGetRequest(notebookApi);
-        JSONArray jsonArray = new JSONArray(notebookRes);
-        JSONObject notebook = null;
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject notebookObj = jsonArray.getJSONObject(i);
-            if (StringUtils.equals(notebookId, notebookObj.getString("NotebookId"))) {
-                notebook = notebookObj;
-            }
-        }
-
-        NotebookInfo serverNotebook = NoteSyncService.parseServerNotebook(notebook);
-        Leanote.leaDB.updateNotebook(serverNotebook);
-    }
 
 
     @Nullable

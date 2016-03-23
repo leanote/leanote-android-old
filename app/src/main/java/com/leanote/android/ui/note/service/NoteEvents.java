@@ -13,6 +13,11 @@ public class NoteEvents {
         PostUploadStarted() {}
     }
 
+    public static class NotebookUploadStarted {
+
+        NotebookUploadStarted() {}
+    }
+
     public static class PostUploadEnded {
         public final NoteSyncResultEnum result;
 
@@ -20,6 +25,16 @@ public class NoteEvents {
             this.result = result;
         }
     }
+
+    public static class NotebookUploadEnded {
+        public final NoteSyncResultEnum result;
+
+        NotebookUploadEnded(NoteSyncResultEnum result) {
+            this.result = result;
+        }
+    }
+
+
 
     public static class PostMediaInfoUpdated {
         private long mMediaId;
@@ -38,21 +53,27 @@ public class NoteEvents {
     }
 
     public static class RequestNotes {
-        private boolean mFailed;
+        private boolean mFailed = false;
         private String errorMsg;
         RequestNotes() {
             mFailed = false;
         }
 
-        public boolean getFailed() {
+        public boolean ismFailed() {
             return mFailed;
         }
 
-        public void setErrorType(String errorMsg) {
-            this.errorMsg = errorMsg;
-            mFailed = true;
+        public void setmFailed(boolean mFailed) {
+            this.mFailed = mFailed;
         }
 
+        public String getErrorMsg() {
+            return errorMsg;
+        }
+
+        public void setErrorMsg(String errorMsg) {
+            this.errorMsg = errorMsg;
+        }
     }
 
 }

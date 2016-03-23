@@ -14,6 +14,7 @@ public class NoteDetail implements Serializable {
     private Long id;
     private String noteId;
     private String noteBookId;
+    private Long localNotebookId;
     private String userId;
     private String title;
     private String desc;
@@ -31,6 +32,7 @@ public class NoteDetail implements Serializable {
     private String publicTime;
     private int usn;
     private boolean isUploading;
+    private boolean uploadSucc = true;
 
 
 
@@ -123,6 +125,14 @@ public class NoteDetail implements Serializable {
         return usn;
     }
 
+    public boolean isUploadSucc() {
+        return uploadSucc;
+    }
+
+    public void setUploadSucc(boolean uploadSucc) {
+        this.uploadSucc = uploadSucc;
+    }
+
     @Override
     public String toString() {
         return "NoteDetail{" +
@@ -165,7 +175,7 @@ public class NoteDetail implements Serializable {
 
         AppLog.i("title equals:" + !StringUtils.equals(title, otherNote.title));
         AppLog.i("content equals:" + !StringUtils.equals(content, otherNote.content));
-        AppLog.i("notebookid equals:" + !StringUtils.equals(noteBookId, otherNote.noteBookId));
+        AppLog.i("notebookid equals:" + !(noteBookId.equals(otherNote.noteBookId)));
         AppLog.i("isMarkDown equal:" + (isMarkDown != otherNote.isMarkDown));
         AppLog.i("tags equals:" + !StringUtils.equals(tags, otherNote.tags));
         AppLog.i("isblog equals:" + (isPublicBlog != otherNote.isPublicBlog));
@@ -241,5 +251,13 @@ public class NoteDetail implements Serializable {
 
     public void setIsUploading(boolean isUploading) {
         this.isUploading = isUploading;
+    }
+
+    public Long getLocalNotebookId() {
+        return localNotebookId;
+    }
+
+    public void setLocalNotebookId(Long localNotebookId) {
+        this.localNotebookId = localNotebookId;
     }
 }

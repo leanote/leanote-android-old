@@ -9,9 +9,10 @@
 
     <item
         android:id="@+id/menu_settings_post"
-        android:icon="@drawable/ic_post_settings"
+        android:icon="@drawable/ic_settings"
         app:showAsAction="always"
-        android:title="@string/note_settings"/>
+        android:title="@string/note_settings">
+    </item>
     <item
         android:id="@+id/menu_save_post"
         app:showAsAction="always"
