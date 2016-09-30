@@ -1,17 +1,15 @@
-package com.leanote.android;
-
+package com.leanote.android.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 
-import com.leanote.android.datasets.AccountTable;
+import com.leanote.android.Leanote;
+import com.leanote.android.model.Account;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.MediaFile;
@@ -20,161 +18,64 @@ import com.leanote.android.util.SqlUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LeanoteDB extends SQLiteOpenHelper {
+/**
+ * Created by yuchuan
+ * DATE 7/23/16
+ * TIME 08:49
+ */
+public class LeanoteDbManager {
 
-    public static final String COLUMN_NAME_ID                    = "id";
-    public static final String COLUMN_NAME_NOTE_ID               = "noteID";
-    public static final String COLUMN_NAME_FILE_PATH             = "filePath";
-    public static final String COLUMN_NAME_FILE_NAME             = "fileName";
-    public static final String COLUMN_NAME_TITLE                 = "title";
-    public static final String COLUMN_NAME_DESCRIPTION           = "description";
-    public static final String COLUMN_NAME_CAPTION               = "caption";
-    public static final String COLUMN_NAME_HORIZONTAL_ALIGNMENT  = "horizontalAlignment";
-    public static final String COLUMN_NAME_WIDTH                 = "width";
-    public static final String COLUMN_NAME_HEIGHT                = "height";
-    public static final String COLUMN_NAME_MIME_TYPE             = "mimeType";
-    public static final String COLUMN_NAME_FILE_URL              = "fileURL";
-    public static final String COLUMN_NAME_THUMBNAIL_URL         = "thumbnailURL";
-    public static final String COLUMN_NAME_MEDIA_ID              = "mediaId";
-    public static final String COLUMN_NAME_UPLOAD_STATE          = "uploadState";
-    private static final int DATABASE_VERSION = 1;
+    public static LeanoteDbManager sLeanoteDbManager;
+    private LeanoteDB mLeanoteDB;
+    private SQLiteDatabase mDb;
 
-    private static final String DATABASE_NAME = "leanote";
-
-    private static final String CREATE_TABLE_NOTES =
-        "create table if not exists notes ("
-            + "id integer primary key autoincrement,"
-            + "noteId text,"
-            + "notebookId text,"
-            + "userId text,"
-            + "title text default '',"
-            + "tags text default '',"
-            + "content text default '',"
-            + "isMarkDown integer default 0,"
-            + "isBlog integer default 0,"
-            + "isTrash integer default 0,"
-            + "files text default '',"
-            + "createdTime text default '',"
-            + "updatedTime text default '',"
-            + "publicTime text default '',"
-            + "usn  integer default 0,"
-            + "desc text default '',"
-            + "note_abstract default '',"
-            + "is_dirty integer default 0,"
-            + "isUploading integer default 0)";
-
-//    private static final String CREATE_TABLE_NOTE_CONTENT =
-//            "create table if not exists note_content ("
-//                    + "noteId text primary key,"
-//                    + "userId text,"
-//                    + "content text);";
-
-
-    private static final String CREATE_TABLE_NOTEBOOKS =
-            "create table if not exists notebooks ("
-                    + "id integer primary key autoincrement,"
-                    + "notebookId text,"
-                    + "parentNotebookId text,"
-                    + "userId text,"
-                    + "title text default '',"
-                    + "urlTitle text default '',"
-                    + "isBlog integer default 0,"
-                    + "isTrash integer default 0,"
-                    + "isDeleted integer default 0,"
-                    + "createdTime text default '',"
-                    + "updatedTime text default '',"
-                    + "usn integer,"
-                    + "is_dirty integer default 0)";
-
-    private static final String NOTES_TABLE = "notes";
-
-    private static final String ACCOUNTS_TABLE = "accounts";
-
-    private static final String NOTEBOOKS_TABLE = "notebooks";
-
-    //private static final String NOTE_CONTENT_TABLE = "note_content";
-
-    private static final String MEDIA_TABLE = "media";
-
-    private static final String CREATE_TABLE_MEDIA = "create table if not exists media "
-            + "(id text primary key, "
-            + "mediaID text default '',"
-            + "noteID text default '', filePath text default '', "
-            + "fileName text default '', title text default '', "
-            + "fileURL text default '',"
-            + "thumbnailURL text default '',"
-            + "uploadState text default '',"
-            + "description text default '', caption text default '', "
-            + "horizontalAlignment integer default 0, width integer default 0, "
-            + "height integer default 0, mimeType text default '');";
-
-
-    private SQLiteDatabase db;
-
-    private Context context;
-
-    public SQLiteDatabase getDatabase() {
-        return db;
+    public LeanoteDbManager() {
+        mLeanoteDB = new LeanoteDB(Leanote.getContext());
     }
 
-    public LeanoteDB(Context ctx) {
-        super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
-
-        //db = ctx.openOrCreateDatabase(DATABASE_NAME, 0, null);
-        db = this.getWritableDatabase();
-
+    public static LeanoteDbManager getInstance() {
+        if (sLeanoteDbManager == null) {
+            synchronized (LeanoteDbManager.class) {
+                if (sLeanoteDbManager == null) {
+                    sLeanoteDbManager = new LeanoteDbManager();
+                }
+            }
+        }
+        return sLeanoteDbManager;
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE_NOTES);
-        db.execSQL(CREATE_TABLE_NOTEBOOKS);
-        db.execSQL(CREATE_TABLE_MEDIA);
-
-        AccountTable.createTables(db);
-    }
-
-
-
-    public static void deleteDatabase(Context ctx) {
-        ctx.deleteDatabase(DATABASE_NAME);
-    }
-
-    public void saveNotes(List<?> notesList) {
-        List<String> noteIds = getLocalNoteIds(AccountHelper.getDefaultAccount().getmUserId());
+    public synchronized void saveNotes(List<?> notesList) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        List<String> noteIds = getLocalNoteIds(AccountHelper.getDefaultAccount().getUserId());
         if (notesList != null && notesList.size() != 0) {
-            db.beginTransaction();
+            mDb.beginTransaction();
             try {
                 for (int i = 0; i < notesList.size(); i++) {
 
-                    NoteDetail note = (NoteDetail) notesList.get(i);
+                    NoteInfo note = (NoteInfo) notesList.get(i);
 
                     String noteId = note.getNoteId();
                     if (noteIds.contains(noteId)) {
                         continue;
                     }
-
                     ContentValues values = getContentValuesFromNote(note);
-
-                    db.insert(NOTES_TABLE, null, values);
+                    mDb.insert(LeanoteDB.NOTES_TABLE, null, values);
                 }
-
-                db.setTransactionSuccessful();
+                mDb.setTransactionSuccessful();
             } finally {
-                db.endTransaction();
+                mDb.endTransaction();
             }
         }
     }
 
-
-    public NoteDetailList getNotesList(String userId) {
+    public synchronized NoteDetailList getNotesList(String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         NoteDetailList listPosts = new NoteDetailList();
-
         String[] args = {userId};
-        Cursor c = db.query(NOTES_TABLE, null, "userId=?", args, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "userId=?", args, null, null, "");
         try {
             while (c.moveToNext()) {
-                NoteDetail detail = fillNote(c);
+                NoteInfo detail = fillNote(c);
                 listPosts.add(detail);
             }
             return listPosts;
@@ -183,19 +84,11 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-
-
-
-    @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
-    }
-
-    public List<String> getLocalNoteIds(String userId) {
-
+    public synchronized List<String> getLocalNoteIds(String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {userId};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "userId=?", args, null, null, "");
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "userId=?", args, null, null, "");
         List<String> noteIds = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -208,12 +101,12 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public NoteDetail getLocalNoteById(long localNoteId) {
+    public synchronized NoteInfo getLocalNoteById(long localNoteId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {String.valueOf(localNoteId)};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "id=?", args, null, null, "");
-
-        NoteDetail detail = null;
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "id=?", args, null, null, "");
+        NoteInfo detail = null;
         try {
             if (c.moveToNext()) {
                 detail = fillNote(c);
@@ -224,9 +117,8 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    private NoteDetail fillNote(Cursor c) {
-        NoteDetail detail = new NoteDetail();
-
+    private NoteInfo fillNote(Cursor c) {
+        NoteInfo detail = new NoteInfo();
         detail.setId(c.getLong(0));
         detail.setNoteId(c.getString(1));
         detail.setNoteBookId(c.getString(2));
@@ -249,10 +141,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
         return detail;
     }
 
-
 //    public NoteContent getNoteContentByNoteId(String noteId) {
 //        String[] args = {String.valueOf(noteId)};
-//        Cursor c = db.query(NOTE_CONTENT_TABLE, null, "noteId=?", args, null, null, "");
+//        Cursor c = mDb.query(NOTE_CONTENT_TABLE, null, "noteId=?", args, null, null, "");
 //        NoteContent content = new NoteContent();
 //        if (c.moveToNext()) {
 //            content.setNoteId(noteId);
@@ -264,91 +155,82 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
     private ContentValues getContentsFromMf(MediaFile mf) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_ID, mf.getId());
-        values.put(COLUMN_NAME_NOTE_ID, mf.getNoteID());
-        values.put(COLUMN_NAME_FILE_PATH, mf.getFilePath());
-        values.put(COLUMN_NAME_FILE_NAME, mf.getFileName());
-        values.put(COLUMN_NAME_TITLE, mf.getTitle());
-        values.put(COLUMN_NAME_DESCRIPTION, mf.getDescription());
-        values.put(COLUMN_NAME_CAPTION, mf.getCaption());
-        values.put(COLUMN_NAME_HORIZONTAL_ALIGNMENT, mf.getHorizontalAlignment());
-        values.put(COLUMN_NAME_WIDTH, mf.getWidth());
-        values.put(COLUMN_NAME_HEIGHT, mf.getHeight());
-        values.put(COLUMN_NAME_MIME_TYPE, mf.getMimeType());
-//        values.put(COLUMN_NAME_FEATURED, mf.isFeatured());
-//        values.put(COLUMN_NAME_IS_FEATURED_IN_POST, mf.isFeaturedInPost());
-        values.put(COLUMN_NAME_FILE_URL, mf.getFileURL());
-        values.put(COLUMN_NAME_THUMBNAIL_URL, mf.getThumbnailURL());
-        values.put(COLUMN_NAME_MEDIA_ID, mf.getMediaId());
-
+        values.put(LeanoteDB.COLUMN_NAME_ID, mf.getId());
+        values.put(LeanoteDB.COLUMN_NAME_NOTE_ID, mf.getNoteID());
+        values.put(LeanoteDB.COLUMN_NAME_FILE_PATH, mf.getFilePath());
+        values.put(LeanoteDB.COLUMN_NAME_FILE_NAME, mf.getFileName());
+        values.put(LeanoteDB.COLUMN_NAME_TITLE, mf.getTitle());
+        values.put(LeanoteDB.COLUMN_NAME_DESCRIPTION, mf.getDescription());
+        values.put(LeanoteDB.COLUMN_NAME_CAPTION, mf.getCaption());
+        values.put(LeanoteDB.COLUMN_NAME_HORIZONTAL_ALIGNMENT, mf.getHorizontalAlignment());
+        values.put(LeanoteDB.COLUMN_NAME_WIDTH, mf.getWidth());
+        values.put(LeanoteDB.COLUMN_NAME_HEIGHT, mf.getHeight());
+        values.put(LeanoteDB.COLUMN_NAME_MIME_TYPE, mf.getMimeType());
+//        values.put(LeanoteDB.COLUMN_NAME_FEATURED, mf.isFeatured());
+//        values.put(LeanoteDB.COLUMN_NAME_IS_FEATURED_IN_POST, mf.isFeaturedInPost());
+        values.put(LeanoteDB.COLUMN_NAME_FILE_URL, mf.getFileURL());
+        values.put(LeanoteDB.COLUMN_NAME_THUMBNAIL_URL, mf.getThumbnailURL());
+        values.put(LeanoteDB.COLUMN_NAME_MEDIA_ID, mf.getMediaId());
         //values.put(COLUMN_NAME_DATE_CREATED_GMT, mf.getDateCreatedGMT());
-
-        if (mf.getUploadState() != null)
-            values.put(COLUMN_NAME_UPLOAD_STATE, mf.getUploadState());
-        else
-            values.putNull(COLUMN_NAME_UPLOAD_STATE);
-
+        if (mf.getUploadState() != null) {
+            values.put(LeanoteDB.COLUMN_NAME_UPLOAD_STATE, mf.getUploadState());
+        } else {
+            values.putNull(LeanoteDB.COLUMN_NAME_UPLOAD_STATE);
+        }
         return values;
     }
 
-    public void saveMediaFile(MediaFile mf) {
-
+    public synchronized void saveMediaFile(MediaFile mf) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = getContentsFromMf(mf);
-
-        int result = db.update(MEDIA_TABLE, values, "id=?",
+        int result = mDb.update(LeanoteDB.MEDIA_TABLE, values, "id=?",
                 new String[]{mf.getId()});
 
         if (result == 0) {
             AppLog.i("insert new media:" + values);
-            db.insert(MEDIA_TABLE, null, values);
+            mDb.insert(LeanoteDB.MEDIA_TABLE, null, values);
         }
-
     }
 
-    public void saveNoteContent(String noteId, String content) {
-        if (org.apache.commons.lang.StringUtils.isEmpty(noteId)) {
+    public synchronized void saveNoteContent(String noteId, String content) {
+        if (TextUtils.isEmpty(noteId)) {
             return;
         }
-
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("content", content);
-
-        db.update(NOTES_TABLE, values, "noteId=?", new String[]{noteId});
-
+        mDb.update(LeanoteDB.NOTES_TABLE, values, "noteId=?", new String[]{noteId});
     }
 
-    public long addNote(NoteDetail newNote) {
+    public synchronized long addNote(NoteInfo newNote) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
-
         values.put("noteId", newNote.getNoteId());
         values.put("notebookId", newNote.getNoteBookId());
         values.put("userId", newNote.getUserId());
         values.put("title", newNote.getTitle());
         values.put("updatedTime", newNote.getUpdatedTime());
-
-        long result = db.insert(NOTES_TABLE, null, values);
+        long result = mDb.insert(LeanoteDB.NOTES_TABLE, null, values);
         if (result > 0) {
             newNote.setId(result);
         }
         return result;
     }
 
-    public void updateNote(NoteDetail note) {
+    public synchronized void updateNote(NoteInfo note) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = getContentValuesFromNote(note);
-
-        db.update(NOTES_TABLE, values, "id=?", new String[]{String.valueOf(note.getId())});
+        mDb.update(LeanoteDB.NOTES_TABLE, values, "id=?", new String[]{String.valueOf(note.getId())});
     }
 
-    public void updateNoteByNoteId(NoteDetail note) {
+    public synchronized void updateNoteByNoteId(NoteInfo note) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = getContentValuesFromNote(note);
-
-        db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
-
+        mDb.update(LeanoteDB.NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
     }
 
-    private ContentValues getContentValuesFromNote(NoteDetail note) {
+    private ContentValues getContentValuesFromNote(NoteInfo note) {
         ContentValues values = new ContentValues();
-
         values.put("noteId", note.getNoteId());
         values.put("notebookId", note.getNoteBookId());
         values.put("userId", note.getUserId());
@@ -367,17 +249,16 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("note_abstract", note.getNoteAbstract());
         values.put("is_dirty", note.isDirty());
         values.put("isUploading", note.isUploading() ? 1 : 0);
-
         return values;
     }
 
-
-    public NoteDetail getLocalNoteByNoteId(String noteId) {
+    public synchronized NoteInfo getLocalNoteByNoteId(String noteId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {String.valueOf(noteId)};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "noteId=?", args, null, null, "");
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "noteId=?", args, null, null, "");
 
-        NoteDetail detail = null;
+        NoteInfo detail = null;
         try {
             if (c.moveToNext()) {
                 detail = fillNote(c);
@@ -388,8 +269,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public List<String> getNotebookTitles(String userId) {
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "userId=?", new String[]{userId}, null, null, "");
+    public synchronized List<String> getNotebookTitles(String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "userId=?", new String[]{userId}, null, null, "");
         List<String> notebookTitles = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -401,35 +283,39 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void deleteNote(long id) {
-        String sql = "delete from notes where id='" + id + "'" ;
-        db.execSQL(sql);
+    public synchronized void deleteNote(long id) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        String sql = "delete from notes where id='" + id + "'";
+        mDb.execSQL(sql);
     }
 
-    public void deleteNoteByNoteId(String noteId) {
-        String sql = "delete from notes where noteId='" + noteId + "'" ;
-        db.execSQL(sql);
+    public synchronized void deleteNoteByNoteId(String noteId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        String sql = "delete from notes where noteId='" + noteId + "'";
+        mDb.execSQL(sql);
     }
 
-
-    public void deleteNoteInLocal(String noteId) {
-        String sql = "update notes set isDeleted = 1 and is_dirty = 1 where noteId='" + noteId + "'" ;
-        db.execSQL(sql);
+    public synchronized void deleteNoteInLocal(String noteId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        String sql = "update notes set isDeleted = 1 and is_dirty = 1 where noteId='" + noteId + "'";
+        mDb.execSQL(sql);
     }
 
-    public void deleteNotebook(String notebookId) {
-        String sql = "delete from notebooks where notebookId='" + notebookId + "'" ;
-        db.execSQL(sql);
+    public synchronized void deleteNotebook(String notebookId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        String sql = "delete from notebooks where notebookId='" + notebookId + "'";
+        mDb.execSQL(sql);
     }
 
-    public void deletenotebookInLocal(long id) {
+    public synchronized void deletenotebookInLocal(long id) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String sql = "delete from notebooks where id = " + id;
-        db.execSQL(sql);
+        mDb.execSQL(sql);
     }
 
-
-    public List<String> getLocalNotebookIds(String userId) {
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "userId=?", new String[]{userId}, null, null, "");
+    public synchronized List<String> getLocalNotebookIds(String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "userId=?", new String[]{userId}, null, null, "");
         List<String> notebookIds = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -442,9 +328,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void updateNotebook(NotebookInfo serverNotebook) {
+    public synchronized void updateNotebook(NotebookInfo serverNotebook) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
-
         values.put("notebookId", serverNotebook.getNotebookId());
         values.put("parentNotebookId", serverNotebook.getParentNotebookId());
         values.put("userId", serverNotebook.getUserId());
@@ -457,20 +343,19 @@ public class LeanoteDB extends SQLiteOpenHelper {
         values.put("createdTime", serverNotebook.getCreateTime());
         values.put("usn", serverNotebook.getUsn());
         values.put("is_dirty", serverNotebook.isDirty() ? 1 : 0);
-
 //        if (serverNotebook.getId() != 0l) {
-//            db.update(NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
+//            mDb.update(NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
 //        } else {
-//            db.update(NOTEBOOKS_TABLE, values, "notebookId=?", new String[]{serverNotebook.getNotebookId()});
+//            mDb.update(NOTEBOOKS_TABLE, values, "notebookId=?", new String[]{serverNotebook.getNotebookId()});
 //        }
-        db.update(NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
-
+        mDb.update(LeanoteDB.NOTEBOOKS_TABLE, values, "id=?", new String[]{String.valueOf(serverNotebook.getId())});
     }
 
-    public NotebookInfo getLocalNotebookByNotebookId(String notebookId) {
+    public synchronized NotebookInfo getLocalNotebookByNotebookId(String notebookId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {String.valueOf(notebookId)};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "notebookId=?", args, null, null, "");
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "notebookId=?", args, null, null, "");
 
         NotebookInfo notebook = null;
         try {
@@ -483,15 +368,14 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void saveNotebooks(List<NotebookInfo> newNotebooks) {
-
+    public synchronized void saveNotebooks(List<NotebookInfo> newNotebooks) {
         if (newNotebooks != null && newNotebooks.size() != 0) {
-            db.beginTransaction();
+            mDb = mLeanoteDB.getWritableDatabase();
+            mDb.beginTransaction();
             try {
                 for (int i = 0; i < newNotebooks.size(); i++) {
                     ContentValues values = new ContentValues();
                     NotebookInfo notebook = (NotebookInfo) newNotebooks.get(i);
-
                     values.put("notebookId", notebook.getNotebookId());
                     values.put("parentNotebookId", notebook.getParentNotebookId());
                     values.put("userId", notebook.getUserId());
@@ -503,50 +387,50 @@ public class LeanoteDB extends SQLiteOpenHelper {
                     values.put("updatedTime", notebook.getUpdateTime());
                     values.put("createdTime", notebook.getCreateTime());
                     values.put("usn", notebook.getUsn());
-
-                    db.insert(NOTEBOOKS_TABLE, null, values);
+                    mDb.insert(LeanoteDB.NOTEBOOKS_TABLE, null, values);
                 }
-
-                db.setTransactionSuccessful();
+                mDb.setTransactionSuccessful();
             } finally {
-                db.endTransaction();
+                mDb.endTransaction();
             }
         }
     }
 
-    public void updateUsn(String userId, int usn) {
+    public synchronized void updateUsn(String userId, int usn) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String sql = "update accounts set usn = " + usn + " where user_id = '" + userId + "'";
-        db.execSQL(sql);
+        mDb.execSQL(sql);
     }
 
-    public void dangerouslyDeleteAllContent() {
-//        db.execSQL("drop table " + NOTES_TABLE);
-//        db.execSQL("drop table " + NOTEBOOKS_TABLE);
-//        db.execSQL("drop table " + MEDIA_TABLE);
-
-        db.delete(NOTES_TABLE, null, null);
-        db.delete(NOTEBOOKS_TABLE, null, null);
-        db.delete(MEDIA_TABLE, null, null);
+    public synchronized void dangerouslyDeleteAllContent() {
+        mDb = mLeanoteDB.getWritableDatabase();
+//        mDb.execSQL("drop table " + NOTES_TABLE);
+//        mDb.execSQL("drop table " + NOTEBOOKS_TABLE);
+//        mDb.execSQL("drop table " + MEDIA_TABLE);
+        mDb.delete(LeanoteDB.NOTES_TABLE, null, null);
+        mDb.delete(LeanoteDB.NOTEBOOKS_TABLE, null, null);
+        mDb.delete(LeanoteDB.MEDIA_TABLE, null, null);
     }
 
-    public void publicNote(String noteId, boolean isPublic) {
+    public synchronized void publicNote(String noteId, boolean isPublic) {
+        mDb = mLeanoteDB.getWritableDatabase();
         int publicNote = isPublic ? 1 : 0;
         String sql = "update notes set isBlog = " + publicNote + " where noteId = '" + noteId + "'";
-        db.execSQL(sql);
-
+        mDb.execSQL(sql);
     }
 
-    public void updateMarkdown(boolean useMarkdown, String userId) {
+    public synchronized void updateMarkdown(boolean useMarkdown, String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         int mkd = useMarkdown ? 1 : 0;
         String sql = "update accounts set isMarkDown = " + mkd + " where local_id = 0 and user_id='" + userId + "'";
-        db.execSQL(sql);
-
+        mDb.execSQL(sql);
     }
 
-    public List<String> getNoteisBlogIds() {
+    public synchronized List<String> getNoteisBlogIds() {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] st = {"title"};
-//        Cursor c = db.query(NOTES_TABLE, null, null , null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, st , "isBlog=1", null, null, null, "");
+//        Cursor c = mDb.query(NOTES_TABLE, null, null , null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, st, "isBlog=1", null, null, null, "");
         List<String> notebookIds = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -559,17 +443,17 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public NoteDetailList getNoteisBlogList(String userId) {
+    public synchronized  NoteDetailList getNoteisBlogList(String userId) {
         NoteDetailList listPosts = new NoteDetailList();
-
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] st = {"title"};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "isBlog=1 and userId=?", new String[]{userId}, null, null, "");
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "isBlog=1 and userId=?", new String[]{userId}, null, null, "");
         try {
             while (c.moveToNext()) {
                 String title = c.getString(4);
                 String updateTime = c.getString(12);
-                NoteDetail detail = new NoteDetail();
+                NoteInfo detail = new NoteInfo();
 
                 detail.setId(c.getLong(0));
                 detail.setNoteId(c.getString(1));
@@ -585,8 +469,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public List<NotebookInfo> getNotebookList(String userId) {
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "userId=?", new String[]{userId}, null, null, "");
+    public  synchronized List<NotebookInfo> getNotebookList(String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "userId=?", new String[]{userId}, null, null, "");
         List<NotebookInfo> notebooks = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -615,34 +500,31 @@ public class LeanoteDB extends SQLiteOpenHelper {
         notebook.setUpdateTime(c.getString(10));
         notebook.setUsn(c.getInt(11));
         notebook.setIsDirty(c.getInt(12) != 0);
-
         return notebook;
     }
 
-    public void saveNoteSettings(NoteDetail note) {
+    public synchronized void saveNoteSettings(NoteInfo note) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
-
         values.put("isBlog", note.isPublicBlog() ? 1 : 0);
         values.put("notebookId", note.getNoteBookId());
         values.put("tags", note.getTags());
-
         if (TextUtils.isEmpty(note.getNoteId())) {
-            db.update(NOTES_TABLE, values, "id=?", new String[]{String.valueOf(note.getId())});
+            mDb.update(LeanoteDB.NOTES_TABLE, values, "id=?", new String[]{String.valueOf(note.getId())});
         } else {
-            db.update(NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
+            mDb.update(LeanoteDB.NOTES_TABLE, values, "noteId=?", new String[]{note.getNoteId()});
         }
-
     }
 
-
-    public List<NoteDetail> getDirtyNotes() {
+    public synchronized List<NoteInfo> getDirtyNotes() {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {"1"};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "is_dirty=?", args, null, null, "");
-        List<NoteDetail> notes = new ArrayList<>();
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "is_dirty=?", args, null, null, "");
+        List<NoteInfo> notes = new ArrayList<>();
         try {
             while (c.moveToNext()) {
-                NoteDetail note = fillNote(c);
+                NoteInfo note = fillNote(c);
 
                 notes.add(note);
             }
@@ -653,10 +535,11 @@ public class LeanoteDB extends SQLiteOpenHelper {
 
     }
 
-    public List<NotebookInfo> getDirtyNotebooks() {
+    public synchronized List<NotebookInfo> getDirtyNotebooks() {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {"1"};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "is_dirty=?", args, null, null, "");
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "is_dirty=?", args, null, null, "");
         List<NotebookInfo> notebooks = new ArrayList<>();
         try {
             while (c.moveToNext()) {
@@ -665,9 +548,9 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 notebook.setParentNotebookId(c.getString(2));
                 notebook.setTitle(c.getString(4));
                 notebook.setUrlTitle(c.getString(5));
-                notebook.setIsBlog(c.getInt(6) == 0 ? false : true);
-                notebook.setIsTrash(c.getInt(7) == 0 ? false : true);
-                notebook.setIsDirty(c.getInt(8) == 0 ? false : true);
+                notebook.setIsBlog(c.getInt(6) == 0);
+                notebook.setIsTrash(c.getInt(7) == 0);
+                notebook.setIsDirty(c.getInt(8) == 0);
                 notebook.setUpdateTime(c.getString(10));
                 notebook.setUsn(c.getInt(11));
                 notebooks.add(notebook);
@@ -676,27 +559,26 @@ public class LeanoteDB extends SQLiteOpenHelper {
         } finally {
             SqlUtils.closeCursor(c);
         }
-
     }
 
-    public long addNotebook(NotebookInfo newNotebook) {
+    public synchronized long addNotebook(NotebookInfo newNotebook) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
-
         values.put("notebookId", newNotebook.getNotebookId());
         values.put("is_dirty", 0);
         values.put("userId", newNotebook.getUserId());
-        long result = db.insert(NOTEBOOKS_TABLE, null, values);
+        long result = mDb.insert(LeanoteDB.NOTEBOOKS_TABLE, null, values);
         if (result > 0) {
             newNotebook.setId(result);
         }
         return result;
     }
 
-    public NotebookInfo getLocalNotebookById(long localNotebookId) {
+    public synchronized NotebookInfo getLocalNotebookById(long localNotebookId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {String.valueOf(localNotebookId)};
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "id=?", args, null, null, "");
-
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "id=?", args, null, null, "");
         NotebookInfo notebook = null;
         try {
             if (c.moveToNext()) {
@@ -708,10 +590,10 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    public MediaFile getMediaFile(String imageUri) {
-        Cursor c = db.query(MEDIA_TABLE, null, "fileURL=?",
+    public synchronized MediaFile getMediaFile(String imageUri) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.MEDIA_TABLE, null, "fileURL=?",
                 new String[]{imageUri}, null, null, null);
-
         try {
             if (c.moveToFirst()) {
                 MediaFile mf = getMediaFileFromCursor(c);
@@ -721,13 +603,12 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 return null;
             }
         } finally {
-            c.close();
+            SqlUtils.closeCursor(c);
         }
     }
 
     private MediaFile getMediaFileFromCursor(Cursor c) {
         MediaFile mf = new MediaFile();
-
         mf.setId(c.getString(0));
         mf.setMediaId(c.getString(1));
         mf.setNoteID(c.getString(2));
@@ -746,10 +627,10 @@ public class LeanoteDB extends SQLiteOpenHelper {
         return mf;
     }
 
-    public MediaFile getMediaFileById(String id) {
-        Cursor c = db.query(MEDIA_TABLE, null, "id=?",
+    public synchronized MediaFile getMediaFileById(String id) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.MEDIA_TABLE, null, "id=?",
                 new String[]{String.valueOf(id)}, null, null, null);
-
         try {
             if (c.moveToFirst()) {
                 MediaFile mf = getMediaFileFromCursor(c);
@@ -759,46 +640,42 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 return null;
             }
         } finally {
-            c.close();
+            SqlUtils.closeCursor(c);
         }
     }
 
-    public void updateDirtyUsn(String noteId, int usn) {
+    public synchronized void updateDirtyUsn(String noteId, int usn) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("usn", usn);
         values.put("is_dirty", 0);
-
-        db.update(NOTES_TABLE, values, "noteId=?", new String[]{noteId});
+        mDb.update(LeanoteDB.NOTES_TABLE, values, "noteId=?", new String[]{noteId});
     }
 
-
-    public void updateAccountUsn(int serverUsn, String userId) {
+    public synchronized void updateAccountUsn(int serverUsn, String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("usn", serverUsn);
-
-        db.update(ACCOUNTS_TABLE, values, "user_id=?", new String[]{userId});
-
+        mDb.update(LeanoteDB.ACCOUNT_TABLE, values, "user_id=?", new String[]{userId});
     }
 
-    public int getAccountUsn(String userId) {
-        Cursor c = db.query(ACCOUNTS_TABLE, null, "user_id=?", new String[]{userId}, null, null, "");
-
+    public synchronized int getAccountUsn(String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.ACCOUNT_TABLE, null, "user_id=?", new String[]{userId}, null, null, "");
         try {
             if (c.moveToNext()) {
                 return c.getInt(8);
             }
-
         } finally {
             SqlUtils.closeCursor(c);
         }
         return 0;
     }
 
-    public MediaFile getMediaFileByUrl(String url) {
-
-        Cursor c = db.query(MEDIA_TABLE, null, "fileURL=?",
+    public synchronized MediaFile getMediaFileByUrl(String url) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.MEDIA_TABLE, null, "fileURL=?",
                 new String[]{url}, null, null, null);
-
         try {
             if (c.moveToNext()) {
                 return getMediaFileFromCursor(c);
@@ -806,26 +683,28 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 return null;
             }
         } finally {
-            c.close();
+            SqlUtils.closeCursor(c);
         }
     }
 
-    public void deleteMediaFileByNoteId(String noteId) {
+    public synchronized void deleteMediaFileByNoteId(String noteId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String sql = "delete from media where noteId='" + noteId + "'";
-        db.execSQL(sql);
+        mDb.execSQL(sql);
     }
 
-    public void updateMedia(String localFileId, String serverFileId) {
+    public synchronized void updateMedia(String localFileId, String serverFileId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_MEDIA_ID, serverFileId);
+        values.put(LeanoteDB.COLUMN_NAME_MEDIA_ID, serverFileId);
 
-        db.update(MEDIA_TABLE, values, "id=?", new String[]{localFileId});
+        mDb.update(LeanoteDB.MEDIA_TABLE, values, "id=?", new String[]{localFileId});
     }
 
-    public MediaFile getMediaFileByFileId(String fileId) {
-        Cursor c = db.query(MEDIA_TABLE, null, "id=? or mediaId=?",
+    public synchronized MediaFile getMediaFileByFileId(String fileId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Cursor c = mDb.query(LeanoteDB.MEDIA_TABLE, null, "id=? or mediaId=?",
                 new String[]{fileId, fileId}, null, null, null);
-
         try {
             if (c.moveToNext()) {
                 return getMediaFileFromCursor(c);
@@ -833,11 +712,12 @@ public class LeanoteDB extends SQLiteOpenHelper {
                 return null;
             }
         } finally {
-            c.close();
+            SqlUtils.closeCursor(c);
         }
     }
 
-    public NoteDetailList getNotesListInNotebook(Long localNotebookId, String userId) {
+    public synchronized NoteDetailList getNotesListInNotebook(Long localNotebookId, String userId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         NoteDetailList notelist = new NoteDetailList();
 
         String notebookId = getNotebookIdByLocalId(localNotebookId);
@@ -845,12 +725,11 @@ public class LeanoteDB extends SQLiteOpenHelper {
         if (localNotebookId == null) {
             return notelist;
         }
-
-        //Cursor c = db.query(NOTES_TABLE, null, null, null, null, null, "");
-        Cursor c = db.query(NOTES_TABLE, null, "notebookId=? and userId=?", args, null, null, "");
+        //Cursor c = mDb.query(NOTES_TABLE, null, null, null, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTES_TABLE, null, "notebookId=? and userId=?", args, null, null, "");
         try {
             while (c.moveToNext()) {
-                NoteDetail detail = fillNote(c);
+                NoteInfo detail = fillNote(c);
                 notelist.add(detail);
             }
             return notelist;
@@ -859,9 +738,10 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
     }
 
-    private String getNotebookIdByLocalId(Long localNotebookId) {
+    public synchronized String getNotebookIdByLocalId(Long localNotebookId) {
+        mDb = mLeanoteDB.getWritableDatabase();
         String[] args = {String.valueOf(localNotebookId)};
-        Cursor c = db.query(NOTEBOOKS_TABLE, null, "id=?", args, null, null, "");
+        Cursor c = mDb.query(LeanoteDB.NOTEBOOKS_TABLE, null, "id=?", args, null, null, "");
         try {
             if (c.moveToNext()) {
                 return c.getString(1);
@@ -871,5 +751,46 @@ public class LeanoteDB extends SQLiteOpenHelper {
         }
         return null;
     }
+
+    public synchronized Account getAccountByLocalId(long localId) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        Account account = new Account();
+        String[] args = {Long.toString(localId)};
+        Cursor c = mDb.rawQuery("SELECT * FROM " + LeanoteDB.ACCOUNT_TABLE + " WHERE local_id=?", args);
+
+        try {
+            if (c.moveToFirst()) {
+                account.setUserName(c.getString(c.getColumnIndex("user_name")));
+                account.setUserId(c.getString(c.getColumnIndex("user_id")));
+                account.setEmail(c.getString(c.getColumnIndex("email")));
+                account.setAvatar(c.getString(c.getColumnIndex("logo")));
+                account.setVerified(c.getInt(c.getColumnIndex("verified")) == 0);
+                account.setAccessToken(c.getString(c.getColumnIndex("access_token")));
+                account.setUseMarkdown(c.getInt(c.getColumnIndex("isMarkDown")) == 0);
+                account.setLastSyncUsn(c.getInt(c.getColumnIndex("usn")));
+                account.setHost(c.getString(c.getColumnIndex("host")));
+            }
+            return account;
+        } finally {
+            SqlUtils.closeCursor(c);
+        }
+    }
+
+    public synchronized void save(Account account) {
+        mDb = mLeanoteDB.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        // we only support one wpcom user at the moment: local_id is always 0
+        values.put("local_id", 0);
+        values.put("user_name", account.getUserName());
+        values.put("user_id", account.getUserId());
+        values.put("email", account.getEmail());
+        values.put("verified", account.isVerified() ? 0 : 1);
+        values.put("logo", account.getAvatar());
+        values.put("access_token", account.getAccessToken());
+        values.put("host", account.getHost());
+
+        mDb.insertWithOnConflict(LeanoteDB.ACCOUNT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
 
 }

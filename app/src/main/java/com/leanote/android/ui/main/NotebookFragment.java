@@ -18,8 +18,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.leanote.android.Constants;
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.model.NotebookInfo;
@@ -309,7 +309,7 @@ public class NotebookFragment extends Fragment
         //final Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(note.getNoteId());
 
         //non null notebook couldn't be deleted
-        NoteDetailList noteLists = Leanote.leaDB.getNotesListInNotebook(notebook.getId(), AccountHelper.getDefaultAccount().getmUserId());
+        NoteDetailList noteLists = LeanoteDbManager.getInstance().getNotesListInNotebook(notebook.getId(), AccountHelper.getDefaultAccount().getUserId());
         if (noteLists.size() > 0) {
             ToastUtils.showToast(getActivity(), getString(R.string.NOT_NULL_NOTEBOOK_DELETED));
             return;
@@ -346,7 +346,7 @@ public class NotebookFragment extends Fragment
                 }
 
                 //delete note in local
-                Leanote.leaDB.deletenotebookInLocal(notebook.getId());
+                LeanoteDbManager.getInstance().deletenotebookInLocal(notebook.getId());
                 //delete note in server
                 new DeleteNotebookTask(notebook.getNotebookId(), notebook.getId(), notebook.getUsn()).execute();
             }
@@ -359,7 +359,7 @@ public class NotebookFragment extends Fragment
 
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());
         //load note detail
-        NotebookInfo fullNotebook = Leanote.leaDB.getLocalNotebookById(notebook.getId());
+        NotebookInfo fullNotebook = LeanoteDbManager.getInstance().getLocalNotebookById(notebook.getId());
 
         if (fullNotebook == null) {
             ToastUtils.showToast(getActivity(), R.string.note_not_found);
@@ -466,7 +466,7 @@ public class NotebookFragment extends Fragment
         @Override
         protected String doInBackground(Void... params) {
 
-            Leanote.leaDB.deletenotebookInLocal(this.localNotebookId);
+            LeanoteDbManager.getInstance().deletenotebookInLocal(this.localNotebookId);
 
             if (TextUtils.isEmpty(this.notebookId)) {
                 return null;
@@ -474,7 +474,7 @@ public class NotebookFragment extends Fragment
 
             String api = String.format("%s/api/notebook/deleteNotebook?token=%s&notebookId=%s&usn=%s",
                     AccountHelper.getDefaultAccount().getHost(),
-                    AccountHelper.getDefaultAccount().getmAccessToken(),
+                    AccountHelper.getDefaultAccount().getAccessToken(),
                     this.notebookId, this.usn);
 
             try {

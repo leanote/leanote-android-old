@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.net.http.SslCertificate;
 import android.os.Bundle;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.util.AppLog;
@@ -95,8 +94,6 @@ public class SelfSignedSSLCertsManager {
             mLocalKeyStore.setCertificateEntry(alias, cert);
         }
         saveTrustStore();
-        // reset the Volley queue Otherwise new certs are not used
-        Leanote.setupVolleyQueue();
     }
 
     public void addCertificate(X509Certificate cert) throws IOException, GeneralSecurityException {

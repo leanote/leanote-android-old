@@ -16,17 +16,18 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.android.volley.toolbox.RequestFuture;
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
-import com.leanote.android.networking.MultipartRequest;
+import com.leanote.android.model.NoteInfo;
+import com.leanote.android.networking.retrofit.RetrofitUtil;
 import com.leanote.android.service.NoteSyncService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.MediaUtils;
 import com.leanote.android.util.NoteSyncResultEnum;
+import com.leanote.android.util.XLog;
 import com.leanote.android.util.helper.ImageUtils;
 
 import org.json.JSONArray;
@@ -41,40 +42,43 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 
+//提交笔记到服务器
 public class NoteUploadService extends Service {
 
-    public NoteUploadService() {}
+    public NoteUploadService() {
+    }
 
     private static Context mContext;
-    private static final ArrayList<NoteDetail> mNoteDetailsList = new ArrayList<>();
-    private static NoteDetail mCurrentUploadingNote = null;
+    private static final ArrayList<NoteInfo> M_NOTE_DETAILS_LIST = new ArrayList<>();
+    private static NoteInfo mCurrentUploadingNote = null;
     private UploadNoteTask mCurrentTask = null;
     //private FeatureSet mFeatureSet;
 
-    public static void addNoteToUpload(NoteDetail currentNote) {
-        synchronized (mNoteDetailsList) {
-            mNoteDetailsList.add(currentNote);
+    public static void addNoteToUpload(NoteInfo currentNote) {
+        synchronized (M_NOTE_DETAILS_LIST) {
+            M_NOTE_DETAILS_LIST.add(currentNote);
         }
     }
 
     /*
-     * returns true if the passed NoteDetail is either uploading or waiting to be uploaded
+     * returns true if the passed NoteInfo is either uploading or waiting to be uploaded
      */
     public static boolean isNoteUploading(long localNoteId) {
-        // first check the currently uploading NoteDetail
+        // first check the currently uploading NoteInfo
         if (mCurrentUploadingNote != null && mCurrentUploadingNote.getId() == localNoteId) {
             return true;
         }
 
         // then check the list of NoteDetails waiting to be uploaded
-        if (mNoteDetailsList.size() > 0) {
-            synchronized (mNoteDetailsList) {
-                for (NoteDetail note : mNoteDetailsList) {
-                    if (note.getId().longValue() == localNoteId) {
+        if (M_NOTE_DETAILS_LIST.size() > 0) {
+            synchronized (M_NOTE_DETAILS_LIST) {
+                for (NoteInfo note : M_NOTE_DETAILS_LIST) {
+                    if (note.getId() == localNoteId) {
                         return true;
                     }
                 }
@@ -97,7 +101,7 @@ public class NoteUploadService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Cancel current task, it will reset NoteDetail from "uploading" to "local draft"
+        // Cancel current task, it will reset NoteInfo from "uploading" to "local draft"
         if (mCurrentTask != null) {
             AppLog.d(AppLog.T.POSTS, "cancelling current upload task");
             mCurrentTask.cancel(true);
@@ -106,10 +110,10 @@ public class NoteUploadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        AppLog.i("upload size:" + mNoteDetailsList.size());
+        AppLog.i("upload size:" + M_NOTE_DETAILS_LIST.size());
 
-        synchronized (mNoteDetailsList) {
-            if (mNoteDetailsList.size() == 0 || mContext == null) {
+        synchronized (M_NOTE_DETAILS_LIST) {
+            if (M_NOTE_DETAILS_LIST.size() == 0 || mContext == null) {
                 stopSelf();
                 return START_NOT_STICKY;
             }
@@ -120,14 +124,12 @@ public class NoteUploadService extends Service {
         return START_STICKY;
     }
 
-
-
     private void uploadNextNote() {
-        synchronized (mNoteDetailsList) {
+        synchronized (M_NOTE_DETAILS_LIST) {
             if (mCurrentTask == null) { //make sure nothing is running
                 mCurrentUploadingNote = null;
-                if (mNoteDetailsList.size() > 0) {
-                    mCurrentUploadingNote = mNoteDetailsList.remove(0);
+                if (M_NOTE_DETAILS_LIST.size() > 0) {
+                    mCurrentUploadingNote = M_NOTE_DETAILS_LIST.remove(0);
                     mCurrentTask = new UploadNoteTask();
                     mCurrentTask.execute(mCurrentUploadingNote);
                 } else {
@@ -138,17 +140,16 @@ public class NoteUploadService extends Service {
     }
 
     private void noteUploaded() {
-        synchronized (mNoteDetailsList) {
+        synchronized (M_NOTE_DETAILS_LIST) {
             mCurrentTask = null;
             mCurrentUploadingNote = null;
         }
         uploadNextNote();
     }
 
+    private class UploadNoteTask extends AsyncTask<NoteInfo, Boolean, NoteSyncResultEnum> {
 
-    private class UploadNoteTask extends AsyncTask<NoteDetail, Boolean, NoteSyncResultEnum> {
-
-        private NoteDetail mNote;
+        private NoteInfo mNote;
 
         @Override
         protected void onPostExecute(NoteSyncResultEnum result) {
@@ -167,7 +168,7 @@ public class NoteUploadService extends Service {
         }
 
         @Override
-        protected NoteSyncResultEnum doInBackground(NoteDetail... params) {
+        protected NoteSyncResultEnum doInBackground(NoteInfo... params) {
             /*
             同步步骤：
             1) pull 2) push 3) 保存usn
@@ -208,10 +209,9 @@ public class NoteUploadService extends Service {
             return NoteSyncResultEnum.FAIL;
         }
 
-
     }
 
-    private NoteSyncResultEnum processResponse(JSONObject response, NoteDetail mNote) {
+    private NoteSyncResultEnum processResponse(JSONObject response, NoteInfo mNote) {
         String noteId = null;
         String msg = null;
 
@@ -233,7 +233,7 @@ public class NoteUploadService extends Service {
         }
 
 
-        Leanote.leaDB.updateNote(mNote);
+        LeanoteDbManager.getInstance().updateNote(mNote);
 
         if ("conflict".equals(msg)) {
             //server端note覆盖本地note
@@ -253,7 +253,7 @@ public class NoteUploadService extends Service {
                 //push成功后更新usn
                 int serverUsn = NoteSyncService.getServerSyncState();
                 AppLog.i("last serverUsn:" + serverUsn);
-                Leanote.leaDB.updateAccountUsn(serverUsn, AccountHelper.getDefaultAccount().getmUserId());
+                LeanoteDbManager.getInstance().updateAccountUsn(serverUsn, AccountHelper.getDefaultAccount().getUserId());
 
                 return NoteSyncResultEnum.SUCCESS;
             }
@@ -263,50 +263,65 @@ public class NoteUploadService extends Service {
         return NoteSyncResultEnum.FAIL;
     }
 
-    private JSONObject uploadNoteToServer(NoteDetail mNote, Map<String, Object> contentStruct) {
+    private JSONObject uploadNoteToServer(NoteInfo mNote, Map<String, Object> contentStruct) {
         String api;
         String host = AccountHelper.getDefaultAccount().getHost();
-        String token = AccountHelper.getDefaultAccount().getmAccessToken();
+        String token = AccountHelper.getDefaultAccount().getAccessToken();
         if (mNote.getUsn() == 0) {
-            api = String.format("%s/api/note/addNote", host);
-
+//            api = String.format("%s/api/note/addNote", host);
+            api = "addNote";
         } else {
-            api = String.format("%s/api/note/updateNote", host);
-
+//            api = String.format("%s/api/note/updateNote", host);
+            api = "updateNote";
             contentStruct.put("usn", mNote.getUsn());
         }
-
+        XLog.e(XLog.getTag(), XLog.TAG_GU + String.format("%s/api/note/" + api, host));
         contentStruct.put("token", token);
 
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        MultipartRequest request = new MultipartRequest(api, future, future, contentStruct);
+        String response = RetrofitUtil.getInstance()
+                .setBaseUrl(host)
+                .setTimeout(30000)
+                .build()
+                .uploadNoteToServer(api, contentStruct);
 
-        Leanote.requestQueue.add(request);
-        JSONObject response = null;
-        try {
-            response = future.get(30, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
+        XLog.e(XLog.getTag(), XLog.TAG_GU + "updateNote response=   " + response);
+        if (TextUtils.isEmpty(response)) {
             return null;
         }
-        AppLog.i("upload response:" + response);
-        return response;
+        JSONObject object = null;
+        try {
+            object = new JSONObject(response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        AppLog.i("upload response:" + object);
+        return object;
     }
 
-
-    private Map<String, Object> getContentStruct(NoteDetail mNote) {
+    /**
+     * 根据笔记对象获取对应的参数Map
+     * 对象中可以能回有文件
+     *
+     * @param mNote 笔记对象
+     *
+     * @return
+     */
+    private Map<String, Object> getContentStruct(NoteInfo mNote) {
         Map<String, Object> contentStruct = new HashMap<>();
 
         String content = mNote.getContent();
         contentStruct.put("title", mNote.getTitle());
-        contentStruct.put("NoteId", mNote.getNoteId());
+        if (!TextUtils.isEmpty(mNote.getNoteId())) {
+            contentStruct.put("NoteId", mNote.getNoteId());
+        }
         contentStruct.put("IsBlog", mNote.isPublicBlog());
         contentStruct.put("IsMarkdown", mNote.isMarkDown());
         //content = content.replaceAll("\uFFFC", "");
         contentStruct.put("Content", content);
         contentStruct.put("NotebookId", mNote.getNoteBookId());
-        contentStruct.put("CreatedTime", mNote.getCreatedTime());
-        contentStruct.put("UpdatedTime", mNote.getUpdatedTime());
+        if (mNote.getUsn() != 0) {
+            contentStruct.put("Usn", mNote.getUsn());
+        }
         String tags = mNote.getTags();
         if (!TextUtils.isEmpty(tags)) {
             String[] tagArray = tags.split(",");
@@ -325,7 +340,7 @@ public class NoteUploadService extends Service {
             //mediafile本地id
             String[] fileIdArray = fileIds.split(",");
             for (int i = 0; i < fileIdArray.length; i++) {
-                MediaFile mf = Leanote.leaDB.getMediaFileById(fileIdArray[i]);
+                MediaFile mf =LeanoteDbManager.getInstance().getMediaFileById(fileIdArray[i]);
                 if (mf != null) {
                     contentStruct.put(String.format("Files[%s][LocalFileId]", i), mf.getId());
                     contentStruct.put(String.format("Files[%s][IsAttach]", i), false);
@@ -345,14 +360,11 @@ public class NoteUploadService extends Service {
                         } catch (Exception e) {
                             return null;
                         }
-
-                        contentStruct.put(String.format("FileDatas[%s]", mf.getId()), tempFile);
+                        RequestBody fileBody = RequestBody.create(MediaType.parse("multipart/form-data"), tempFile);
+                        contentStruct.put(String.format("FileDatas[%s]", mf.getId()), fileBody);
                     }
-
                 }
-
             }
-
         }
         return contentStruct;
     }
@@ -380,7 +392,7 @@ public class NoteUploadService extends Service {
                 mimeType = cur.getString(mimeTypeColumn);
                 path = thumbData;
                 mf.setFilePath(thumbData);
-                Leanote.leaDB.saveMediaFile(mf);
+                LeanoteDbManager.getInstance().saveMediaFile(mf);
 
             }
         } else {
@@ -471,32 +483,32 @@ public class NoteUploadService extends Service {
         options.inJustDecodeBounds = false;
 
         Bitmap bm = BitmapFactory.decodeFile(filePath, options);
-        if(bm == null){
-            return  null;
+        if (bm == null) {
+            return null;
         }
         int degree = readPictureDegree(filePath);
-        bm = rotateBitmap(bm,degree) ;
-        ByteArrayOutputStream baos = null ;
-        try{
+        bm = rotateBitmap(bm, degree);
+        ByteArrayOutputStream baos = null;
+        try {
             baos = new ByteArrayOutputStream();
 
             bm.compress(fmt, 30, baos);
 
-        }finally{
+        } finally {
             try {
-                if(baos != null)
-                    baos.close() ;
+                if (baos != null)
+                    baos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return bm ;
+        return bm;
 
     }
 
-    private static Bitmap rotateBitmap(Bitmap bitmap, int rotate){
-        if(bitmap == null)
-            return null ;
+    private static Bitmap rotateBitmap(Bitmap bitmap, int rotate) {
+        if (bitmap == null)
+            return null;
 
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
@@ -506,7 +518,6 @@ public class NoteUploadService extends Service {
         mtx.postRotate(rotate);
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
     }
-
 
     private static int calculateInSampleSize(BitmapFactory.Options options,
                                              int reqWidth, int reqHeight) {
@@ -533,9 +544,8 @@ public class NoteUploadService extends Service {
         return inSampleSize;
     }
 
-
     private static int readPictureDegree(String path) {
-        int degree  = 0;
+        int degree = 0;
         try {
             ExifInterface exifInterface = new ExifInterface(path);
             int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
@@ -556,13 +566,12 @@ public class NoteUploadService extends Service {
         return degree;
     }
 
-
-    private void updateLocalNote(JSONObject response, NoteDetail mNote) throws JSONException {
+    private void updateLocalNote(JSONObject response, NoteInfo mNote) throws JSONException {
         int usn = response.getInt("Usn");
         AppLog.i("push usn:" + usn);
 
         //新增笔记需要更新所有字段
-        List<String> localNoteIds = Leanote.leaDB.getLocalNoteIds(AccountHelper.getDefaultAccount().getmUserId());
+        List<String> localNoteIds = LeanoteDbManager.getInstance().getLocalNoteIds(AccountHelper.getDefaultAccount().getUserId());
         try {
             //更新media表mediaId
             //更新服务端fileId 到 media表的 mediaId
@@ -572,15 +581,15 @@ public class NoteUploadService extends Service {
                     JSONObject file = files.getJSONObject(i);
                     String localFileId = file.getString("LocalFileId");
                     String serverFileId = file.getString("FileId");
-                    Leanote.leaDB.updateMedia(localFileId, serverFileId);
+                    LeanoteDbManager.getInstance().updateMedia(localFileId, serverFileId);
                 }
             }
 
-            NoteDetail note = NoteSyncService.parseServerNote(response, localNoteIds);
+            NoteInfo note = NoteSyncService.parseServerNote(response, localNoteIds);
             //Leanote.leaDB.updateDirtyUsn(noteId, usn);
             if (note != null) {
                 note.setId(mNote.getId());
-                Leanote.leaDB.updateNote(note);
+                LeanoteDbManager.getInstance().updateNote(note);
             }
 
         } catch (Exception e) {
@@ -590,9 +599,9 @@ public class NoteUploadService extends Service {
     }
 
     private void updateNoteToLocal(String noteId) throws JSONException {
-        NoteDetail serverNote = NoteSyncService.getServerNote(noteId);
+        NoteInfo serverNote = NoteSyncService.getServerNote(noteId);
         serverNote.setIsDirty(false);
-        Leanote.leaDB.updateNoteByNoteId(serverNote);
+        LeanoteDbManager.getInstance().updateNoteByNoteId(serverNote);
     }
 
 }

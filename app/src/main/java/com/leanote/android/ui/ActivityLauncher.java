@@ -6,14 +6,13 @@ import android.content.Intent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.SSLCertsViewActivity;
 import com.leanote.android.networking.SelfSignedSSLCertsManager;
-import com.leanote.android.ui.accounts.NewAccountActivity;
 import com.leanote.android.ui.lea.LeaActivity;
 import com.leanote.android.ui.note.EditNoteActivity;
 import com.leanote.android.ui.note.EditNotebookActivity;
@@ -39,11 +38,9 @@ public class ActivityLauncher {
     }
 
     public static void newAccountForResult(Activity activity) {
-        Intent intent = new Intent(activity, NewAccountActivity.class);
+        Intent intent = new Intent(activity, SignUpActivity.class);
         activity.startActivityForResult(intent, SignInActivity.CREATE_ACCOUNT_REQUEST);
     }
-
-
 
     public static void viewSSLCerts(Context context) {
         try {
@@ -63,9 +60,9 @@ public class ActivityLauncher {
     public static void addNewNoteForResult(Activity context) {
 
         // Create a new post object
-        NoteDetail newNote = new NoteDetail();
+        NoteInfo newNote = new NoteInfo();
         //WordPress.wpDB.savePost(newPost);
-        Leanote.leaDB.addNote(newNote);
+        LeanoteDbManager.getInstance().addNote(newNote);
         Intent intent = new Intent(context, EditNoteActivity.class);
         intent.putExtra(EditNoteActivity.EXTRA_NOTEID, newNote.getId());
         intent.putExtra(EditNoteActivity.EXTRA_IS_NEW_NOTE, true);
@@ -101,12 +98,11 @@ public class ActivityLauncher {
         }
     }
 
-
     public static void addNewNotebookForResult(Activity context) {
         NotebookInfo newNotebook = new NotebookInfo();
-        newNotebook.setUserId(AccountHelper.getDefaultAccount().getmUserId());
+        newNotebook.setUserId(AccountHelper.getDefaultAccount().getUserId());
         //WordPress.wpDB.savePost(newPost);
-        Leanote.leaDB.addNotebook(newNotebook);
+        LeanoteDbManager.getInstance().addNotebook(newNotebook);
         Intent intent = new Intent(context, EditNotebookActivity.class);
         intent.putExtra(EditNotebookActivity.EXTRA_NEW_NOTEBOOK_ID, newNotebook.getId());
         intent.putExtra(EditNotebookActivity.EXTRA_IS_NEW_NOTEBOOK, true);
@@ -114,7 +110,7 @@ public class ActivityLauncher {
     }
 
     public static void previewNoteForResult(Activity activity, Long id) {
-        NoteDetail note = Leanote.leaDB.getLocalNoteById(id);
+        NoteInfo note = LeanoteDbManager.getInstance().getLocalNoteById(id);
         if (note == null) return;
 
         Intent intent = new Intent(activity, NotePreviewActivity.class);
@@ -136,7 +132,7 @@ public class ActivityLauncher {
         Intent intent = new Intent(activity,BlogHomeActivity.class);
         String url = String.format("%s/blog/%s",
                 AccountHelper.getDefaultAccount().getHost(),
-                AccountHelper.getDefaultAccount().getmUserName());
+                AccountHelper.getDefaultAccount().getUserName());
 
         intent.putExtra("url", url);
         activity.startActivity(intent);

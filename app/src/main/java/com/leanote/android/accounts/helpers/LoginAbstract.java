@@ -10,6 +10,7 @@ public abstract class LoginAbstract {
 
     public interface Callback {
         void onSuccess();
+
         void onError();
     }
 
@@ -20,12 +21,7 @@ public abstract class LoginAbstract {
 
     public void execute(Callback callback) {
         mCallback = callback;
-        new Thread() {
-            @Override
-            public void run() {
-                login();
-            }
-        }.start();
+        login();
     }
 
     protected abstract void login();

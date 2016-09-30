@@ -23,11 +23,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leanote.android.Constants;
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.networking.NetworkRequest;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.service.NoteSyncService;
@@ -303,7 +303,7 @@ public class NoteListFragment extends Fragment
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Leanote.leaDB.updateAccountUsn(NoteSyncService.getServerSyncState(), AccountHelper.getDefaultAccount().getmUserId());
+                        LeanoteDbManager.getInstance().updateAccountUsn(NoteSyncService.getServerSyncState(), AccountHelper.getDefaultAccount().getUserId());
                     }
                 }).start();
 
@@ -380,7 +380,7 @@ public class NoteListFragment extends Fragment
      * called by the adapter when the user clicks a post
      */
     @Override
-    public void onNotesSelected(NoteDetail note) {
+    public void onNotesSelected(NoteInfo note) {
         onNoteButtonClicked(PostListButton.BUTTON_PREVIEW, note);
     }
 
@@ -388,13 +388,13 @@ public class NoteListFragment extends Fragment
      * called by the adapter when the user clicks the edit/view/stats/trash button for a post
      */
     @Override
-    public void onNoteButtonClicked(int buttonType, NoteDetail note) {
+    public void onNoteButtonClicked(int buttonType, NoteInfo note) {
         if (!isAdded()) return;
 
         //Post fullPost = WordPress.wpDB.getPostForLocalTablePostId(post.getPostId());
         //load note detail
         AppLog.i("click note id:" + note.getId());
-        NoteDetail fullNote = Leanote.leaDB.getLocalNoteById(note.getId());
+        NoteInfo fullNote = LeanoteDbManager.getInstance().getLocalNoteById(note.getId());
         if (fullNote == null) {
             ToastUtils.showToast(getActivity(), R.string.note_not_found);
             return;
@@ -427,7 +427,7 @@ public class NoteListFragment extends Fragment
     /*
          * send the passed post to the trash with undo
          */
-    private void trashNote(final NoteDetail note) {
+    private void trashNote(final NoteInfo note) {
         if (!isAdded() || !NetworkUtils.checkConnection(getActivity())) {
             return;
         }
@@ -466,20 +466,20 @@ public class NoteListFragment extends Fragment
 
                 //delete note in local
                 AppLog.i("delete note id:" + note.getId());
-                Leanote.leaDB.deleteNote(note.getId());
-                Leanote.leaDB.deleteMediaFileByNoteId(note.getNoteId());
+                LeanoteDbManager.getInstance().deleteNote(note.getId());
+                LeanoteDbManager.getInstance().deleteMediaFileByNoteId(note.getNoteId());
                 //delete note in server
                 new DeleteNoteTask().execute(note);
             }
         }, Constants.SNACKBAR_LONG_DURATION_MS);
     }
 
-    private class DeleteNoteTask extends AsyncTask<NoteDetail, Spanned, Void> {
+    private class DeleteNoteTask extends AsyncTask<NoteInfo, Spanned, Void> {
 
 
         @Override
-        protected Void doInBackground(NoteDetail... params) {
-            NoteDetail note = params[0];
+        protected Void doInBackground(NoteInfo... params) {
+            NoteInfo note = params[0];
 
             // local draft note
             if (TextUtils.isEmpty(note.getNoteId())) {
@@ -487,7 +487,7 @@ public class NoteListFragment extends Fragment
             }
             String api = String.format("%s/api/note/deleteTrash?token=%s&usn=%s&noteId=%s",
                     AccountHelper.getDefaultAccount().getHost(),
-                    AccountHelper.getDefaultAccount().getmAccessToken(),
+                    AccountHelper.getDefaultAccount().getAccessToken(),
                     note.getUsn(),
                     note.getNoteId());
 

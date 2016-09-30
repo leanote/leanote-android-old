@@ -7,8 +7,9 @@ import android.util.AttributeSet;
  * Created by binnchx on 8/27/15.
  */
 public class OpenSansEditText extends PersistentEditText {
+
     public OpenSansEditText(Context context) {
-        super(context, null);
+        super(context);
         TypefaceCache.setCustomTypeface(context, this, null);
     }
 

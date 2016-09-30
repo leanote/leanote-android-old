@@ -14,10 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.Constant;
 
@@ -60,14 +60,14 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         if (extras != null) {
             type = extras.getInt("type");
             if (type == Constant.NOTEBOOK_SEARCH) {
-                allDatas = Leanote.leaDB.getNotebookList(AccountHelper.getDefaultAccount().getmUserId());
+                allDatas = LeanoteDbManager.getInstance().getNotebookList(AccountHelper.getDefaultAccount().getUserId());
             } else if (type == Constant.BLOG_SEARCH) {
-                allDatas = Leanote.leaDB.getNoteisBlogList(AccountHelper.getDefaultAccount().getmUserId());
+                allDatas = LeanoteDbManager.getInstance().getNoteisBlogList(AccountHelper.getDefaultAccount().getUserId());
             } else {
-                allDatas = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+                allDatas = LeanoteDbManager.getInstance().getNotesList(AccountHelper.getDefaultAccount().getUserId());
             }
         } else {
-            allDatas = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+            allDatas = LeanoteDbManager.getInstance().getNotesList(AccountHelper.getDefaultAccount().getUserId());
         }
 
 
@@ -99,7 +99,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     @Override
     public boolean onQueryTextChange(String query) {
 
-        final List<NoteDetail> filteredModelList = filter(allDatas, query);
+        final List<NoteInfo> filteredModelList = filter(allDatas, query);
         mAdapter.animateTo(filteredModelList);
         mRecyclerView.scrollToPosition(0);
         return true;
@@ -126,7 +126,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
                     filteredModelList.add(model);
                 }
             } else {
-                NoteDetail note = (NoteDetail) model;
+                NoteInfo note = (NoteInfo) model;
                 final String content = note.getContent().toLowerCase();
                 final String title = note.getTitle().toLowerCase();
 

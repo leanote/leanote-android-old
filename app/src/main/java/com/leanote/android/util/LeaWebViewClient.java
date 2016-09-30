@@ -14,6 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.leanote.android.Leanote;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.networking.SelfSignedSSLCertsManager;
 import com.leanote.android.task.DownloadMediaTask;
 
@@ -106,7 +107,7 @@ public class LeaWebViewClient extends WebViewClient {
             //处理图片逻辑, 笔记上传后，图片本地url被替换成服务端url,用文件id去取
             String fileId = url.split("fileId=")[1];
             //MediaFile mf = Leanote.leaDB.getMediaFileByUrl(url);
-            MediaFile mf = Leanote.leaDB.getMediaFileByFileId(fileId);
+            MediaFile mf = LeanoteDbManager.getInstance().getMediaFileByFileId(fileId);
 
             if (mf != null && !TextUtils.isEmpty(mf.getFilePath())) {
                 AppLog.i("image from cache");
@@ -148,7 +149,7 @@ public class LeaWebViewClient extends WebViewClient {
             String thumbData = cur.getString(dataColumn);
 
             mf.setFilePath(thumbData);
-            Leanote.leaDB.saveMediaFile(mf);
+            LeanoteDbManager.getInstance().saveMediaFile(mf);
 
         }
     }

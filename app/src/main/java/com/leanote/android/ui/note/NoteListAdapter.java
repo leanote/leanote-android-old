@@ -18,11 +18,11 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
 import com.leanote.android.model.NoteDetailList;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.ui.note.service.NoteUploadService;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.Constant;
@@ -43,7 +43,7 @@ import java.util.List;
 public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public interface OnNotesButtonClickListener {
-        void onNoteButtonClicked(int buttonId, NoteDetail note);
+        void onNoteButtonClicked(int buttonId, NoteInfo note);
     }
 
     private OnNotesLoadedListener mOnNotesLoadedListener;
@@ -55,7 +55,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private boolean mIsLoadingNotes;
 
     private NoteDetailList mNotes = new NoteDetailList();
-    private final List<NoteDetail> mHiddenNotes = new ArrayList<>();
+    private final List<NoteInfo> mHiddenNotes = new ArrayList<>();
 
     private final LayoutInflater mLayoutInflater;
 
@@ -87,7 +87,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mOnNotesButtonClickListener = listener;
     }
 
-    private NoteDetail getItem(int position) {
+    private NoteInfo getItem(int position) {
         if (isValidPostPosition(position)) {
             return mNotes.get(position);
         }
@@ -149,7 +149,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return;
         }
 
-        final NoteDetail note = mNotes.get(position - 1);
+        final NoteInfo note = mNotes.get(position - 1);
         //Log.i("note", note.toString());
         Context context = holder.itemView.getContext();
 
@@ -176,7 +176,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NoteDetail selectedNote = getItem(position - 1);    //or position -1
+                NoteInfo selectedNote = getItem(position - 1);    //or position -1
                 if (mOnNotesSelectedListener != null && selectedNote != null) {
                     mOnNotesSelectedListener.onNotesSelected(selectedNote);
                 }
@@ -189,7 +189,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
     private void configurePostButtons(final NoteViewHolder holder,
-                                      final NoteDetail note) {
+                                      final NoteInfo note) {
         // posts with local changes have preview rather than view button
         holder.btnView.setButtonType(PostListButton.BUTTON_VIEW);
 
@@ -234,7 +234,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      * routine is used to animate the new row in and the old row out
      */
     private void animateButtonRows(final NoteViewHolder holder,
-                                   final NoteDetail note,
+                                   final NoteInfo note,
                                    final boolean showRow1) {
         // first animate out the button row, then show/hide the appropriate buttons,
         // then animate the row layout back in
@@ -282,7 +282,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      * hides the post - used when the post is trashed by the user but the network request
      * to delete the post hasn't completed yet
      */
-    public void hidePost(NoteDetail note) {
+    public void hidePost(NoteInfo note) {
         mHiddenNotes.add(note);
 
         int position = mNotes.indexOfPost(note);
@@ -298,7 +298,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    public void unhidePost(NoteDetail note) {
+    public void unhidePost(NoteInfo note) {
         if (mHiddenNotes.remove(note)) {
             loadNotes(null);
         }
@@ -309,7 +309,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 //    }
 
     public interface OnNotesSelectedListener {
-        void onNotesSelected(NoteDetail note);
+        void onNotesSelected(NoteInfo note);
     }
 
     public interface OnNotesLoadedListener {
@@ -317,7 +317,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
 
-    private void updateStatusText(TextView txtStatus, NoteDetail note) {
+    private void updateStatusText(TextView txtStatus, NoteInfo note) {
         AppLog.i("is uploading:" + NoteUploadService.isNoteUploading(note.getId()));
         if (!note.isDirty()) {
             txtStatus.setVisibility(View.GONE);
@@ -413,15 +413,15 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         protected Boolean doInBackground(Long... params) {
 
             if (params.length != 0 && params[0] != null) {
-                tmpNotes = Leanote.leaDB.getNotesListInNotebook(params[0], AccountHelper.getDefaultAccount().getmUserId());
+                tmpNotes = LeanoteDbManager.getInstance().getNotesListInNotebook(params[0], AccountHelper.getDefaultAccount().getUserId());
             } else {
-                tmpNotes = Leanote.leaDB.getNotesList(AccountHelper.getDefaultAccount().getmUserId());
+                tmpNotes = LeanoteDbManager.getInstance().getNotesList(AccountHelper.getDefaultAccount().getUserId());
             }
 
             // make sure we don't return any hidden posts
 
 
-            for (NoteDetail hiddenNote : mHiddenNotes) {
+            for (NoteInfo hiddenNote : mHiddenNotes) {
 
                 int index = tmpNotes.indexOfPost(hiddenNote);
                 if (index >= 0 && index < tmpNotes.size()) {
@@ -431,9 +431,9 @@ public class NoteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
 
             // 根据updatetime 排序
-            Collections.sort(tmpNotes, new Comparator<NoteDetail>() {
+            Collections.sort(tmpNotes, new Comparator<NoteInfo>() {
                 @Override
-                public int compare(NoteDetail lnote, NoteDetail rnote) {
+                public int compare(NoteInfo lnote, NoteInfo rnote) {
                     String lTime = lnote.getUpdatedTime();
                     String rTime = rnote.getUpdatedTime();
 

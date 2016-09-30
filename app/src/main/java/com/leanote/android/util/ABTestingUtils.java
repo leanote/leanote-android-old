@@ -1,17 +1,22 @@
 package com.leanote.android.util;
 
+import android.text.TextUtils;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.internal.StringMap;
 import com.leanote.android.Leanote;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ABTestingUtils {
-    private static StringMap sRemoteControlMap;
+    private static Map<String, Boolean> sRemoteControlMap;
 
     // URL where remote control values are stored
     private final static String REMOTE_CONTROL_URL = "http://api.wordpress.org/androidapp/feedback-check/1.0/";
@@ -30,7 +35,6 @@ public class ABTestingUtils {
         }
         return false;
     }
-
 
     private static boolean getBooleanRemoteControlField(String fieldName, boolean defaultValue) {
         if (sRemoteControlMap != null) {
@@ -57,11 +61,15 @@ public class ABTestingUtils {
     private static void fetchRemoteControlData() {
         Response.Listener<String> listener = new Response.Listener<String>() {
             public void onResponse(String response) {
-                Gson gson = new Gson();
+                if (TextUtils.isEmpty(response)){
+                    return;
+                }
                 try {
-                    sRemoteControlMap = gson.fromJson(response, StringMap.class);
-                } catch (JsonSyntaxException jsonSyntaxException) {
-                    AppLog.e(AppLog.T.UTILS, jsonSyntaxException);
+                    JSONObject object = new JSONObject(response);
+                    sRemoteControlMap = new HashMap<>();
+                    sRemoteControlMap.put("feedback-enabled", object.getBoolean("feedback-enabled"));
+                } catch (JSONException e) {
+                    AppLog.e(AppLog.T.UTILS, e);
                 }
             }
         };

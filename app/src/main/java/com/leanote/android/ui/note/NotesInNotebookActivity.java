@@ -5,8 +5,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.NotebookInfo;
 
 public class NotesInNotebookActivity extends AppCompatActivity {
@@ -28,7 +28,7 @@ public class NotesInNotebookActivity extends AppCompatActivity {
         if (extras != null) {
             //String notebookId = extras.getString(EditNotebookActivity.EXTRA_SERVER_NOTEBOOK_ID);
             Long localotebookId = extras.getLong(EditNotebookActivity.EXTRA_LOCAL_NOTEBOOK_ID);
-            NotebookInfo notebook = Leanote.leaDB.getLocalNotebookById(localotebookId);
+            NotebookInfo notebook = LeanoteDbManager.getInstance().getLocalNotebookById(localotebookId);
             setTitle(notebook.getTitle());
         } else {
             setTitle("");

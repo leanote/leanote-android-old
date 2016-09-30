@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.leanote.android.R;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchViewHolder> {
         return mList.size();
     }
 
-    public void animateTo(List<NoteDetail> models) {
+    public void animateTo(List<NoteInfo> models) {
         applyAndAnimateRemovals(models);
         applyAndAnimateAdditions(models);
         applyAndAnimateMovedItems(models);

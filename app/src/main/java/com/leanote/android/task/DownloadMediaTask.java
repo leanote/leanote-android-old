@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.leanote.android.Leanote;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.LeaWebViewClient;
@@ -50,7 +51,7 @@ public class DownloadMediaTask extends AsyncTask<Uri, Integer, Uri> {
 
         //下载图片带上token
         if (!imageUri.toString().contains("token=")) {
-            imageUri = Uri.parse(imageUri.toString() + "&token=" + AccountHelper.getDefaultAccount().getmAccessToken());
+            imageUri = Uri.parse(imageUri.toString() + "&token=" + AccountHelper.getDefaultAccount().getAccessToken());
         }
         AppLog.i("download image:" + imageUri);
         return MediaUtils.downloadExternalMedia(Leanote.getContext(), imageUri);
@@ -75,7 +76,7 @@ public class DownloadMediaTask extends AsyncTask<Uri, Integer, Uri> {
         mf.setFileURL(url);
         String fileId = url.split("fileId=")[1];
         mf.setMediaId(fileId);
-        Leanote.leaDB.saveMediaFile(mf);
+        LeanoteDbManager.getInstance().saveMediaFile(mf);
 
         AppLog.i("download ,image listener is null? " + (imageLoadedListener == null));
         if (imageLoadedListener != null) {

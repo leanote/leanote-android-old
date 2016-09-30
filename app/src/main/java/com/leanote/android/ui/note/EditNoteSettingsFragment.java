@@ -18,10 +18,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.EditTextUtils;
@@ -37,7 +37,7 @@ public class EditNoteSettingsFragment extends Fragment
 
     private static final int ACTIVITY_REQUEST_CODE_SELECT_CATEGORIES = 5;
 
-    private NoteDetail mNote;
+    private NoteInfo mNote;
 
     private LinearLayout notePublicSettings;
     private ToggleButton togglePublicBlog;
@@ -66,11 +66,11 @@ public class EditNoteSettingsFragment extends Fragment
         togglePublicBlog = (ToggleButton) mRootView.findViewById(R.id.toggle_public_blog);
         toggleButtonPublicBlog = (ImageButton) mRootView.findViewById(R.id.toggleButton_public_blog);
 
-        String userId = AccountHelper.getDefaultAccount().getmUserId();
-        mNotebooks = Leanote.leaDB.getNotebookTitles(userId);
-        mNotebookInfos = Leanote.leaDB.getNotebookList(userId);
+        String userId = AccountHelper.getDefaultAccount().getUserId();
+        mNotebooks = LeanoteDbManager.getInstance().getNotebookTitles(userId);
+        mNotebookInfos = LeanoteDbManager.getInstance().getNotebookList(userId);
 
-        Leanote.leaDB.getNotebookList(userId);
+        LeanoteDbManager.getInstance().getNotebookList(userId);
         mNotebookSpinner = (Spinner) mRootView.findViewById(R.id.notebook);
         mNotebookSpinner.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
@@ -232,7 +232,7 @@ public class EditNoteSettingsFragment extends Fragment
         NotebookInfo notebook = mNotebookInfos.get(mNotebookSpinner.getSelectedItemPosition());
         mNote.setNoteBookId(notebook.getNotebookId());
 
-        Leanote.leaDB.saveNoteSettings(mNote);
+        LeanoteDbManager.getInstance().saveNoteSettings(mNote);
         //((EditNoteActivity)getActivity()).reloadNote();
     }
 

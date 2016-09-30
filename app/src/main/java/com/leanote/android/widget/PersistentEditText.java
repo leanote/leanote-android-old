@@ -11,11 +11,12 @@ import com.leanote.android.R;
  * Created by binnchx on 8/27/15.
  */
 public class PersistentEditText extends EditText {
+
     private PersistentEditTextHelper mPersistentEditTextHelper;
-    private Boolean mPersistenceEnabled;
+    private boolean mPersistenceEnabled;
 
     public PersistentEditText(Context context) {
-        super(context, (AttributeSet)null);
+        super(context);
         this.mPersistentEditTextHelper = new PersistentEditTextHelper(context);
     }
 
@@ -25,8 +26,8 @@ public class PersistentEditText extends EditText {
         this.mPersistentEditTextHelper = new PersistentEditTextHelper(context);
     }
 
-    public PersistentEditText(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public PersistentEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         this.readCustomAttrs(context, attrs);
         this.mPersistentEditTextHelper = new PersistentEditTextHelper(context);
     }
@@ -36,7 +37,7 @@ public class PersistentEditText extends EditText {
     }
 
     public void setPersistenceEnabled(boolean enabled) {
-        this.mPersistenceEnabled = Boolean.valueOf(enabled);
+        this.mPersistenceEnabled = enabled;
     }
 
     protected void onAttachedToWindow() {
@@ -46,7 +47,7 @@ public class PersistentEditText extends EditText {
 
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
-        if(text.length() != 0 || lengthBefore != 0) {
+        if (text.length() != 0 || lengthBefore != 0) {
             this.save();
         }
     }
@@ -57,21 +58,22 @@ public class PersistentEditText extends EditText {
     }
 
     private void load() {
-        if(this.mPersistenceEnabled.booleanValue()) {
+        if (mPersistenceEnabled) {
             this.getAutoSaveTextHelper().loadString(this);
         }
     }
 
     private void save() {
-        if(this.mPersistenceEnabled.booleanValue()) {
-            this.getAutoSaveTextHelper().saveString(this);
+        if (mPersistenceEnabled) {
+            getAutoSaveTextHelper().saveString(this);
         }
     }
 
     private void readCustomAttrs(Context context, AttributeSet attrs) {
         TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PersistentEditText, 0, 0);
-        if(array != null) {
-            this.mPersistenceEnabled = Boolean.valueOf(array.getBoolean(R.styleable.PersistentEditText_persistenceEnabled, false));
+        if (array != null) {
+            this.mPersistenceEnabled = array.getBoolean(R.styleable.PersistentEditText_persistenceEnabled, false);
+            array.recycle();
         }
 
     }

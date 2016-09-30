@@ -31,7 +31,7 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 
 import com.leanote.android.R;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.util.AppLog.T;
 import com.leanote.android.util.helper.ImageUtils;
 import com.leanote.android.util.helper.LeaUnderlineSpan;
@@ -97,7 +97,7 @@ public class LeaHtml {
      * This uses TagSoup to handle real HTML, including all of the brokenness
      * found in the wild.
      */
-    public static Spanned fromHtml(String source, Context ctx, NoteDetail note, int maxImageWidth) {
+    public static Spanned fromHtml(String source, Context ctx, NoteInfo note, int maxImageWidth) {
         return fromHtml(source, null, null, ctx, note, maxImageWidth);
     }
 
@@ -121,7 +121,7 @@ public class LeaHtml {
      * found in the wild.
      */
     public static Spanned fromHtml(String source, ImageGetter imageGetter,
-                                   TagHandler tagHandler, Context ctx, NoteDetail note, int maxImageWidth) {
+                                   TagHandler tagHandler, Context ctx, NoteInfo note, int maxImageWidth) {
         Parser parser = new Parser();
         try {
             parser.setProperty(Parser.schemaProperty, HtmlParser.schema);
@@ -498,13 +498,13 @@ class HtmlToSpannedConverter implements ContentHandler {
     private boolean mysteryTagFound;
     private int mMaxImageWidth;
     private Context mContext;
-    private NoteDetail mNote;
+    private NoteInfo mNote;
 
     private String mysteryTagName;
 
     public HtmlToSpannedConverter(String source,
                                   LeaHtml.ImageGetter imageGetter, LeaHtml.TagHandler tagHandler,
-                                  Parser parser, Context context, NoteDetail note, int maxImageWidth) {
+                                  Parser parser, Context context, NoteInfo note, int maxImageWidth) {
         mSource = source;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mImageGetter = imageGetter;

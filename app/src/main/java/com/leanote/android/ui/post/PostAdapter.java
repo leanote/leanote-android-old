@@ -11,8 +11,9 @@ import android.widget.TextView;
 
 import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.model.NoteDetailList;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.note.NoteListAdapter;
@@ -54,7 +55,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final boolean mAlwaysShowAllButtons;
     private boolean mIsLoadingPosts;
     private NoteDetailList mPosts = new NoteDetailList();
-    private final List<NoteDetail> mHiddenPosts = new ArrayList<>();
+    private final List<NoteInfo> mHiddenPosts = new ArrayList<>();
 
     private static final long ROW_ANIM_DURATION = 150;
 
@@ -130,7 +131,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return (position >= 0 && position < mPosts.size());
     }
 
-    private NoteDetail getItem(int position) {
+    private NoteInfo getItem(int position) {
         if (isValidPostPosition(position)) {
             return mPosts.get(position);
         }
@@ -163,7 +164,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return;
         }
 
-        final NoteDetail note = mPosts.get(position - 2);  //not clear
+        final NoteInfo note = mPosts.get(position - 2);  //not clear
 
         Context context = holder.itemView.getContext();
 
@@ -180,7 +181,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NoteDetail selectedNote = getItem(position - 2);
+                NoteInfo selectedNote = getItem(position - 2);
                 if (mOnNotesSelectedListener != null && selectedNote != null) {
                     mOnNotesSelectedListener.onNotesSelected(selectedNote);
                 }
@@ -217,10 +218,10 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @Override
         protected Boolean doInBackground(Void... voids) {
 
-            tmpNotes = Leanote.leaDB.getNoteisBlogList(AccountHelper.getDefaultAccount().getmUserId());
+            tmpNotes = LeanoteDbManager.getInstance().getNoteisBlogList(AccountHelper.getDefaultAccount().getUserId());
 
             // make sure we don't return any hidden posts
-            for (NoteDetail hiddenNote : mHiddenPosts) {
+            for (NoteInfo hiddenNote : mHiddenPosts) {
                 int index = tmpNotes.indexOfPost(hiddenNote);
                 tmpNotes.remove(index);
             }

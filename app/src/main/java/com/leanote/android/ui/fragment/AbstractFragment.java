@@ -1,4 +1,4 @@
-package com.leanote.android.ui;
+package com.leanote.android.ui.fragment;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -14,11 +14,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.leanote.android.R;
-import com.leanote.android.networking.RestClientUtils;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
 import com.wordpress.rest.RestRequest;
@@ -30,8 +27,7 @@ import org.json.JSONObject;
  * Created by binnchx on 8/30/15.
  */
 public abstract class AbstractFragment extends Fragment {
-    protected static RequestQueue requestQueue;
-    protected static RestClientUtils mRestClientUtils;
+
     protected ConnectivityManager mSystemService;
     protected boolean mPasswordVisible;
 
@@ -41,16 +37,6 @@ public abstract class AbstractFragment extends Fragment {
         AppLog.v(T.NUX, "NewAccountAbstractOage.onCreate()");
         mSystemService = (ConnectivityManager) getActivity().getApplicationContext().
                 getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (requestQueue == null) {
-            requestQueue = Volley.newRequestQueue(getActivity());
-        }
-    }
-
-    protected RestClientUtils getRestClientUtils() {
-        if (mRestClientUtils == null) {
-            mRestClientUtils = new RestClientUtils(requestQueue, null, null);
-        }
-        return mRestClientUtils;
     }
 
     protected void startProgress(String message) {
@@ -64,6 +50,7 @@ public abstract class AbstractFragment extends Fragment {
 
     protected abstract void onDoneAction();
 
+    //用户登录注册信息是否符合要求
     protected abstract boolean isUserDataValid();
 
     protected boolean onDoneEvent(int actionId, KeyEvent event) {

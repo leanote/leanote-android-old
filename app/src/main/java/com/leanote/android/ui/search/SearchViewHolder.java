@@ -8,7 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.leanote.android.R;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.ui.ActivityLauncher;
 
@@ -33,7 +33,7 @@ public class SearchViewHolder extends RecyclerView.ViewHolder {
             NotebookInfo notebook = (NotebookInfo) obj;
             title.setText(notebook.getTitle());
         } else {
-            NoteDetail note = (NoteDetail) obj;
+            NoteInfo note = (NoteInfo) obj;
             title.setText(note.getTitle());
         }
 
@@ -46,7 +46,7 @@ public class SearchViewHolder extends RecyclerView.ViewHolder {
                     NotebookInfo notebook = (NotebookInfo) obj;
                     ActivityLauncher.viewNotebookForResult(activity, notebook.getId());
                 } else {
-                    NoteDetail note = (NoteDetail) obj;
+                    NoteInfo note = (NoteInfo) obj;
                     ActivityLauncher.previewNoteForResult(activity, note.getId());
                 }
 

@@ -8,7 +8,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.leanote.android.Leanote;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.NetworkRequest;
@@ -43,10 +43,10 @@ public class NotebookUploadService extends Service {
     }
 
     /*
-     * returns true if the passed NoteDetail is either uploading or waiting to be uploaded
+     * returns true if the passed NoteInfo is either uploading or waiting to be uploaded
      */
     public static boolean isNotebookUploading(long localNoteId) {
-        // first check the currently uploading NoteDetail
+        // first check the currently uploading NoteInfo
         if (mCurrentUploadingNotebook != null && mCurrentUploadingNotebook.getId() == localNoteId) {
             return true;
         }
@@ -73,7 +73,7 @@ public class NotebookUploadService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Cancel current task, it will reset NoteDetail from "uploading" to "local draft"
+        // Cancel current task, it will reset NoteInfo from "uploading" to "local draft"
         if (mCurrentTask != null) {
             AppLog.d(AppLog.T.POSTS, "cancelling current upload task");
             mCurrentTask.cancel(true);
@@ -145,7 +145,7 @@ public class NotebookUploadService extends Service {
                         notebook.getTitle(),
                         notebook.getParentNotebookId(),
                         notebook.getSeq(), notebook.getUsn(),
-                        AccountHelper.getDefaultAccount().getmAccessToken());
+                        AccountHelper.getDefaultAccount().getAccessToken());
 
             } else {
                 api = String.format("%s/api/notebook/addNotebook?title=%s&parentNotebookid=%s&seq=%s&token=%s",
@@ -153,7 +153,7 @@ public class NotebookUploadService extends Service {
                         notebook.getTitle(),
                         notebook.getParentNotebookId(),
                         notebook.getSeq(),
-                        AccountHelper.getDefaultAccount().getmAccessToken());
+                        AccountHelper.getDefaultAccount().getAccessToken());
 
             }
 
@@ -206,7 +206,7 @@ public class NotebookUploadService extends Service {
             NotebookInfo notebook = NoteSyncService.parseServerNotebook(json);
             //加上本地id
             notebook.setId(localNotebookId);
-            Leanote.leaDB.updateNotebook(notebook);
+            LeanoteDbManager.getInstance().updateNotebook(notebook);
             return NoteSyncResultEnum.SUCCESS;
         } else if (!ok && "conflict".equals(msg)){
             //更新server端笔记本到本地
@@ -221,7 +221,7 @@ public class NotebookUploadService extends Service {
     private void handleConflictNotebook(String notebookId) throws Exception {
         String notebookApi = String.format("%s/api/notebook/getNotebooks?token=%s",
                 AccountHelper.getDefaultAccount().getHost(),
-                AccountHelper.getDefaultAccount().getmAccessToken());
+                AccountHelper.getDefaultAccount().getAccessToken());
 
         String notebookRes = NetworkRequest.syncGetRequest(notebookApi);
         JSONArray jsonArray = new JSONArray(notebookRes);
@@ -235,7 +235,7 @@ public class NotebookUploadService extends Service {
         }
 
         NotebookInfo serverNotebook = NoteSyncService.parseServerNotebook(notebook);
-        Leanote.leaDB.updateNotebook(serverNotebook);
+        LeanoteDbManager.getInstance().updateNotebook(serverNotebook);
     }
 
 }

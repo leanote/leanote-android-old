@@ -27,12 +27,9 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <meta-data
-        android:name="UMENG_CHANNEL"
-        android:value="${UMENG_CHANNEL_VALUE}" />
-    <meta-data
-        android:name="io.fabric.ApiKey"
-        android:value="fdsfkjl;k4234f8989fsdf" />
+    <!--<meta-data-->
+        <!--android:name="UMENG_CHANNEL"-->
+        <!--android:value="${UMENG_CHANNEL_VALUE}" />-->
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -79,7 +76,7 @@
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
-            android:name=".ui.accounts.NewAccountActivity"
+            android:name=".ui.SignUpActivity"
             android:label="@string/title_activity_new_account"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>

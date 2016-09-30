@@ -1,38 +1,62 @@
 package com.leanote.android.model;
 
-import com.leanote.android.Leanote;
+import com.google.gson.annotations.SerializedName;
+import com.leanote.android.db.LeanoteDbManager;
 
 /**
  * Created by binnchx on 8/26/15.
  */
 public class AccountModel {
+
+    @SerializedName("Ok")
+    private boolean isOk;
+    @SerializedName("LocalUserId")
     private long localUserId;
-    private String mUserId;
-    private String mUserName;
-    private String mEmail;
+    @SerializedName("UserId")
+    private String userId;
+    @SerializedName("Username")
+    private String userName;
+    @SerializedName("Email")
+    private String email;
+    @SerializedName("Verified")
     private boolean verified;
-    private String mAvatar;
-    private String mAccessToken;
+    @SerializedName("Avatar")
+    private String avatar;
+    @SerializedName("Token")
+    private String accessToken;
+    @SerializedName("UseMarkdown")
     private boolean useMarkdown;
+    @SerializedName("LastSyncUsn")
     private int lastSyncUsn;
+    @SerializedName("Host")
     private String host;
+    @SerializedName("Msg")
+    private String msg;
 
     public AccountModel() {
         localUserId = 0L;
     }
 
     public void init() {
-        mUserId = "";
-        mUserName = "";
-        mEmail = "";
+        userId = "";
+        userName = "";
+        email = "";
         verified = false;
-        mAvatar = "";
-        mAccessToken = "";
+        avatar = "";
+        accessToken = "";
         lastSyncUsn = 0;
     }
 
+    public boolean isOk() {
+        return isOk;
+    }
+
+    public void setOk(boolean ok) {
+        isOk = ok;
+    }
+
     public void clearToken() {
-        mAccessToken = "";
+        accessToken = "";
     }
 
     public long getLocalUserId() {
@@ -43,28 +67,28 @@ public class AccountModel {
         this.localUserId = localUserId;
     }
 
-    public String getmUserId() {
-        return mUserId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setmUserId(String mUserId) {
-        this.mUserId = mUserId;
+    public void setUserId(String mUserId) {
+        this.userId = mUserId;
     }
 
-    public String getmUserName() {
-        return mUserName;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setmUserName(String mUserName) {
-        this.mUserName = mUserName;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getmEmail() {
-        return mEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setmEmail(String mEmail) {
-        this.mEmail = mEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public boolean isVerified() {
@@ -75,24 +99,24 @@ public class AccountModel {
         this.verified = verified;
     }
 
-    public String getmAvatar() {
-        return mAvatar;
+    public String getAvatar() {
+        return avatar;
     }
 
-    public void setmAvatar(String mAvatar) {
-        this.mAvatar = mAvatar;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
-    public String getmAccessToken() {
-        return mAccessToken;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setmAccessToken(String mAccessToken) {
-        this.mAccessToken = mAccessToken;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public int getLastSyncUsn() {
-        return Leanote.leaDB.getAccountUsn(mUserId);
+        return LeanoteDbManager.getInstance().getAccountUsn(userId);
     }
 
     public void setLastSyncUsn(int lastSyncUsn) {
@@ -108,10 +132,37 @@ public class AccountModel {
     }
 
     public String getHost() {
-        return host;
+        return "https://leanote.com";
+//        return host;
     }
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    @Override
+    public String toString() {
+        return "AccountModel{" +
+                "isOk=" + isOk +
+                ", localUserId=" + localUserId +
+                ", userId='" + userId + '\'' +
+                ", userName='" + userName + '\'' +
+                ", email='" + email + '\'' +
+                ", verified=" + verified +
+                ", avatar='" + avatar + '\'' +
+                ", accessToken='" + accessToken + '\'' +
+                ", useMarkdown=" + useMarkdown +
+                ", lastSyncUsn=" + lastSyncUsn +
+                ", host='" + host + '\'' +
+                ", msg='" + msg + '\'' +
+                '}';
     }
 }

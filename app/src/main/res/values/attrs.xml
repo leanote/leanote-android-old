@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="FlowLayout">
-        <attr name="horizontalSpacing" format="dimension" />
-        <attr name="verticalSpacing" format="dimension" />
+        <attr name="horizontalSpacing" format="dimension"/>
+        <attr name="verticalSpacing" format="dimension"/>
     </declare-styleable>
 
     <declare-styleable name="FlowLayout_LayoutParams">
-        <attr name="layout_horizontalSpacing" format="dimension" />
-        <attr name="layout_verticalSpacing" format="dimension" />
+        <attr name="layout_horizontalSpacing" format="dimension"/>
+        <attr name="layout_verticalSpacing" format="dimension"/>
     </declare-styleable>
 
 
@@ -15,8 +15,8 @@
     LeaLinearLayoutSizeBound attributes
     -->
     <declare-styleable name="LeaLinearLayoutSizeBound">
-        <attr name="maxWidth" format="dimension" />
-        <attr name="maxHeight" format="dimension" />
+        <attr name="maxWidth" format="dimension"/>
+        <attr name="maxHeight" format="dimension"/>
     </declare-styleable>
 
     <!--
@@ -24,56 +24,56 @@
     -->
     <declare-styleable name="LeaTextView">
         <attr name="fontVariation" format="enum">
-            <enum name="normal" value="0" />
-            <enum name="light" value="1" />
+            <enum name="normal" value="0"/>
+            <enum name="light" value="1"/>
         </attr>
         <attr name="fontFamily" format="enum">
-            <enum name="openSans" value="0" />
-            <enum name="merriweather" value="1" />
+            <enum name="openSans" value="0"/>
+            <enum name="merriweather" value="1"/>
         </attr>
-        <attr name="fixWidowWords" format="boolean" />
+        <attr name="fixWidowWords" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="leaPostListButton">
         <attr name="leaPostButtonType" format="enum">
-            <enum name="none" value="0" />
-            <enum name="edit" value="1" />
-            <enum name="view" value="2" />
-            <enum name="preview" value="3" />
-            <enum name="stats" value="4" />
-            <enum name="trash" value="5" />
-            <enum name="delete" value="6" />
-            <enum name="publish" value="7" />
-            <enum name="more" value="8" />
-            <enum name="back" value="9" />
-            <enum name="visitblog" value="10" />
+            <enum name="none" value="0"/>
+            <enum name="edit" value="1"/>
+            <enum name="view" value="2"/>
+            <enum name="preview" value="3"/>
+            <enum name="stats" value="4"/>
+            <enum name="trash" value="5"/>
+            <enum name="delete" value="6"/>
+            <enum name="publish" value="7"/>
+            <enum name="more" value="8"/>
+            <enum name="back" value="9"/>
+            <enum name="visitblog" value="10"/>
         </attr>
     </declare-styleable>
 
     <declare-styleable name="PersistentEditText">
-        <attr format="boolean" name="persistenceEnabled" />
+        <attr name="persistenceEnabled" format="boolean"/>
     </declare-styleable>
 
     <!--<declare-styleable name="RefreshIndicator_refreshIndicatorColor"></declare-styleable>-->
 
-    <attr name="swipeToRefreshStyle" format="reference" />
+    <attr name="swipeToRefreshStyle" format="reference"/>
     <declare-styleable name="RefreshIndicator">
-        <attr name="refreshIndicatorColor" format="reference|color" />
+        <attr name="refreshIndicatorColor" format="reference|color"/>
     </declare-styleable>
 
     <declare-styleable name="wpPostListButton">
         <attr name="wpPostButtonType" format="enum">
-            <enum name="none" value="0" />
-            <enum name="edit" value="1" />
-            <enum name="view" value="2" />
-            <enum name="preview" value="3" />
-            <enum name="stats" value="4" />
-            <enum name="trash" value="5" />
-            <enum name="delete" value="6" />
-            <enum name="publish" value="7" />
-            <enum name="more" value="8" />
-            <enum name="back" value="9" />
-            <enum name="visitblog" value="10" />
+            <enum name="none" value="0"/>
+            <enum name="edit" value="1"/>
+            <enum name="view" value="2"/>
+            <enum name="preview" value="3"/>
+            <enum name="stats" value="4"/>
+            <enum name="trash" value="5"/>
+            <enum name="delete" value="6"/>
+            <enum name="publish" value="7"/>
+            <enum name="more" value="8"/>
+            <enum name="back" value="9"/>
+            <enum name="visitblog" value="10"/>
         </attr>
     </declare-styleable>
 

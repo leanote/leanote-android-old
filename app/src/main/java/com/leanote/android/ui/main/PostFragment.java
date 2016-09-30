@@ -16,7 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leanote.android.R;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.ActivityLauncher;
 import com.leanote.android.ui.EmptyViewMessageType;
@@ -262,7 +262,7 @@ public class PostFragment extends Fragment
     }
 
     @Override
-    public void onNotesSelected(NoteDetail note) {
+    public void onNotesSelected(NoteInfo note) {
         if (!isAdded()) return;
 
         if (note == null) {

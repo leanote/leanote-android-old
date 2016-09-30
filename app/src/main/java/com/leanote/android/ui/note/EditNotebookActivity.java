@@ -18,8 +18,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.networking.NetworkUtils;
 import com.leanote.android.ui.note.service.NotebookUploadService;
@@ -66,7 +66,7 @@ public class EditNotebookActivity extends AppCompatActivity {
                 // Load post from the postId passed in extras
                 long notebookId = extras.getLong(EXTRA_NEW_NOTEBOOK_ID);
                 mIsNewNotebook = extras.getBoolean(EXTRA_IS_NEW_NOTEBOOK);
-                mNotebook = Leanote.leaDB.getLocalNotebookById(notebookId);
+                mNotebook = LeanoteDbManager.getInstance().getLocalNotebookById(notebookId);
 
                 if (!mIsNewNotebook) {
                     mOriginalNotebookTitle = mNotebook.getTitle();
@@ -129,7 +129,7 @@ public class EditNotebookActivity extends AppCompatActivity {
 
                 if (!notebookTitle.equals(mOriginalNotebookTitle)) {
                     mNotebook.setIsDirty(true);
-                    Leanote.leaDB.updateNotebook(mNotebook);
+                    LeanoteDbManager.getInstance().updateNotebook(mNotebook);
 
                     NotebookUploadService.addNotebookToUpload(mNotebook);
                     startService(new Intent(this, NotebookUploadService.class));

@@ -11,6 +11,7 @@ import android.text.style.QuoteSpan;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+
 public class HtmlUtils {
     /*
      * removes html from the passed string - relies on Html.fromHtml which handles invalid HTML,

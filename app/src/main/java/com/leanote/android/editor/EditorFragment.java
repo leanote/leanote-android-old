@@ -26,7 +26,6 @@ import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.ToggleButton;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.leanote.android.R;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.AppLog.T;
@@ -35,6 +34,7 @@ import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.StringUtils;
 import com.leanote.android.util.ToastUtils;
 import com.leanote.android.util.helper.MediaGallery;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.json.JSONObject;
 
@@ -52,7 +52,7 @@ import static android.view.View.SCROLLBARS_OUTSIDE_OVERLAY;
 public class EditorFragment extends EditorFragmentAbstract implements View.OnClickListener, View.OnTouchListener,
         OnJsEditorStateChangedListener, OnImeBackListener, LeaWebViewClient.OnImageLoadListener
 //        , EditorMediaUploadListener
-    {
+{
     private static final String ARG_PARAM_TITLE = "param_title";
     private static final String ARG_PARAM_CONTENT = "param_content";
 
@@ -147,7 +147,6 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         LeaWebViewClient webViewClient = new LeaWebViewClient();
         webViewClient.setImageLoadListener(this);
         //mWebView.setWebViewClient(webViewClient);
-
 
 
         // Ensure that the content field is always filling the remaining screen space
@@ -361,7 +360,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     }
 
     protected void initJsEditor() {
-        if(!isAdded()) {
+        if (!isAdded()) {
             return;
         }
 
@@ -591,7 +590,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
     @SuppressLint("NewApi")
     private void enableWebDebugging(boolean enable) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             AppLog.i(T.EDITOR, "Enabling web debugging");
             WebView.setWebContentsDebuggingEnabled(enable);
         }
@@ -714,7 +713,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     }
 
     @Override
-    public void appendMediaFile(final MediaFile mediaFile, final String mediaUrl, ImageLoader imageLoader) {
+    public void appendMediaFile(final MediaFile mediaFile, final String mediaUrl, final ImageLoader imageLoader) {
         if (!mDomHasLoaded) {
             // If the DOM hasn't loaded yet, we won't be able to add media to the ZSSEditor
             // Place them in a queue to be handled when the DOM loaded callback is received
@@ -745,8 +744,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
     }
 
 
-
-        @Override
+    @Override
     public void appendGallery(MediaGallery mediaGallery) {
         // TODO
     }
@@ -989,7 +987,7 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
     void updateFormatBarEnabledState(boolean enabled) {
         float alpha = (enabled ? TOOLBAR_ALPHA_ENABLED : TOOLBAR_ALPHA_DISABLED);
-        for(ToggleButton button : mTagToggleButtonMap.values()) {
+        for (ToggleButton button : mTagToggleButtonMap.values()) {
             button.setEnabled(enabled);
             button.setAlpha(alpha);
         }
@@ -1015,8 +1013,9 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
 
     /**
      * In HTML mode, applies formatting to selected text, or inserts formatting tag at current cursor position
+     *
      * @param toggleButton format bar button which was clicked
-     * @param tag identifier tag
+     * @param tag          identifier tag
      */
     private void applyFormattingHtmlMode(ToggleButton toggleButton, String tag) {
         if (mSourceViewContent == null) {
@@ -1077,9 +1076,9 @@ public class EditorFragment extends EditorFragmentAbstract implements View.OnCli
         }
     }
 
-        @Override
-        public void onImageLoaded(String localFileId) {
-            AppLog.i("download, reload webview...");
-            mWebView.reload();
-        }
+    @Override
+    public void onImageLoaded(String localFileId) {
+        AppLog.i("download, reload webview...");
+        mWebView.reload();
     }
+}

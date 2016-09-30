@@ -1,33 +1,48 @@
 package com.leanote.android.model;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by binnchx on 11/1/15.
  */
 public class NotebookInfo {
 
-    private long id;
-    private String notebookId;
-    private String parentNotebookId;
+    @SerializedName("Ok")
+    private boolean isOk = true;
+    @SerializedName("Msg")
+    private String msg;
 
+    private long id;
+    @SerializedName("NotebookId")
+    private String notebookId;
+    @SerializedName("ParentNotebookId")
+    private String parentNotebookId;
+    @SerializedName("UserId")
     private String userId;
+    @SerializedName("Title")
     private String title;
     private String urlTitle;
+    @SerializedName("Seq")
     private int seq;
+    @SerializedName("IsBlog")
     private boolean isBlog;
-    private String CreateTime;
-    private String UpdateTime;
+    @SerializedName("CreatedTime")
+    private String createTime;
+    @SerializedName("UpdatedTime")
+    private String updateTime;
     private boolean isDirty;
+    @SerializedName("IsDeleted")
     private boolean isDeleted;
     private boolean isTrash;
-
+    @SerializedName("ParentNotebookId")
     private int usn;
 
     public String getCreateTime() {
-        return CreateTime;
+        return createTime;
     }
 
     public void setCreateTime(String createTime) {
-        CreateTime = createTime;
+        this.createTime = createTime;
     }
 
     public long getId() {
@@ -87,11 +102,11 @@ public class NotebookInfo {
     }
 
     public String getUpdateTime() {
-        return UpdateTime;
+        return updateTime;
     }
 
     public void setUpdateTime(String updateTime) {
-        UpdateTime = updateTime;
+        this.updateTime = updateTime;
     }
 
     public String getUrlTitle() {

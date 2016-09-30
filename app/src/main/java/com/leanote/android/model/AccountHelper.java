@@ -1,9 +1,9 @@
 package com.leanote.android.model;
 
 
-import com.leanote.android.datasets.AccountTable;
+import android.text.TextUtils;
 
-import org.apache.commons.lang.StringUtils;
+import com.leanote.android.db.LeanoteDbManager;
 
 
 /**
@@ -11,11 +11,38 @@ import org.apache.commons.lang.StringUtils;
  * need the account data.
  */
 public class AccountHelper {
+
+    private static AccountHelper sAccountHelper;
+
+    public static AccountHelper getInstance() {
+        if (sAccountHelper == null) {
+            synchronized (AccountHelper.class) {
+                if (sAccountHelper == null) {
+                    sAccountHelper = new AccountHelper();
+                }
+            }
+        }
+        return sAccountHelper;
+    }
+
+    public AccountHelper() {
+        sAccount = new Account();
+    }
+
+    public Account getAccount() {
+        return sAccount;
+    }
+
+    public void setAccount(Account account) {
+        AccountHelper.sAccount = account;
+        sAccount.save();
+    }
+
     private static Account sAccount;
 
     public static Account getDefaultAccount() {
         if (sAccount == null) {
-            sAccount = AccountTable.getDefaultAccount();
+            sAccount = LeanoteDbManager.getInstance().getAccountByLocalId(0);
             if (sAccount == null) {
                 sAccount = new Account();
             }
@@ -24,7 +51,7 @@ public class AccountHelper {
     }
 
     public static boolean isSignedIn() {
-        return StringUtils.isNotEmpty(getDefaultAccount().getmAccessToken());
+        return !TextUtils.isEmpty(getDefaultAccount().getAccessToken());
     }
 
 

@@ -14,8 +14,8 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
+import com.leanote.android.db.LeanoteDbManager;
 import com.leanote.android.model.AccountHelper;
 import com.leanote.android.model.NotebookInfo;
 import com.leanote.android.util.AppLog;
@@ -349,7 +349,7 @@ public class NotebookListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         @Override
         protected Boolean doInBackground(Void... voids) {
 
-            tmpNotebooks = Leanote.leaDB.getNotebookList(AccountHelper.getDefaultAccount().getmUserId());
+            tmpNotebooks = LeanoteDbManager.getInstance().getNotebookList(AccountHelper.getDefaultAccount().getUserId());
             AppLog.i("loading notebooks:" + tmpNotebooks);
             for (NotebookInfo hiddenNote : mHiddenNotebooks) {
                 int index = -1;

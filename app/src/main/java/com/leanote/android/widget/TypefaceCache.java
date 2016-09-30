@@ -32,6 +32,7 @@ public class TypefaceCache {
     public static Typeface getTypeface(Context context) {
         return getTypeface(context, FAMILY_DEFAULT, Typeface.NORMAL, VARIATION_DEFAULT);
     }
+
     private static Typeface getTypeface(Context context,
                                         int family,
                                         int fontStyle,

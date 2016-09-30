@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
  * Created by binnchx on 9/7/15.
  */
 public class Blog {
+
     private int localTableBlogId;
     private String url;
     private String homeURL;

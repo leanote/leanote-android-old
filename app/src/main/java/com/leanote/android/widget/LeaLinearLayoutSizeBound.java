@@ -11,6 +11,7 @@ import com.leanote.android.R;
  * Created by binnchx on 8/27/15.
  */
 public class LeaLinearLayoutSizeBound extends LinearLayout {
+
     private final int mMaxWidth;
     private final int mMaxHeight;
 
@@ -22,12 +23,13 @@ public class LeaLinearLayoutSizeBound extends LinearLayout {
 
     public LeaLinearLayoutSizeBound(Context context, AttributeSet attrs) {
         super(context, attrs);
-        TypedArray a = getContext().obtainStyledAttributes(attrs,
+        TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.LeaLinearLayoutSizeBound);
         mMaxWidth = a.getDimensionPixelSize(R.styleable.LeaLinearLayoutSizeBound_maxWidth,
                 Integer.MAX_VALUE);
         mMaxHeight = a.getDimensionPixelSize(R.styleable.LeaLinearLayoutSizeBound_maxHeight,
                 Integer.MAX_VALUE);
+        a.recycle();
     }
 
     @Override

@@ -52,8 +52,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.leanote.android.R;
 import com.leanote.android.editor.legacy.EditLinkActivity;
 import com.leanote.android.editor.legacy.LeaEditImageSpan;
@@ -68,8 +66,9 @@ import com.leanote.android.util.helper.LeaUnderlineSpan;
 import com.leanote.android.util.helper.MediaGallery;
 import com.leanote.android.util.helper.MediaGalleryImageSpan;
 import com.leanote.android.widget.LeaEditText;
-
-
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 
 public class LegacyEditorFragment extends EditorFragmentAbstract implements TextWatcher,
@@ -939,7 +938,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         return width;
     }
 
-    private void loadLeaImageSpanThumbnail(MediaFile mediaFile, String imageURL, ImageLoader imageLoader) {
+    private void loadLeaImageSpanThumbnail(MediaFile mediaFile, String imageURL, com.nostra13.universalimageloader.core.ImageLoader imageLoader) {
         if (mediaFile == null || imageURL == null) {
             return;
         }
@@ -949,28 +948,32 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         }
 
         final int maxThumbWidth = ImageUtils.getMaximumThumbnailWidthForEditor(getActivity());
-
-        imageLoader.get(imageURL, new ImageLoader.ImageListener() {
+        imageLoader.loadImage(imageURL, new ImageLoadingListener() {
             @Override
-            public void onErrorResponse(VolleyError arg0) {
+            public void onLoadingStarted(String imageUri, View view) {
+
             }
 
             @Override
-            public void onResponse(ImageLoader.ImageContainer container, boolean arg1) {
-                Bitmap downloadedBitmap = container.getBitmap();
-                if (downloadedBitmap == null) {
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                if (loadedImage == null) {
                     // no bitmap downloaded from the server.
                     return;
                 }
 
-                if (downloadedBitmap.getWidth() < MIN_THUMBNAIL_WIDTH) {
+                if (loadedImage.getWidth() < MIN_THUMBNAIL_WIDTH) {
                     // Picture is too small. Show the placeholder in this case.
                     return;
                 }
 
                 Bitmap resizedBitmap;
                 // resize the downloaded bitmap
-                resizedBitmap = ImageUtils.getScaledBitmapAtLongestSide(downloadedBitmap, maxThumbWidth);
+                resizedBitmap = ImageUtils.getScaledBitmapAtLongestSide(loadedImage, maxThumbWidth);
 
                 if (resizedBitmap == null) {
                     return;
@@ -1005,7 +1008,13 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
                     }
                 }
             }
-        }, 0, 0);
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+            }
+        });
+
     }
 
     @Override
@@ -1023,7 +1032,7 @@ public class LegacyEditorFragment extends EditorFragmentAbstract implements Text
         outState.putString(KEY_CONTENT, mContentEditText.getText().toString());
     }
 
-    public void addMediaFile(final MediaFile mediaFile, final String imageUrl, final ImageLoader imageLoader, final int start, final int end) {
+    public void addMediaFile(final MediaFile mediaFile, final String imageUrl, final com.nostra13.universalimageloader.core.ImageLoader imageLoader, final int start, final int end) {
         mediaFile.setFileURL(imageUrl);
         mediaFile.setFilePath(imageUrl);
         final LeaEditImageSpan imageSpan = createLeaEditImageSpan(getActivity(), mediaFile);

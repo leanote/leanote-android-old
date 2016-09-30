@@ -1,454 +1,273 @@
 package com.leanote.android.model;
 
-import android.text.TextUtils;
-
+import com.google.gson.annotations.SerializedName;
 import com.leanote.android.util.AppLog;
-import com.leanote.android.util.AppLog.T;
 import com.leanote.android.util.StringUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 
 /**
- * Created by binnchx on 10/27/15.
+ * Created by binnchx on 10/18/15.
  */
 public class NoteInfo implements Serializable {
-    static final long serialVersionUID  = 2L;
 
-    public static String QUICK_MEDIA_TYPE_PHOTO = "QuickPhoto";
+    @SerializedName("Ok")
+    private boolean isOk = true;
+    @SerializedName("Msg")
+    private String msg;
 
-    private long localTablePostId;
-    private int localTableBlogId;
-    private String categories;
-    private String customFields;
-    private long dateCreated;
-    private long dateCreatedGmt;
-    private String description;
-    private String link;
-    private boolean allowComments;
-    private boolean allowPings;
-    private String excerpt;
-    private String keywords;
-    private String moreText;
-    private String permaLink;
-    private String status;
-    private String remotePostId;
-    private String title;
+    private Long id;
+    @SerializedName("NoteId")
+    private String noteId;
+    @SerializedName("NotebookId")
+    private String noteBookId;
+    private Long localNotebookId;
+    @SerializedName("UserId")
     private String userId;
-    private String authorDisplayName;
-    private String authorId;
-    private String password;
-    private String postFormat;
-    private String slug;
+    @SerializedName("Title")
+    private String title;
+    private String desc;
+    @SerializedName("Tags")
+    private String tags;
+    private String noteAbstract;
+    @SerializedName("Content")
+    private String content;
+    private String fileIds;
+    @SerializedName("IsMarkdown")
+    private boolean isMarkDown;
+    @SerializedName("IsTrash")
+    private boolean isTrash;
+    private boolean isDeleted;
+    private boolean isDirty;
+    @SerializedName("IsBlog")
+    private boolean isPublicBlog;
+    @SerializedName("CreatedTime")
+    private String createdTime;
+    @SerializedName("UpdatedTime")
+    private String updatedTime;
+    @SerializedName("PublicTime")
+    private String publicTime;
+    @SerializedName("Usn")
+    private int usn;
+    private boolean isUploading;
+    private boolean uploadSucc = true;
 
-    private boolean localDraft;
-    private boolean mChangedFromLocalToPublished;
-    private boolean isPage;
-    private String pageParentId;
-    private String pageParentTitle;
-    private boolean isLocalChange;
-    private String mediaPaths;
-    private String quickPostType;
-
-    private int featuredImageId;
-
-    public NoteInfo() {
+    public String getCreatedTime() {
+        return createdTime;
     }
 
-    public NoteInfo(int blogId, boolean isPage) {
-        // creates a new, empty post for the passed in blogId
-        this.localTableBlogId = blogId;
-        this.isPage = isPage;
-        this.localDraft = true;
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 
-    public long getLocalTablePostId() {
-        return localTablePostId;
+    public String getUpdatedTime() {
+        return updatedTime;
     }
 
-    public long getDateCreated() {
-        return dateCreated;
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
     }
 
-    public void setDateCreated(long dateCreated) {
-        this.dateCreated = dateCreated;
+    public String getPublicTime() {
+        return publicTime;
     }
 
-    public long getDate_created_gmt() {
-        return dateCreatedGmt;
+    public void setPublicTime(String publicTime) {
+        this.publicTime = publicTime;
     }
 
-    public void setDate_created_gmt(long dateCreatedGmt) {
-        this.dateCreatedGmt = dateCreatedGmt;
+    public Long getId() {
+        return id;
     }
 
-    public void setCategories(String postCategories) {
-        this.categories = postCategories;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setCustomFields(String customFields) {
-        this.customFields = customFields;
+    public String getNoteBookId() {
+        return noteBookId;
     }
 
-    public int getLocalTableBlogId() {
-        return localTableBlogId;
+    public void setNoteBookId(String noteBookId) {
+        this.noteBookId = noteBookId;
     }
 
-    public void setLocalTableBlogId(int localTableBlogId) {
-        this.localTableBlogId = localTableBlogId;
+    public String getUserId() {
+        return userId;
     }
 
-    public boolean isLocalDraft() {
-        return localDraft;
-    }
-
-    public void setLocalDraft(boolean localDraft) {
-        this.localDraft = localDraft;
-    }
-
-    public JSONArray getJSONCategories() {
-        JSONArray jArray = null;
-        if (categories == null) {
-            categories = "[]";
-        }
-        try {
-            categories = StringUtils.unescapeHTML(categories);
-            if (TextUtils.isEmpty(categories)) {
-                jArray = new JSONArray();
-            } else {
-                jArray = new JSONArray(categories);
-            }
-        } catch (JSONException e) {
-            AppLog.e(T.POSTS, e);
-        }
-        return jArray;
-    }
-
-    public void setJSONCategories(JSONArray categories) {
-        this.categories = categories.toString();
-    }
-
-    public JSONArray getCustomFields() {
-        if (customFields == null) {
-            return null;
-        }
-        JSONArray jArray = null;
-        try {
-            jArray = new JSONArray(customFields);
-        } catch (JSONException e) {
-            AppLog.e(T.POSTS, "No custom fields found for post.");
-        }
-        return jArray;
-    }
-
-    public JSONObject getCustomField(String key) {
-        JSONArray customFieldsJson = getCustomFields();
-        if (customFieldsJson == null) {
-            return null;
-        }
-
-        for (int i = 0; i < customFieldsJson.length(); i++) {
-            try {
-                JSONObject jsonObject = new JSONObject(customFieldsJson.getString(i));
-                String curentKey = jsonObject.getString("key");
-                if (key.equals(curentKey)) {
-                    return jsonObject;
-                }
-            } catch (JSONException e) {
-                AppLog.e(T.POSTS, e);
-            }
-        }
-        return null;
-    }
-
-    public void setCustomFields(JSONArray customFields) {
-        this.customFields = customFields.toString();
-    }
-
-    public String getDescription() {
-        return StringUtils.notNullStr(description);
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getLink() {
-        return StringUtils.notNullStr(link);
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-    public boolean isAllowComments() {
-        return allowComments;
-    }
-
-    public void setAllowComments(boolean mtAllowComments) {
-        allowComments = mtAllowComments;
-    }
-
-    public boolean isAllowPings() {
-        return allowPings;
-    }
-
-    public void setAllowPings(boolean mtAllowPings) {
-        allowPings = mtAllowPings;
-    }
-
-    public String getPostExcerpt() {
-        return StringUtils.notNullStr(excerpt);
-    }
-
-    public void setPostExcerpt(String mtExcerpt) {
-        excerpt = mtExcerpt;
-    }
-
-    public String getKeywords() {
-        return StringUtils.notNullStr(keywords);
-    }
-
-    public void setKeywords(String mtKeywords) {
-        keywords = mtKeywords;
-    }
-
-    public String getMoreText() {
-        return StringUtils.notNullStr(moreText);
-    }
-
-    public void setMoreText(String mtTextMore) {
-        moreText = mtTextMore;
-    }
-
-    public String getPermaLink() {
-        return StringUtils.notNullStr(permaLink);
-    }
-
-    public void setPermaLink(String permaLink) {
-        this.permaLink = permaLink;
-    }
-
-    public String getPostStatus() {
-        return StringUtils.notNullStr(status);
-    }
-
-    public void setPostStatus(String postStatus) {
-        status = postStatus;
-    }
-
-
-    public String getRemotePostId() {
-        return StringUtils.notNullStr(remotePostId);
-    }
-
-    public void setRemotePostId(String postId) {
-        this.remotePostId = postId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getTitle() {
-        return StringUtils.notNullStr(title);
+        return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getUserId() {
-        return StringUtils.notNullStr(userId);
+    public String getTags() {
+        return tags;
     }
 
-    public void setUserId(String userid) {
-        this.userId = userid;
-    }
-
-    public String getAuthorDisplayName() {
-        return StringUtils.notNullStr(authorDisplayName);
-    }
-
-    public void setAuthorDisplayName(String wpAuthorDisplayName) {
-        authorDisplayName = wpAuthorDisplayName;
-    }
-
-    public String getAuthorId() {
-        return StringUtils.notNullStr(authorId);
-    }
-
-    public void setAuthorId(String wpAuthorId) {
-        authorId = wpAuthorId;
-    }
-
-    public String getPassword() {
-        return StringUtils.notNullStr(password);
-    }
-
-    public void setPassword(String wpPassword) {
-        password = wpPassword;
-    }
-
-    public String getPostFormat() {
-        return StringUtils.notNullStr(postFormat);
-    }
-
-    public void setPostFormat(String wpPostForm) {
-        postFormat = wpPostForm;
-    }
-
-    public String getSlug() {
-        return StringUtils.notNullStr(slug);
-    }
-
-    public void setSlug(String wpSlug) {
-        slug = wpSlug;
-    }
-
-    public String getMediaPaths() {
-        return StringUtils.notNullStr(mediaPaths);
-    }
-
-    public void setMediaPaths(String mediaPaths) {
-        this.mediaPaths = mediaPaths;
-    }
-
-    public boolean supportsLocation() {
-        // Right now, we only disable for pages.
-        return !isPage();
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
 
-    public boolean isPage() {
-        return isPage;
+    public boolean isMarkDown() {
+        return isMarkDown;
     }
 
-    public void setIsPage(boolean isPage) {
-        this.isPage = isPage;
+    public void setIsMarkDown(boolean isMarkDown) {
+        this.isMarkDown = isMarkDown;
     }
 
-    public String getPageParentId() {
-        return StringUtils.notNullStr(pageParentId);
+    public boolean isTrash() {
+        return isTrash;
     }
 
-    public void setPageParentId(String wp_page_parent_id) {
-        this.pageParentId = wp_page_parent_id;
+    public void setIsTrash(boolean isTrash) {
+        this.isTrash = isTrash;
     }
 
-    public String getPageParentTitle() {
-        return StringUtils.notNullStr(pageParentTitle);
+    public int getUsn() {
+        return usn;
     }
 
-    public void setPageParentTitle(String wp_page_parent_title) {
-        this.pageParentTitle = wp_page_parent_title;
+    public boolean isUploadSucc() {
+        return uploadSucc;
     }
 
-    public boolean isLocalChange() {
-        return isLocalChange;
+    public void setUploadSucc(boolean uploadSucc) {
+        this.uploadSucc = uploadSucc;
     }
 
-    public void setLocalChange(boolean isLocalChange) {
-        this.isLocalChange = isLocalChange;
+    public void setUsn(int usn) {
+        this.usn = usn;
     }
 
-    public void setLocalTablePostId(long id) {
-        this.localTablePostId = id;
+    public String getNoteId() {
+        return noteId;
     }
 
-    public void setQuickPostType(String type) {
-        this.quickPostType = type;
+    public void setNoteId(String noteId) {
+        this.noteId = noteId;
     }
 
-    public String getQuickPostType() {
-        return StringUtils.notNullStr(quickPostType);
+    @Override
+    public String toString() {
+        return "NoteInfo{" +
+                "id=" + id +
+                ", noteId='" + noteId + '\'' +
+                ", noteBookId='" + noteBookId + '\'' +
+                ", userId='" + userId + '\'' +
+                ", title='" + title + '\'' +
+                ", desc='" + desc + '\'' +
+                ", tags='" + tags + '\'' +
+                ", noteAbstract='" + noteAbstract + '\'' +
+                ", content='" + content + '\'' +
+                ", fileIds='" + fileIds + '\'' +
+                ", isMarkDown=" + isMarkDown +
+                ", isTrash=" + isTrash +
+                ", isDeleted=" + isDeleted +
+                ", isDirty=" + isDirty +
+                ", isPublicBlog=" + isPublicBlog +
+                ", createdTime='" + createdTime + '\'' +
+                ", updatedTime='" + updatedTime + '\'' +
+                ", publicTime='" + publicTime + '\'' +
+                ", usn=" + usn +
+                '}';
     }
 
-    /**
-     * This indicates if the post has changed from a draft to published. This is primarily used
-     * for stats tracking purposes as we want to ensure that we properly track certain things when
-     * the user first publishes a post
-     * @return
-     */
-    public boolean hasChangedFromDraftToPublished() {
-        return mChangedFromLocalToPublished;
-    }
-
-    public void setChangedFromDraftToPublished(boolean changedFromDraftToPublished) {
-        this.mChangedFromLocalToPublished = changedFromDraftToPublished;
-    }
-
-    /**
-     * Checks if this post currently has data differing from another post.
-     *
-     * @param otherNote The post to compare to this post's editable data.
-     * @return True if this post's data differs from otherPost's data, False otherwise.
-     */
     public boolean hasChanges(NoteInfo otherNote) {
-        return otherNote == null || !(StringUtils.equals(title, otherNote.title) &&
-                StringUtils.equals(description, otherNote.description) &&
-                StringUtils.equals(excerpt, otherNote.excerpt) &&
-                StringUtils.equals(keywords, otherNote.keywords) &&
-                StringUtils.equals(categories, otherNote.categories) &&
-                StringUtils.equals(status, otherNote.status) &&
-                StringUtils.equals(password, otherNote.password) &&
-                StringUtils.equals(postFormat, otherNote.postFormat) &&
-                this.dateCreatedGmt == otherNote.dateCreatedGmt);
+
+        AppLog.i("title equals:" + !StringUtils.equals(title, otherNote.title));
+        AppLog.i("content equals:" + !StringUtils.equals(content, otherNote.content));
+        AppLog.i("notebookid equals:" + !(noteBookId.equals(otherNote.noteBookId)));
+        AppLog.i("isMarkDown equal:" + (isMarkDown != otherNote.isMarkDown));
+        AppLog.i("tags equals:" + !StringUtils.equals(tags, otherNote.tags));
+        AppLog.i("isblog equals:" + (isPublicBlog != otherNote.isPublicBlog));
+
+        return otherNote == null || !StringUtils.equals(title, otherNote.title)
+                || !StringUtils.equals(content, otherNote.content)
+                || !StringUtils.equals(noteBookId, otherNote.noteBookId)
+                || isMarkDown != otherNote.isMarkDown
+                || !StringUtils.equals(tags, otherNote.tags)
+                || isPublicBlog != otherNote.isPublicBlog;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + localTableBlogId;
-        result = prime * result + (int) (localTablePostId ^ (localTablePostId >>> 32));
-        result = prime * result + (isPage ? 1231 : 1237);
-        return result;
+    public boolean isPublicBlog() {
+        return isPublicBlog;
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other == this)
-            return true;
-        if (other instanceof NoteInfo) {
-            NoteInfo otherPost = (NoteInfo) other;
-            return (this.localTablePostId == otherPost.localTablePostId);
-        } else {
-            return false;
-        }
+    public void setIsPublicBlog(boolean isPublicBlog) {
+        this.isPublicBlog = isPublicBlog;
     }
 
-    /**
-     * Get the entire post content
-     * Joins description and moreText fields if both are valid
-     * @return post content as String
-     */
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public boolean isDirty() {
+        return isDirty;
+    }
+
+    public void setIsDirty(boolean isDirty) {
+        this.isDirty = isDirty;
+    }
+
+    public String getNoteAbstract() {
+        return noteAbstract;
+    }
+
+    public void setNoteAbstract(String noteAbstract) {
+        this.noteAbstract = noteAbstract;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     public String getContent() {
-        String postContent;
-        if (!TextUtils.isEmpty(getMoreText())) {
-            if (isLocalDraft()) {
-                postContent = getDescription() + "\n&lt;!--more--&gt;\n" + getMoreText();
-            } else {
-                postContent = getDescription() + "\n<!--more-->\n" + getMoreText();
-            }
-        } else {
-            postContent = getDescription();
-        }
-
-        return postContent;
+        return content;
     }
 
-    public boolean isPublished() {
-        return !getRemotePostId().isEmpty();
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public boolean isPublishable() {
-        return !(getContent().isEmpty() && getPostExcerpt().isEmpty() && getTitle().isEmpty());
+    public String getFileIds() {
+        return fileIds;
     }
 
-    public int getFeaturedImageId() {
-        return featuredImageId;
+    public void setFileIds(String fileIds) {
+        this.fileIds = fileIds;
     }
-    public void setFeaturedImageId(int id) {
-        this.featuredImageId = id;
+
+    public boolean isUploading() {
+        return isUploading;
+    }
+
+    public void setIsUploading(boolean isUploading) {
+        this.isUploading = isUploading;
+    }
+
+    public Long getLocalNotebookId() {
+        return localNotebookId;
+    }
+
+    public void setLocalNotebookId(Long localNotebookId) {
+        this.localNotebookId = localNotebookId;
     }
 }

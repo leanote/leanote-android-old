@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Created by binnchx on 10/18/15.
  */
-public class NoteDetailList extends ArrayList<NoteDetail> {
+public class NoteDetailList extends ArrayList<NoteInfo> {
 
     public boolean isSameList(NoteDetailList noteList) {
         if (noteList == null || this.size() != noteList.size()) {
@@ -13,8 +13,8 @@ public class NoteDetailList extends ArrayList<NoteDetail> {
         }
 
         for (int i = 0; i < noteList.size(); i++) {
-            NoteDetail newNote = noteList.get(i);
-            NoteDetail currentNote = this.get(i);
+            NoteInfo newNote = noteList.get(i);
+            NoteInfo currentNote = this.get(i);
 
             if (newNote.getNoteId() != currentNote.getNoteId())
                 return false;
@@ -25,7 +25,7 @@ public class NoteDetailList extends ArrayList<NoteDetail> {
         return true;
     }
 
-    public int indexOfPost(NoteDetail note) {
+    public int indexOfPost(NoteInfo note) {
         if (note == null) {
             return -1;
         }

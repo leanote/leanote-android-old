@@ -1,13 +1,150 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/nux_background"
-    android:orientation="vertical" >
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-    <fragment android:name="com.leanote.android.ui.accounts.NewUserFragment"
-        android:id="@+id/new_user_page_fragment"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
 
-</LinearLayout>
+        <com.leanote.android.widget.LeaLinearLayoutSizeBound
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:animateLayoutChanges="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:maxWidth="@dimen/nux_width">
+
+            <com.leanote.android.widget.LeaTextView
+                android:id="@+id/create_account_label"
+                style="@style/Leanote.NUXTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/create_account_wpcom"
+                app:fixWidowWords="true"
+                app:fontVariation="light"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white">
+
+                <com.leanote.android.widget.OpenSansEditText
+                    android:id="@+id/email_address"
+                    style="@style/Leanote.NUXEditText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/email_hint"
+                    android:inputType="textEmailAddress"
+                    app:persistenceEnabled="true"/>
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="false"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentRight="false"
+                    android:layout_alignParentStart="false"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="10dp"
+                    android:src="@drawable/dashicon_email"
+                    android:tint="@color/grey_darken_10"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:background="@color/white">
+
+                <com.leanote.android.widget.OpenSansEditText
+                    android:id="@+id/password"
+                    style="@style/Leanote.NUXEditText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="38dp"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"/>
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="false"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentRight="false"
+                    android:layout_alignParentStart="false"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="10dp"
+                    android:src="@drawable/dashicon_lock"
+                    android:tint="@color/grey_darken_10"/>
+
+                <ImageView
+                    android:id="@+id/password_visibility"
+                    android:layout_width="24dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="false"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentStart="false"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginRight="16dp"
+                    android:src="@drawable/dashicon_eye_closed"
+                    android:tint="@color/nux_eye_icon_color_closed"/>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/nux_main_button_height"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
+
+                <com.leanote.android.widget.LeaTextView
+                    android:id="@+id/signup_button"
+                    style="@style/Leanote.NUXPrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/nux_main_button_height"
+                    android:clickable="true"
+                    android:enabled="false"
+                    android:gravity="center"
+                    android:text="@string/nux_welcome_create_account"/>
+
+                <RelativeLayout
+                    android:id="@+id/nux_sign_in_progress_bar"
+                    style="@style/Leanote.NUXPrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/nux_main_button_height"
+                    android:enabled="false"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"/>
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <com.leanote.android.widget.LeaTextView
+                android:id="@+id/nux_sign_in_progress_text"
+                style="@style/Leanote.NUXFlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center|top"
+                android:textColor="@color/blue_light"
+                android:visibility="gone"/>
+
+        </com.leanote.android.widget.LeaLinearLayoutSizeBound>
+    </LinearLayout>
+</ScrollView>

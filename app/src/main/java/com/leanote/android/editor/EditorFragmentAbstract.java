@@ -5,9 +5,9 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Spanned;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.leanote.android.util.MediaFile;
 import com.leanote.android.util.helper.MediaGallery;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 
 public abstract class EditorFragmentAbstract extends Fragment {
@@ -15,7 +15,7 @@ public abstract class EditorFragmentAbstract extends Fragment {
     public abstract void setContent(CharSequence text);
     public abstract CharSequence getTitle();
     public abstract CharSequence getContent();
-    public abstract void appendMediaFile(MediaFile mediaFile, String imageUrl, ImageLoader imageLoader);
+    public abstract void appendMediaFile(MediaFile mediaFile, String imageUrl,ImageLoader imageLoader);
     public abstract void appendGallery(MediaGallery mediaGallery);
     //public abstract boolean hasFailedMediaUploads();
     public abstract void setTitlePlaceholder(CharSequence text);

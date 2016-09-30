@@ -22,15 +22,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.DisplayUtils;
-import com.leanote.android.util.VolleyUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.HashSet;
+
 
 /**
  * Created by binnchx on 10/19/15.
@@ -46,7 +46,7 @@ public class LeaNetworkImageView extends ImageView {
 
     private ImageType mImageType = ImageType.NONE;
     private String mUrl;
-    private ImageLoader.ImageContainer mImageContainer;
+    private ImageLoader mImageLoader;
 
     private int mDefaultImageResId;
     private int mErrorImageResId;
@@ -56,9 +56,11 @@ public class LeaNetworkImageView extends ImageView {
     public LeaNetworkImageView(Context context) {
         super(context);
     }
+
     public LeaNetworkImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
     public LeaNetworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
@@ -107,6 +109,7 @@ public class LeaNetworkImageView extends ImageView {
 
     /**
      * Loads the image for the view if it isn't already loaded.
+     *
      * @param isInLayoutPass True if this was invoked from a layout pass, false otherwise.
      */
     private void loadImageIfNecessary(final boolean isInLayoutPass) {
@@ -130,24 +133,24 @@ public class LeaNetworkImageView extends ImageView {
         // if the URL to be loaded in this view is empty, cancel any old requests and clear the
         // currently loaded image.
         if (TextUtils.isEmpty(mUrl)) {
-            if (mImageContainer != null) {
-                mImageContainer.cancelRequest();
-                mImageContainer = null;
+            if (mImageLoader != null) {
+                mImageLoader.destroy();
+                mImageLoader = null;
             }
             showErrorImage();
             return;
         }
 
         // if there was an old request in this view, check if it needs to be canceled.
-        if (mImageContainer != null && mImageContainer.getRequestUrl() != null) {
-            if (mImageContainer.getRequestUrl().equals(mUrl)) {
-                // if the request is from the same URL, return.
-                return;
-            } else {
-                // if there is a pre-existing request, cancel it if it's fetching a different URL.
-                mImageContainer.cancelRequest();
-                showDefaultImage();
-            }
+        if (mImageLoader != null) {
+            mImageLoader.cancelDisplayTask(this);
+//            if (mImageLoader..getRequestUrl().equals(mUrl)) {
+//                // if the request is from the same URL, return.
+//                return;
+//            } else {
+//                // if there is a pre-existing request, cancel it if it's fetching a different URL.
+//                showDefaultImage();
+//            }
         }
 
         // skip this URL if a previous request for it returned a 404
@@ -163,37 +166,41 @@ public class LeaNetworkImageView extends ImageView {
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        mImageContainer = Leanote.imageLoader.get(mUrl,
-                new ImageLoader.ImageListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        showErrorImage();
-                        // keep track of URLs that 404 so we can skip them the next time
-                        int statusCode = VolleyUtils.statusCodeFromVolleyError(error);
-                        if (statusCode == 404) {
-                            mUrlSkipList.add(mUrl);
-                        }
-                    }
+        mImageLoader.loadImage(mUrl, new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
 
-                    @Override
-                    public void onResponse(final ImageLoader.ImageContainer response, boolean isImmediate) {
-                        // If this was an immediate response that was delivered inside of a layout
-                        // pass do not set the image immediately as it will trigger a requestLayout
-                        // inside of a layout. Instead, defer setting the image by posting back to
-                        // the main thread.
-                        if (isImmediate && isInLayoutPass) {
-                            post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // don't fade in the image since we know it's cached
-                                    handleResponse(response, true, false);
-                                }
-                            });
-                        } else {
-                            handleResponse(response, isImmediate, true);
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                showErrorImage();
+                if (FailReason.FailType.NETWORK_DENIED.equals(failReason.getType())) {
+                    mUrlSkipList.add(mUrl);
+                }
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, final Bitmap loadedImage) {
+                if (loadedImage != null && isInLayoutPass) {
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // don't fade in the image since we know it's cached
+                            handleResponse(loadedImage, true, false);
                         }
-                    }
-                }, maxSize, maxSize);
+                    });
+                } else {
+                    handleResponse(loadedImage, true, true);
+                }
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+            }
+        });
+
     }
 
     private static boolean canFadeInImageType(ImageType imageType) {
@@ -201,12 +208,10 @@ public class LeaNetworkImageView extends ImageView {
                 || imageType == ImageType.VIDEO;
     }
 
-    private void handleResponse(ImageLoader.ImageContainer response,
+    private void handleResponse(Bitmap bitmap,
                                 boolean isCached,
                                 boolean allowFadeIn) {
-        if (response.getBitmap() != null) {
-            Bitmap bitmap = response.getBitmap();
-
+        if (bitmap != null) {
             // Apply circular rounding to avatars in a background task
             if (mImageType == ImageType.AVATAR) {
                 new CircularizeBitmapTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, bitmap);
@@ -234,13 +239,13 @@ public class LeaNetworkImageView extends ImageView {
 
     @Override
     protected void onDetachedFromWindow() {
-        if (mImageContainer != null) {
+        if (mImageLoader != null) {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
-            mImageContainer.cancelRequest();
+            mImageLoader.cancelDisplayTask(this);
             setImageDrawable(null);
             // also clear out the container so we can reload the image if necessary.
-            mImageContainer = null;
+            mImageLoader = null;
         }
         super.onDetachedFromWindow();
     }
@@ -279,7 +284,7 @@ public class LeaNetworkImageView extends ImageView {
                 // Grey circle for avatars
                 setImageResource(R.drawable.shape_oval_grey_light);
                 break;
-            default :
+            default:
                 // light grey box for all others
                 setImageDrawable(new ColorDrawable(getColorRes(R.color.grey_light)));
                 break;
@@ -303,7 +308,7 @@ public class LeaNetworkImageView extends ImageView {
             case BLAVATAR:
                 showDefaultBlavatarImage();
                 break;
-            default :
+            default:
                 // grey box for all others
                 setImageDrawable(new ColorDrawable(getColorRes(R.color.grey_lighten_30)));
                 break;
@@ -344,7 +349,7 @@ public class LeaNetworkImageView extends ImageView {
         }
 
         private Bitmap getCircularBitmap(Bitmap bitmap) {
-            if (bitmap==null)
+            if (bitmap == null)
                 return null;
 
             final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);

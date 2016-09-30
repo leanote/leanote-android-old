@@ -48,9 +48,6 @@ public class NetworkRequest {
         return response;
     }
 
-
-
-
     public static boolean syncPostRequest(String api, Map<String, String> params) {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, api,  new JSONObject(params), future, future);

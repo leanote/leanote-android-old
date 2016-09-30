@@ -15,9 +15,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import com.leanote.android.Leanote;
 import com.leanote.android.R;
-import com.leanote.android.model.NoteDetail;
+import com.leanote.android.db.LeanoteDbManager;
+import com.leanote.android.model.NoteInfo;
 import com.leanote.android.util.AppLog;
 import com.leanote.android.util.LeaWebViewClient;
 import com.leanote.android.util.MediaFile;
@@ -129,7 +129,7 @@ public class EditNotePreviewFragment extends Fragment {
             if (m.find()) {
                 String imageUri = m.group(1);
                 if (!"".equals(imageUri)) {
-                    MediaFile mediaFile = Leanote.leaDB.getMediaFileByUrl(imageUri);
+                    MediaFile mediaFile = LeanoteDbManager.getInstance().getMediaFileByUrl(imageUri);
 
                     if (mediaFile != null) {
                         String localImagePath = mediaFile.getFilePath();
@@ -165,7 +165,7 @@ public class EditNotePreviewFragment extends Fragment {
                 return null;
             }
 
-            NoteDetail note = mActivity.getNote();
+            NoteInfo note = mActivity.getNote();
 
             String postTitle = "<h1>" + note.getTitle() + "</h1>";
             String postContent = postTitle + note.getContent();

@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Leanote" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Leanote" parent="Theme.AppCompat.Light">
         <!-- Material theme -->
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
-        <item name="colorControlActivated">@color/color_control_activated</item>
-        <item name="colorControlHighlight">@color/color_control_highlight</item>
+        <!--<item name="colorControlActivated">@color/color_control_activated</item>-->
+        <!--<item name="colorControlHighlight">@color/color_control_highlight</item>-->
 
-        <item name="android:windowBackground">@color/grey_lighten_30</item>
-        <item name="android:actionBarItemBackground">@drawable/selectable_background_leanote</item>
-        <item name="android:popupMenuStyle">@style/PopupMenu.Leanote</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
-        <item name="android:actionDropDownStyle">@style/DropDownNav.Leanote</item>
-        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Leanote</item>
-        <item name="android:actionModeBackground">@color/color_primary_dark</item>
-        <item name="android:actionBarTabTextStyle">@style/TabTextStyle.Leanote</item>
-        <item name="android:actionBarTabBarStyle">@style/TabBarStyle.Leanote</item>
-        <item name="windowActionModeOverlay">true</item>
+        <!--<item name="android:windowBackground">@color/grey_lighten_30</item>-->
+        <!--<item name="android:actionBarItemBackground">@drawable/selectable_background_leanote</item>-->
+        <!--<item name="android:popupMenuStyle">@style/PopupMenu.Leanote</item>-->
+        <!--<item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>-->
+        <!--<item name="android:actionDropDownStyle">@style/DropDownNav.Leanote</item>-->
+        <!--<item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Leanote</item>-->
+        <!--<item name="android:actionModeBackground">@color/color_primary_dark</item>-->
+        <!--<item name="android:actionBarTabTextStyle">@style/TabTextStyle.Leanote</item>-->
+        <!--<item name="android:actionBarTabBarStyle">@style/TabBarStyle.Leanote</item>-->
+        <!--<item name="windowActionModeOverlay">true</item>-->
 
         <!-- Light.DarkActionBar specific -->
-        <item name="android:actionBarWidgetTheme">@style/Theme.Leanote.Widget</item>
+        <!--<item name="android:actionBarWidgetTheme">@style/Theme.Leanote.Widget</item>-->
 
-        <item name="swipeToRefreshStyle">@style/SwipeToRefresh</item>
-
+        <!--<item name="swipeToRefreshStyle">@style/SwipeToRefresh</item>-->
 
     </style>
 
@@ -32,14 +31,10 @@
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
     </style>
 
-
     <style name="AppTheme4Preview" parent="Leanote">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
-
-
-
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
     <style name="Theme.Leanote.Widget" parent="Theme.AppCompat">
@@ -47,7 +42,7 @@
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Light.Leanote</item>
     </style>
 
-    <style name="SignInTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="SignInTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorControlActivated">@color/color_control_activated</item>
         <item name="colorControlHighlight">@color/color_control_highlight</item>
     </style>
@@ -156,7 +151,7 @@
     </style>
 
     <!-- NUX Styles -->
-    <style name="Leanote.NUXPrimaryButton">
+    <style name="Leanote.NUXPrimaryButton" parent="@android:style/TextAppearance">
         <!--<item name="android:textColor">@color/nux_primary_button</item>-->
         <!--<item name="android:layout_height">@dimen/nux_main_button_height</item>-->
         <item name="android:layout_marginLeft">4dp</item>
@@ -164,31 +159,29 @@
         <item name="android:layout_marginBottom">8dp</item>
         <item name="android:clickable">true</item>
         <item name="android:background">@drawable/nux_primary_button_selector</item>
-        <item name="android:stateListAnimator">@anim/raise</item>
-
+        <!--<item name="android:stateListAnimator">@anim/raise</item>-->
     </style>
 
-    <style name="Leanote.NUXFlatButton">
+    <style name="Leanote.NUXFlatButton" parent="@android:style/TextAppearance">
         <item name="android:textColor">@drawable/nux_flat_button_text_selector</item>
         <item name="android:background">@drawable/nux_flat_button_selector</item>
         <item name="android:padding">8dp</item>
         <item name="android:clickable">true</item>
     </style>
 
-
-    <style name="Leanote.NUXWhiteButtonNoBg">
+    <style name="Leanote.NUXWhiteButtonNoBg" parent="@android:style/TextAppearance.Holo.Widget.TextView">
         <!--<item name="android:textColor">@drawable/nux_white_button_nobg_selector</item>-->
-        <item name="android:padding">8dp</item>
+        <!--<item name="android:padding">8dp</item>-->
         <item name="android:clickable">true</item>
     </style>
 
-    <style name="Leanote.NUXGreyButtonNoBg">
+    <style name="Leanote.NUXGreyButtonNoBg" parent="@android:style/TextAppearance">
         <item name="android:gravity">center_horizontal</item>
         <item name="android:textSize">14sp</item>
         <!--<item name="android:textColor">@drawable/nux_grey_button_nobg_selector</item>-->
     </style>
 
-    <style name="Leanote.NUXEditText">
+    <style name="Leanote.NUXEditText" parent="@android:style/TextAppearance">
         <item name="android:background">@color/white</item>
         <item name="android:singleLine">true</item>
         <item name="android:textColor">#444444</item>
@@ -197,17 +190,17 @@
         <item name="android:layout_marginLeft">40dp</item>
     </style>
 
-    <style name="Leanote.NUXTitle">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">24dp</item>
-        <item name="android:gravity">center_horizontal</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">@dimen/nux_title_font_size</item>
-        <item name="android:lineSpacingExtra">-4sp</item>
+    <style name="Leanote.NUXTitle" parent="@android:style/TextAppearance">
+        <!--<item name="android:layout_width">wrap_content</item>-->
+        <!--<item name="android:layout_height">wrap_content</item>-->
+        <!--<item name="android:layout_marginBottom">24dp</item>-->
+        <!--<item name="android:gravity">center_horizontal</item>-->
+        <!--<item name="android:textColor">@color/white</item>-->
+        <!--<item name="android:textSize">@dimen/nux_title_font_size</item>-->
+        <!--<item name="android:lineSpacingExtra">-4sp</item>-->
     </style>
 
-    <style name="Leanote.EmptyList">
+    <style name="Leanote.EmptyList" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/grey_darken_30</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_marginLeft">16dp</item>
@@ -375,11 +368,13 @@
         <item name="android:textColor">@color/image_options_label</item>
         <item name="android:textStyle">bold</item>
         <item name="android:paddingLeft">@dimen/image_settings_dialog_label_indent</item>
-        <item name="android:layout_marginBottom">@dimen/image_settings_dialog_label_margin_bottom</item>
+        <item name="android:layout_marginBottom">@dimen/image_settings_dialog_label_margin_bottom
+        </item>
     </style>
 
     <style name="ImageOptionsDialogInput">
-        <item name="android:layout_marginBottom">@dimen/image_settings_dialog_input_margin_bottom</item>
+        <item name="android:layout_marginBottom">@dimen/image_settings_dialog_input_margin_bottom
+        </item>
     </style>
 
 

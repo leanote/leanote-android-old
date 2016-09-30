@@ -21,8 +21,7 @@
         android:layout_alignParentBottom="true"
         android:paddingLeft="@dimen/content_margin"
         android:paddingRight="@dimen/content_margin"
-        android:visibility="gone"
-        android:background="@color/snackbar_background_color"
+        android:visibility="visible"
         tools:visibility="visible">
 
         <com.leanote.android.widget.LeaTextView

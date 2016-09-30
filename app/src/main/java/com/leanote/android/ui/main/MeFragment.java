@@ -188,17 +188,17 @@ public class MeFragment extends Fragment {
             mAvatarFrame.setVisibility(View.VISIBLE);
 
             int avatarSz = getResources().getDimensionPixelSize(R.dimen.avatar_sz_large);
-            String avatarUrl = GravatarUtils.fixGravatarUrl(defaultAccount.getmAvatar(), avatarSz);
+            String avatarUrl = GravatarUtils.fixGravatarUrl(defaultAccount.getAvatar(), avatarSz);
             mAvatarImageView.setImageUrl(avatarUrl, LeaNetworkImageView.ImageType.AVATAR);
 
-            mUsernameTextView.setText("@" + defaultAccount.getmUserName());
+            mUsernameTextView.setText("@" + defaultAccount.getUserName());
             mLoginLogoutTextView.setText(R.string.me_disconnect_from_leanote_com);
 
-            String displayName = defaultAccount.getmUserName();
+            String displayName = defaultAccount.getUserName();
             if (!TextUtils.isEmpty(displayName)) {
                 mDisplayNameTextView.setText(displayName);
             } else {
-                mDisplayNameTextView.setText(defaultAccount.getmUserName());
+                mDisplayNameTextView.setText(defaultAccount.getUserName());
             }
         } else {
             mDisplayNameTextView.setVisibility(View.GONE);
@@ -210,7 +210,7 @@ public class MeFragment extends Fragment {
 
     private void signOutWordPressComWithConfirmation() {
         String message = String.format(getString(R.string.sign_out_leacom_confirm), AccountHelper.getDefaultAccount()
-                .getmUserName());
+                .getUserName());
 
         new AlertDialog.Builder(getActivity())
                 .setMessage(message)

@@ -1,4 +1,4 @@
-package com.leanote.android.ui;
+package com.leanote.android.ui.fragment;
 
 import android.app.DialogFragment;
 import android.content.Intent;
@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.leanote.android.R;
+import com.leanote.android.ui.AppLogViewerActivity;
+import com.leanote.android.ui.SignInActivity;
 import com.leanote.android.util.HelpshiftHelper;
 import com.leanote.android.util.HelpshiftHelper.MetadataKey;
 import com.leanote.android.util.HelpshiftHelper.Tag;
@@ -149,9 +151,9 @@ public class SignInDialogFragment extends DialogFragment {
                 break;
             case ACTION_OPEN_SUPPORT_CHAT:
                 HelpshiftHelper.getInstance().addMetaData(MetadataKey.USER_ENTERED_URL, arguments.getString(
-                        SignInFragment.ENTERED_URL_KEY));
+                        SignInActivity.ENTERED_URL_KEY));
                 HelpshiftHelper.getInstance().addMetaData(MetadataKey.USER_ENTERED_USERNAME, arguments.getString(
-                        SignInFragment.ENTERED_USERNAME_KEY));
+                        SignInActivity.ENTERED_USERNAME_KEY));
                 HelpshiftHelper.getInstance().showConversation(getActivity(), Tag.ORIGIN_LOGIN_SCREEN_ERROR);
                 dismissAllowingStateLoss();
                 break;

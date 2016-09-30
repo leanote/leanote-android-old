@@ -16,7 +16,6 @@ import com.leanote.android.R;
  */
 public class LeaMainTabLayout extends TabLayout {
 
-
     public LeaMainTabLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
@@ -37,13 +36,12 @@ public class LeaMainTabLayout extends TabLayout {
     }
 
     private void addTab(@DrawableRes int iconId, @StringRes int contentDescriptionId) {
-        View customView = LayoutInflater.from(getContext()).inflate(R.layout.tab_icon, null);
+        View customView = LayoutInflater.from(getContext()).inflate(R.layout.tab_icon, this, false);
 
         ImageView icon = (ImageView) customView.findViewById(R.id.tab_icon);
         icon.setImageResource(iconId);
 
         addTab(newTab().setCustomView(customView).setContentDescription(contentDescriptionId));
     }
-
 
 }
